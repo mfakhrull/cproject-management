@@ -1,60 +1,118 @@
-import { Webhook, WebhookVerificationError } from 'svix';
-import { headers } from 'next/headers';
-import { WebhookEvent } from '@clerk/nextjs/server';
-import dbConnect from '../../../lib/mongodb';
-import User from '../../../models/User';
+import { Webhook } from 'svix'
+import { headers } from 'next/headers'
+import { WebhookEvent } from '@clerk/nextjs/server'
+import dbConnect from '../../../lib/mongodb'
+import User from '../../../models/User'
 
 export async function POST(req: Request) {
-  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
+
   if (!WEBHOOK_SECRET) {
-    console.error('WEBHOOK_SECRET not set');
-    throw new Error('WEBHOOK_SECRET must be defined');
+    throw new Error('Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local')
   }
 
-  // Retrieve and verify headers
-  const headerPayload = await headers();
-  const svix_id = headerPayload.get('svix-id');
-  const svix_timestamp = headerPayload.get('svix-timestamp');
-  const svix_signature = headerPayload.get('svix-signature');
+  // Get the headers
+  const headerPayload = await headers()
+  const svix_id = headerPayload.get('svix-id')
+  const svix_timestamp = headerPayload.get('svix-timestamp')
+  const svix_signature = headerPayload.get('svix-signature')
+
+  // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Missing required Svix headers', { status: 400 });
+    return new Response('Error occurred -- no svix headers', {
+      status: 400,
+    })
   }
 
-  const payload = await req.json();
-  const body = JSON.stringify(payload);
-  const webhook = new Webhook(WEBHOOK_SECRET);
+  // Get the body
+  const payload = await req.json()
+  const body = JSON.stringify(payload)
 
-  let event: WebhookEvent;
+  // Create a new Svix instance with your secret.
+  const wh = new Webhook(WEBHOOK_SECRET)
+
+  let evt: WebhookEvent
+
+  // Verify the payload with the headers
   try {
-    event = webhook.verify(body, {
+    evt = wh.verify(body, {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
-    }) as WebhookEvent;
+    }) as WebhookEvent
   } catch (err) {
-    if (err instanceof WebhookVerificationError) {
-      console.error('Webhook verification failed:', err.message);
-    }
-    return new Response('Webhook verification failed', { status: 401 });
+    console.error('Error verifying webhook:', err)
+    return new Response('Error occurred', {
+      status: 400,
+    })
   }
 
-  if (event.type === 'user.created') {
-    const { id, username, image_url } = event.data;
-    await dbConnect();
+  // Handle user creation
+  if (evt.type === 'user.created') {
+    await dbConnect()
+    
+    const { 
+      id,
+      username,
+      image_url,
+      email_addresses,
+      first_name,
+      last_name
+    } = evt.data
+
+    // Generate a username if none exists
+    let finalUsername = username
+    if (!finalUsername) {
+      // Try to create username from email or name
+      if (email_addresses && email_addresses.length > 0) {
+        finalUsername = email_addresses[0].email_address.split('@')[0]
+      } else if (first_name && last_name) {
+        finalUsername = `${first_name.toLowerCase()}${last_name.toLowerCase()}`
+      } else {
+        finalUsername = `user${id.substring(0, 8)}`
+      }
+    }
+
     try {
+      // Check if user already exists
+      const existingUser = await User.findOne({ username: finalUsername })
+      
+      if (existingUser) {
+        // Append random string if username is taken
+        finalUsername = `${finalUsername}${Math.random().toString(36).substring(2, 7)}`
+      }
+
+      // Create new user document with initial empty arrays for references
       const newUser = new User({
-        username: username || `user_${id}`,
-        profilePictureUrl: image_url ,
-        team: null, // Default to no team, adjust as necessary
-      });
-      await newUser.save();
-      console.log(`User created with ID: ${newUser._id}`);
+        clerk_id: id,
+        username: finalUsername.toLowerCase(),
+        profilePictureUrl: image_url || '',
+        team: null,
+        authoredTasks: [],
+        assignedTasks: [],
+        taskAssignments: [],
+        attachments: [],
+        comments: []
+      })
+
+      await newUser.save()
+      console.log(`User created successfully with ID: ${newUser._id}`)
+      
+      return new Response(JSON.stringify({ success: true, userId: newUser._id }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      })
     } catch (error) {
-      console.error('Error saving user:', error);
-      return new Response('Error saving user data', { status: 500 });
+      console.error('Error saving user:', error)
+      return new Response(JSON.stringify({ error: 'Error saving user data' }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      })
     }
   }
 
-  console.log(`Handled event type: ${event.type}`);
-  return new Response('Webhook processed successfully', { status: 200 });
+  return new Response(JSON.stringify({ received: true }), { 
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  })
 }

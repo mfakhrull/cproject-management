@@ -38,6 +38,7 @@ async function dbConnect(): Promise<mongoose.Connection> {
   if (!cached.promise) {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
+      dbName: 'project-management',
     };
 
     cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
