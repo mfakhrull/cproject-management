@@ -39,6 +39,7 @@ async function dbConnect(): Promise<mongoose.Connection> {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
       dbName: 'project-management',
+      serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
     };
 
     cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
