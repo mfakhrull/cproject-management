@@ -25,6 +25,9 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+userSchema.index({ username: 'text' });
+
+
 // Team Model
 const teamSchema = new mongoose.Schema({
   teamName: { type: String, required: true },
@@ -54,6 +57,8 @@ const projectSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
+projectSchema.index({ name: 'text', description: 'text' });
+
 // Virtual populate for teams through ProjectTeam
 projectSchema.virtual('teams', {
   ref: 'ProjectTeam',
@@ -79,6 +84,7 @@ const projectTeamSchema = new mongoose.Schema({
 
 // Ensure unique project-team combinations
 projectTeamSchema.index({ projectId: 1, teamId: 1 }, { unique: true });
+
 
 // Task Model
 const taskSchema = new mongoose.Schema({
@@ -115,6 +121,9 @@ const taskSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+taskSchema.index({ title: 'text', description: 'text' });
+
 
 // Comment Model
 const commentSchema = new mongoose.Schema({
