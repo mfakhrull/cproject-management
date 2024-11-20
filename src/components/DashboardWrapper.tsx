@@ -10,6 +10,8 @@ import {
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import StoreProvider, { useAppSelector } from "@/app/redux/redux";
+import { TaskProvider } from "@/context/TaskContext";
+import { Toaster } from "sonner"; // Import the Toaster component
 
 interface DashboardWrapperProps {
   children: React.ReactNode;
@@ -59,7 +61,10 @@ const DashboardWrapper: React.FC<DashboardWrapperProps> = ({ children }) => {
           </SignedOut>
           <SignedIn>
             <StoreProvider>
+            <TaskProvider>
               <DashboardLayout>{children}</DashboardLayout>
+              <Toaster position="bottom-right" />
+              </TaskProvider>
             </StoreProvider>
           </SignedIn>
         </body>

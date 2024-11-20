@@ -1,6 +1,8 @@
-import Image from "next/image";
+import React from "react";
+import HomePage from "@/app/home/page";
 
-// src/pages/index.tsx (or /app/page.tsx for Next.js 13)
-export default function Home() {
-  return <div>Home Page Content</div>;
-}
+const Home = () => {
+  return <HomePage />;
+};
+
+export default Home;

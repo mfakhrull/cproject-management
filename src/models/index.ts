@@ -27,7 +27,6 @@ const userSchema = new mongoose.Schema({
 
 userSchema.index({ username: 'text' });
 
-
 // Team Model
 const teamSchema = new mongoose.Schema({
   teamName: { type: String, required: true },
@@ -84,8 +83,7 @@ const projectTeamSchema = new mongoose.Schema({
 
 // Ensure unique project-team combinations
 projectTeamSchema.index({ projectId: 1, teamId: 1 }, { unique: true });
-
-
+ 
 // Task Model
 const taskSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -110,20 +108,17 @@ const taskSchema = new mongoose.Schema({
     required: true 
   },
   authorId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
+    type: String, // Updated to string (clerk_id)
     required: true 
   },
   assignedUserId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User' 
+    type: String // Updated to string (clerk_id)
   }
 }, {
   timestamps: true
 });
 
 taskSchema.index({ title: 'text', description: 'text' });
-
 
 // Comment Model
 const commentSchema = new mongoose.Schema({

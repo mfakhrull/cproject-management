@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AlertCircle,
   AlertOctagon,
@@ -11,13 +11,13 @@ import {
   Home,
   Layers3,
   Lock,
+  Menu,
   Search,
   Settings,
   ShieldAlert,
   User,
   Users,
   X,
-  Menu,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,9 +26,18 @@ import { SignedIn, UserButton, SignedOut, SignInButton } from "@clerk/nextjs";
 import { useAppDispatch, useAppSelector } from "@/app/redux/redux";
 import { setIsSidebarCollapsed } from "@/app/state";
 
+interface Project {
+  _id: string;
+  name: string;
+}
+
 const Sidebar: React.FC = () => {
   const [showProjects, setShowProjects] = useState(true);
   const [showPriority, setShowPriority] = useState(true);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
@@ -40,13 +49,34 @@ const Sidebar: React.FC = () => {
       isSidebarCollapsed ? "w-0 hidden" : "w-64"
     }`;
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setIsLoadingProjects(true);
+      try {
+        const response = await fetch("/api/projects/read");
+        if (!response.ok) {
+          throw new Error("Failed to fetch projects");
+        }
+        const data: Project[] = await response.json();
+        setProjects(data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
   return (
     <div className={sidebarClassNames}>
       <div className="flex h-[100%] w-full flex-col justify-start">
         {/* TOP LOGO */}
         <div className="z-50 flex min-h-[56px] w-full items-center justify-between bg-white px-4 pt-3 dark:bg-black">
           <div className="text-xl font-bold text-gray-800 dark:text-white">
-            EDLIST
+            ICMS
           </div>
           <button
             className="py-3"
@@ -71,7 +101,7 @@ const Sidebar: React.FC = () => {
             />
             <div>
               <h3 className="text-md font-bold tracking-wide dark:text-gray-200">
-                EDROH TEAM
+                FAKHRUL
               </h3>
               <div className="mt-1 flex items-start gap-2">
                 <Lock className="mt-[0.1rem] h-3 w-3 text-gray-500 dark:text-gray-400" />
@@ -126,7 +156,7 @@ const Sidebar: React.FC = () => {
           onClick={() => setShowProjects((prev) => !prev)}
           className="flex w-full items-center justify-between px-8 py-3 text-gray-500"
         >
-          <span className="">Projects</span>
+          <span>Projects</span>
           {showProjects ? (
             <ChevronUp className="h-5 w-5" />
           ) : (
@@ -134,20 +164,23 @@ const Sidebar: React.FC = () => {
           )}
         </button>
         {showProjects && (
-          <>
-            <SidebarLink
-              icon={Briefcase}
-              label="Project 1" // Placeholder; replace with dynamic data
-              href="/projects/1"
-              isCollapsed={isSidebarCollapsed}
-            />
-            <SidebarLink
-              icon={Briefcase}
-              label="Project 2" // Placeholder; replace with dynamic data
-              href="/projects/2"
-              isCollapsed={isSidebarCollapsed}
-            />
-          </>
+          <div className="">
+            {isLoadingProjects ? (
+              <p className="text-gray-500">Loading projects...</p>
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : (
+              projects.map((project) => (
+                <SidebarLink
+                  key={project._id}
+                  icon={Briefcase}
+                  label={project.name}
+                  href={`/projects/${project._id}`}
+                  isCollapsed={isSidebarCollapsed}
+                />
+              ))
+            )}
+          </div>
         )}
 
         {/* PRIORITIES LINKS */}
@@ -155,7 +188,7 @@ const Sidebar: React.FC = () => {
           onClick={() => setShowPriority((prev) => !prev)}
           className="flex w-full items-center justify-between px-8 py-3 text-gray-500"
         >
-          <span className="">Priority</span>
+          <span>Priority</span>
           {showPriority ? (
             <ChevronUp className="h-5 w-5" />
           ) : (

@@ -1,27 +1,25 @@
 // types/index.ts
-import { Types } from 'mongoose';
-
 export interface IUser {
-  _id: Types.ObjectId;
+  _id: string; // MongoDB ObjectId is now a string
   clerk_id: string;
   username: string;
   profilePictureUrl?: string;
-  teamId?: Types.ObjectId;
+  teamId?: string; // Updated to string for consistency
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface ITeam {
-  _id: Types.ObjectId;
+  _id: string;
   teamName: string;
-  productOwnerId: Types.ObjectId;
-  projectManagerId: Types.ObjectId;
+  productOwnerId: string;
+  projectManagerId: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IProject {
-  _id: Types.ObjectId;
+  _id: string;
   name: string;
   description?: string;
   startDate: Date;
@@ -31,15 +29,15 @@ export interface IProject {
 }
 
 export interface IProjectTeam {
-  _id: Types.ObjectId;
-  projectId: Types.ObjectId;
-  teamId: Types.ObjectId;
+  _id: string;
+  projectId: string;
+  teamId: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface ITask {
-  _id: Types.ObjectId;
+  _id: string;
   title: string;
   description?: string;
   status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
@@ -48,28 +46,28 @@ export interface ITask {
   startDate?: Date;
   dueDate?: Date;
   points?: number;
-  projectId: Types.ObjectId;
-  authorId: Types.ObjectId;
-  assignedUserId?: Types.ObjectId;
+  projectId: string;
+  authorId: string; // Updated to string (clerk_id)
+  assignedUserId?: string; // Updated to string (clerk_id)
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IComment {
-  _id: Types.ObjectId;
+  _id: string;
   text: string;
-  taskId: Types.ObjectId;
-  userId: Types.ObjectId;
+  taskId: string;
+  userId: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IAttachment {
-  _id: Types.ObjectId;
+  _id: string;
   fileUrl: string;
   fileName: string;
-  taskId: Types.ObjectId;
-  uploadedById: Types.ObjectId;
+  taskId: string;
+  uploadedById: string;
   createdAt: Date;
   updatedAt: Date;
 }
