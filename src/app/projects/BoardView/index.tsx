@@ -1,12 +1,16 @@
+// src/app/projects/BoardView/index.tsx
+
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { EllipsisVertical, Plus } from "lucide-react";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 import { ITask } from "@/types";
 import { useTaskContext } from "@/context/TaskContext";
+import TaskDetailsWrapper from "../tasks/TaskDetailsWrapper";
 
 type BoardProps = {
   id: string;
@@ -17,6 +21,8 @@ const taskStatus: ITask["status"][] = ["TODO", "IN_PROGRESS", "COMPLETED"];
 
 const BoardView = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
   const { tasks, fetchTasks, updateTaskStatus, isLoading, error } = useTaskContext();
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchTasks(id); // Fetch tasks for the given project ID
@@ -24,6 +30,18 @@ const BoardView = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
 
   const moveTask = async (taskId: string, toStatus: ITask["status"]) => {
     await updateTaskStatus(taskId, toStatus); // Use the context method to update the task status
+  };
+
+  const openTaskDetails = (taskId: string) => {
+    setSelectedTaskId(taskId); // Open side peek for task details
+  };
+
+  const openFullScreen = (taskId: string) => {
+    router.push(`/projects/${id}/tasks/${taskId}`); // Redirect to full-screen task details
+  };
+
+  const closeTaskDetails = () => {
+    setSelectedTaskId(null);
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -39,9 +57,19 @@ const BoardView = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
             tasks={tasks}
             moveTask={moveTask}
             setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+            openTaskDetails={openTaskDetails}
+            openFullScreen={openFullScreen}
           />
         ))}
       </div>
+
+      {selectedTaskId && (
+        <TaskDetailsWrapper
+          taskId={selectedTaskId}
+          mode="peek" // Always use "peek" for side layout
+          onClose={closeTaskDetails}
+        />
+      )}
     </DndProvider>
   );
 };
@@ -51,6 +79,8 @@ type TaskColumnProps = {
   tasks: ITask[];
   moveTask: (taskId: string, toStatus: ITask["status"]) => void;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
+  openTaskDetails: (taskId: string) => void;
+  openFullScreen: (taskId: string) => void;
 };
 
 const TaskColumn = ({
@@ -58,6 +88,8 @@ const TaskColumn = ({
   tasks,
   moveTask,
   setIsModalNewTaskOpen,
+  openTaskDetails,
+  openFullScreen,
 }: TaskColumnProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -115,7 +147,12 @@ const TaskColumn = ({
       </div>
 
       {filteredTasks.map((task) => (
-        <Task key={task._id.toString()} task={task} />
+        <Task
+          key={task._id.toString()}
+          task={task}
+          openTaskDetails={openTaskDetails}
+          openFullScreen={openFullScreen}
+        />
       ))}
     </div>
   );
@@ -123,9 +160,11 @@ const TaskColumn = ({
 
 type TaskProps = {
   task: ITask;
+  openTaskDetails: (taskId: string) => void;
+  openFullScreen: (taskId: string) => void;
 };
 
-const Task = ({ task }: TaskProps) => {
+const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -149,6 +188,7 @@ const Task = ({ task }: TaskProps) => {
       className={`mb-4 rounded-md bg-white shadow dark:bg-dark-secondary ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
+      onClick={() => openTaskDetails(task._id.toString())}
     >
       <div className="p-4 md:p-6">
         <h4 className="text-md font-bold dark:text-white">{task.title}</h4>

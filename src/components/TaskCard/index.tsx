@@ -1,3 +1,5 @@
+// src/components/TaskCard/index.tsx
+
 "use client";
 
 import { ITask, IAttachment } from "@/types";
@@ -7,11 +9,18 @@ import React from "react";
 
 type Props = {
   task: ITask & { attachments?: IAttachment[] }; // Extend ITask to optionally include attachments
+  onClick?: () => void; // Optional onClick handler for the task card
 };
 
-const TaskCard = ({ task }: Props) => {
+const TaskCard = ({ task, onClick }: Props) => {
   return (
-    <div className="mb-3 rounded bg-white p-4 shadow dark:bg-dark-secondary dark:text-white">
+    <div
+      className={`mb-3 rounded bg-white p-4 shadow dark:bg-dark-secondary dark:text-white ${
+        onClick ? "cursor-pointer hover:shadow-lg transition-shadow" : ""
+      }`}
+      onClick={onClick} // Trigger the onClick handler when the card is clicked
+    >
+      {/* Attachments Section */}
       {task.attachments && task.attachments.length > 0 && (
         <div>
           <strong>Attachments:</strong>
@@ -29,6 +38,8 @@ const TaskCard = ({ task }: Props) => {
           </div>
         </div>
       )}
+
+      {/* Task Details */}
       <p>
         <strong>ID:</strong> {task._id.toString()}
       </p>

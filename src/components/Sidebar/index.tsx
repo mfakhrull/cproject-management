@@ -149,6 +149,12 @@ const Sidebar: React.FC = () => {
             href="/teams"
             isCollapsed={isSidebarCollapsed}
           />
+          <SidebarLink
+            icon={Briefcase}
+            label="Inventory"
+            href="/inventory/Dashboard"
+            isCollapsed={isSidebarCollapsed}
+          />
         </nav>
 
         {/* PROJECTS LINKS */}
