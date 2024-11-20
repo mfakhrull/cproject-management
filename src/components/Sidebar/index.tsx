@@ -12,6 +12,7 @@ import {
   Layers3,
   Lock,
   Menu,
+  Drill,
   Search,
   Settings,
   ShieldAlert,
@@ -150,9 +151,9 @@ const Sidebar: React.FC = () => {
             isCollapsed={isSidebarCollapsed}
           />
           <SidebarLink
-            icon={Briefcase}
+            icon={Drill}
             label="Inventory"
-            href="/inventory/Dashboard"
+            href="/inventory"
             isCollapsed={isSidebarCollapsed}
           />
         </nav>
