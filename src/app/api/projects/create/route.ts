@@ -7,20 +7,32 @@ export async function POST(req: Request) {
   await dbConnect();
 
   try {
-    const { name, description, startDate, endDate } = await req.json();
+    const { name, description, startDate, endDate, location, status, managerId } = await req.json();
+
+    if (!name || !startDate || !location || !status || !managerId) {
+      return NextResponse.json(
+        { message: "All required fields must be filled." },
+        { status: 400 }
+      );
+    }
+
     const newProject = await Project.create({
       name,
       description,
       startDate,
       endDate,
+      location,
+      status,
+      managerId,
     });
+
     return NextResponse.json(newProject, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
       {
         message: `Error creating a project: ${error.message || "Unknown error occurred"}`,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

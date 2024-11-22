@@ -1,5 +1,6 @@
+// src\app\projects\ModalNewProject\index.tsx
 import Modal from "@/components/Modal";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { formatISO } from "date-fns";
 
 type Props = {
@@ -7,16 +8,42 @@ type Props = {
   onClose: () => void;
 };
 
+interface IUser {
+  clerk_id: string; // Use clerk_id
+  username: string;
+}
+
 const ModalNewProject = ({ isOpen, onClose }: Props) => {
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [location, setLocation] = useState("");
+  const [status, setStatus] = useState("PLANNING");
+  const [managerId, setManagerId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState<IUser[]>([]);
+
+  useEffect(() => {
+    // Fetch the list of users
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/api/users/getUsers");
+        if (!response.ok) throw new Error("Failed to fetch users");
+        const data: IUser[] = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setError("Error fetching users");
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleSubmit = async () => {
-    if (!projectName || !startDate || !endDate) return;
+    if (!projectName || !startDate || !endDate || !location || !managerId) return;
 
     const formattedStartDate = formatISO(new Date(startDate), {
       representation: "complete",
@@ -39,6 +66,9 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
           description,
           startDate: formattedStartDate,
           endDate: formattedEndDate,
+          location,
+          status,
+          managerId,
         }),
       });
 
@@ -51,6 +81,9 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
       setDescription("");
       setStartDate("");
       setEndDate("");
+      setLocation("");
+      setManagerId("");
+      setStatus("PLANNING");
       onClose();
     } catch (error: any) {
       console.error("Error creating project:", error);
@@ -61,11 +94,14 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
   };
 
   const isFormValid = () => {
-    return projectName && description && startDate && endDate;
+    return projectName && description && startDate && endDate && location && managerId;
   };
 
   const inputStyles =
     "w-full rounded border border-gray-300 p-2 shadow-sm dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
+
+  const selectStyles =
+    "mb-4 block w-full rounded border border-gray-300 px-3 py-2 dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} name="Create New Project">
@@ -103,6 +139,34 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
+        <input
+          type="text"
+          className={inputStyles}
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+        <select
+          className={selectStyles}
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="PLANNING">Planning</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="COMPLETED">Completed</option>
+        </select>
+        <select
+          className={selectStyles}
+          value={managerId}
+          onChange={(e) => setManagerId(e.target.value)}
+        >
+          <option value="">Select Project Manager</option>
+          {users.map((user) => (
+            <option key={user.clerk_id} value={user.clerk_id}>
+              {user.username}
+            </option>
+          ))}
+        </select>
         {error && <div className="text-red-500">{error}</div>}
         <button
           type="submit"

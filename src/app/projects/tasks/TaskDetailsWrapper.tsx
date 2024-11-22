@@ -54,7 +54,7 @@ const TaskDetailsWrapper: React.FC<TaskDetailsWrapperProps> = ({
   }
 
   return (
-    <div className="fixed right-0 top-0 h-full w-1/3 bg-white shadow-lg p-6">
+    <div className="fixed right-0 top-16 mt-1 h-full w-1/3 bg-white shadow-lg p-6">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-6">
         <h2 className="text-xl font-semibold">Task Details</h2>

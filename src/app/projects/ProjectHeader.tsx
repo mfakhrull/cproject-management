@@ -1,16 +1,28 @@
+// src\app\projects\ProjectHeader.tsx
 "use client";
 
 import Header from "@/components/Header";
-import { Clock, Filter, Grid3x3, List, PlusSquare, Share2, Table } from "lucide-react";
+import Link from "next/link";
+import {
+  Clock,
+  Filter,
+  Grid3x3,
+  List,
+  PlusSquare,
+  Share2,
+  Table,
+  FileText,
+} from "lucide-react";
 import React, { useState } from "react";
 import ModalNewProject from "./ModalNewProject";
 
 type Props = {
   activeTab: string;
   setActiveTab: (tabName: string) => void;
+  projectId: string; // Pass the current project ID to link to the details page
 };
 
-const ProjectHeader = ({ activeTab, setActiveTab }: Props) => {
+const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
   const [isModalNewProjectOpen, setIsModalNewProjectOpen] = useState(false);
 
   return (
@@ -23,12 +35,23 @@ const ProjectHeader = ({ activeTab, setActiveTab }: Props) => {
         <Header
           name="Product Design Development"
           buttonComponent={
-            <button
-              className="flex items-center rounded-md bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
-              onClick={() => setIsModalNewProjectOpen(true)}
-            >
-              <PlusSquare className="mr-2 h-5 w-5" /> New Boards
-            </button>
+            <div className="flex space-x-4">
+              {/* New Boards Button */}
+              <button
+                className="flex items-center rounded-md bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
+                onClick={() => setIsModalNewProjectOpen(true)}
+              >
+                <PlusSquare className="mr-2 h-5 w-5" /> New Boards
+              </button>
+
+              {/* Link to Project Details */}
+              <Link
+                href={`/projects/${projectId}/details`}
+                className="flex items-center rounded-md bg-green-500 px-3 py-2 text-white hover:bg-green-600"
+              >
+                <FileText className="mr-2 h-5 w-5" /> Project Details
+              </Link>
+            </div>
           }
         />
       </div>
@@ -36,10 +59,30 @@ const ProjectHeader = ({ activeTab, setActiveTab }: Props) => {
       {/* TABS */}
       <div className="flex flex-wrap-reverse gap-2 border-y border-gray-200 pb-[8px] pt-2 dark:border-stroke-dark md:items-center">
         <div className="flex flex-1 items-center gap-2 md:gap-4">
-          <TabButton name="Board" icon={<Grid3x3 className="h-5 w-5" />} setActiveTab={setActiveTab} activeTab={activeTab} />
-          <TabButton name="List" icon={<List className="h-5 w-5" />} setActiveTab={setActiveTab} activeTab={activeTab} />
-          <TabButton name="Timeline" icon={<Clock className="h-5 w-5" />} setActiveTab={setActiveTab} activeTab={activeTab} />
-          <TabButton name="Table" icon={<Table className="h-5 w-5" />} setActiveTab={setActiveTab} activeTab={activeTab} />
+          <TabButton
+            name="Board"
+            icon={<Grid3x3 className="h-5 w-5" />}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          />
+          <TabButton
+            name="List"
+            icon={<List className="h-5 w-5" />}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          />
+          <TabButton
+            name="Timeline"
+            icon={<Clock className="h-5 w-5" />}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          />
+          <TabButton
+            name="Table"
+            icon={<Table className="h-5 w-5" />}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          />
         </div>
         <div className="flex items-center gap-2">
           <button className="text-gray-500 hover:text-gray-600 dark:text-neutral-500 dark:hover:text-gray-300">

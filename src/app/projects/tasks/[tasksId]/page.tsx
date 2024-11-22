@@ -1,5 +1,3 @@
-// src/app/projects/tasks/[tasksId]/page.tsx
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -12,35 +10,42 @@ import {
   User,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 const TaskDetailsPage = () => {
-  const params = useParams(); // Use `useParams` hook to handle async params
-  const tasksId = params?.tasksId; // Safely access the `tasksId` property
+  const params = useParams();
+  const tasksId = params?.tasksId;
 
   const [task, setTask] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!tasksId) return;
 
+    // Fetch task details with toast.promise
     const fetchTask = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(`/api/tasks/getTask?taskId=${tasksId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch task details");
+      toast.promise(
+        fetch(`/api/tasks/getTask?taskId=${tasksId}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to fetch task details");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            setTask(data);
+            return data; // Pass data to the success message
+          })
+          .catch((err) => {
+            setError(err.message || "An unknown error occurred");
+            throw err; // Pass error to the error message
+          }),
+        {
+          loading: "Fetching task details...",
+          success: (data) => `Task "${data.title}" loaded successfully!`,
+          error: (err) => err.message || "Error loading task details!",
         }
-
-        const data = await response.json();
-        setTask(data);
-      } catch (err: any) {
-        setError(err.message || "An unknown error occurred");
-      } finally {
-        setIsLoading(false);
-      }
+      );
     };
 
     fetchTask();
@@ -54,16 +59,17 @@ const TaskDetailsPage = () => {
     );
   }
 
-  if (isLoading) {
-    return <div className="flex justify-center items-center h-screen text-xl">Loading...</div>;
-  }
-
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen text-red-500 text-xl">
         Error: {error}
       </div>
     );
+  }
+
+  if (!task) {
+    // No loading spinner needed because toast handles the loading state
+    return null;
   }
 
   return (

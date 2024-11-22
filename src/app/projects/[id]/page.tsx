@@ -1,3 +1,5 @@
+// src\app\projects\[id]\page.tsx
+
 "use client";
 
 import React, { useState } from "react";
@@ -31,20 +33,36 @@ const ProjectPage = () => {
       />
 
       {/* Project Header with Tabs */}
-      <ProjectHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+      <ProjectHeader
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        projectId={projectId} // Pass projectId to ProjectHeader
+      />
 
       {/* Conditional Rendering of Tabs */}
       {activeTab === "Board" && (
-        <BoardView id={projectId} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        <BoardView
+          id={projectId}
+          setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+        />
       )}
       {activeTab === "List" && (
-        <ListView id={projectId} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        <ListView
+          id={projectId}
+          setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+        />
       )}
       {activeTab === "Timeline" && (
-        <TimelineView id={projectId} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        <TimelineView
+          id={projectId}
+          setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+        />
       )}
       {activeTab === "Table" && (
-        <TableView id={projectId} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
+        <TableView
+          id={projectId}
+          setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+        />
       )}
     </div>
   );

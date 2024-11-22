@@ -185,7 +185,7 @@ const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
   return (
     <div
       ref={ref}
-      className={`mb-4 rounded-md bg-white shadow dark:bg-dark-secondary ${
+      className={`mb-4 rounded-md bg-white shadow dark:bg-dark-secondary cursor-pointer transition hover:shadow-lg ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
       onClick={() => openTaskDetails(task._id.toString())}
