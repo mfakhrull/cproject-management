@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { Project } from "@/models"; // Adjust path as needed
 import dbConnect from "@/lib/mongodb";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: { id: string } }) {
   await dbConnect();
+
+  const { params } = context; // Await the params in an asynchronous block
 
   try {
     const project = await Project.findById(params.id)

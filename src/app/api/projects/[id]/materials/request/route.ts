@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { MaterialRequest, Project } from "@/models"; // Adjust path as needed
 import dbConnect from "@/lib/mongodb";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, context: { params: { id: string } }) {
   await dbConnect();
+
+  const { params } = context; // Properly destructure params after context is awaited
 
   try {
     const { items, notes, requestedBy } = await req.json();

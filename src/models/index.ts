@@ -35,7 +35,7 @@ const projectDetailsAttachmentSchema = new mongoose.Schema(
     fileName: { type: String, required: true },
     fileUrl: { type: String, required: true },
     uploadedBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true,
     },

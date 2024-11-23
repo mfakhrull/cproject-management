@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import { MaterialRequest } from "@/models"; // Adjust path as needed
 import dbConnect from "@/lib/mongodb";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: { id: string } }) {
   await dbConnect();
+
+  const { params } = context; // Properly await context to access params safely
 
   try {
     const materialRequests = await MaterialRequest.find({ projectId: params.id })
-    //   .populate("requestedBy", "username profilePictureUrl") // Populate requestedBy field with user info
+      // Uncomment if requestedBy population is needed
+      // .populate("requestedBy", "username profilePictureUrl") 
       .exec();
 
     if (!materialRequests.length) {

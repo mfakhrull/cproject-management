@@ -18,12 +18,42 @@ export interface ITeam {
   updatedAt: Date;
 }
 
+export interface IMaterialRequest {
+  _id: string; // MongoDB ObjectId
+  projectId: string; // MongoDB ObjectId (reference to the project)
+  requestedBy: string; // User ID of the requester
+  status: 'PENDING' | 'APPROVED' | 'REVISION_REQUIRED';
+  items: {
+    name: string;
+    quantity: number;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  }[];
+  notes?: string; // Optional notes from the requester or procurement team
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IProjectDetailsAttachment {
+  _id: string; // MongoDB ObjectId
+  fileName: string;
+  fileUrl: string;
+  uploadedBy: string; // User ID of the uploader
+  createdAt: Date;
+}
+
+
 export interface IProject {
   _id: string;
   name: string;
   description?: string;
   startDate: Date;
   endDate?: Date;
+  location: string; // New field
+  status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED'; // New field
+  managerId: string; // User ID of the project manager
+  teamMembers: string[]; // User IDs of team members
+  attachments: IProjectDetailsAttachment[]; // Project-related attachments
+  materialRequests: IMaterialRequest[]; // Material requests associated with the project
   createdAt: Date;
   updatedAt: Date;
 }
@@ -71,3 +101,4 @@ export interface IAttachment {
   createdAt: Date;
   updatedAt: Date;
 }
+
