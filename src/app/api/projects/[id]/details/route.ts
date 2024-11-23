@@ -9,13 +9,11 @@ export async function GET(req: Request, context: { params: { id: string } }) {
 
   try {
     const project = await Project.findById(params.id)
-      .populate("teamMembers", "username profilePictureUrl") // Populate team member usernames and profile pictures
-      .populate("attachments.uploadedBy", "username profilePictureUrl") // Populate uploadedBy in attachments
-      .populate({
-        path: "materialRequests.requestedBy",
-        select: "username profilePictureUrl", // Populate `requestedBy` in material requests
-      })
-      .exec();
+  .populate("teamMembersInfo", "username profilePictureUrl")
+  .populate("attachmentsInfo", "username profilePictureUrl")
+  .populate("materialRequestsInfo", "username profilePictureUrl")
+  .exec();
+
 
     if (!project) {
       return NextResponse.json(

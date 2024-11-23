@@ -139,6 +139,28 @@ projectSchema.virtual('teams', {
   foreignField: 'projectId'
 });
 
+projectSchema.virtual("teamMembersInfo", {
+  ref: "User",
+  localField: "teamMembers", // Clerk user IDs stored as strings
+  foreignField: "clerk_id", // Clerk ID in the User model
+  justOne: false, // Array of users
+});
+
+projectSchema.virtual("attachmentsInfo", {
+  ref: "User",
+  localField: "attachments.uploadedBy", // Clerk user IDs stored as strings
+  foreignField: "clerk_id", // Clerk ID in the User model
+  justOne: true, // Single user
+});
+
+projectSchema.virtual("materialRequestsInfo", {
+  ref: "User",
+  localField: "materialRequests.requestedBy", // Clerk user IDs stored as strings
+  foreignField: "clerk_id", // Clerk ID in the User model
+  justOne: true, // Single user
+});
+
+
 // ProjectTeam Model (Junction table)
 const projectTeamSchema = new mongoose.Schema({
   projectId: { 
