@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { createPlateEditor } from '@udecode/plate-common/react';
 import { withProps } from '@udecode/cn';
 import { AIPlugin } from '@udecode/plate-ai/react';
 import {
@@ -19,7 +21,6 @@ import { CommentsPlugin } from '@udecode/plate-comments/react';
 import {
   ParagraphPlugin,
   PlateLeaf,
-  usePlateEditor,
 } from '@udecode/plate-common/react';
 import { DatePlugin } from '@udecode/plate-date/react';
 import { EmojiInputPlugin } from '@udecode/plate-emoji/react';
@@ -94,79 +95,87 @@ import { TocElement } from '@/components/plate-ui/toc-element';
 import { ToggleElement } from '@/components/plate-ui/toggle-element';
 import { withDraggables } from '@/components/plate-ui/with-draggables';
 
-export const useCreateEditor = () => {
-  return usePlateEditor({
-    override: {
-      components: withDraggables(
-        withPlaceholders({
-          [AIPlugin.key]: AILeaf,
-          [AudioPlugin.key]: MediaAudioElement,
-          [BlockquotePlugin.key]: BlockquoteElement,
-          [BoldPlugin.key]: withProps(PlateLeaf, { as: 'strong' }),
-          [CodeBlockPlugin.key]: CodeBlockElement,
-          [CodeLinePlugin.key]: CodeLineElement,
-          [CodePlugin.key]: CodeLeaf,
-          [CodeSyntaxPlugin.key]: CodeSyntaxLeaf,
-          [ColumnItemPlugin.key]: ColumnElement,
-          [ColumnPlugin.key]: ColumnGroupElement,
-          [CommentsPlugin.key]: CommentLeaf,
-          [DatePlugin.key]: DateElement,
-          [EmojiInputPlugin.key]: EmojiInputElement,
-          [ExcalidrawPlugin.key]: ExcalidrawElement,
-          [FilePlugin.key]: MediaFileElement,
-          [HEADING_KEYS.h1]: withProps(HeadingElement, { variant: 'h1' }),
-          [HEADING_KEYS.h2]: withProps(HeadingElement, { variant: 'h2' }),
-          [HEADING_KEYS.h3]: withProps(HeadingElement, { variant: 'h3' }),
-          [HEADING_KEYS.h4]: withProps(HeadingElement, { variant: 'h4' }),
-          [HEADING_KEYS.h5]: withProps(HeadingElement, { variant: 'h5' }),
-          [HEADING_KEYS.h6]: withProps(HeadingElement, { variant: 'h6' }),
-          [HighlightPlugin.key]: HighlightLeaf,
-          [HorizontalRulePlugin.key]: HrElement,
-          [ImagePlugin.key]: ImageElement,
-          [ItalicPlugin.key]: withProps(PlateLeaf, { as: 'em' }),
-          [KbdPlugin.key]: KbdLeaf,
-          [LinkPlugin.key]: LinkElement,
-          [MediaEmbedPlugin.key]: MediaEmbedElement,
-          [MentionInputPlugin.key]: MentionInputElement,
-          [MentionPlugin.key]: MentionElement,
-          [ParagraphPlugin.key]: ParagraphElement,
-          [PlaceholderPlugin.key]: MediaPlaceholderElement,
-          [SlashInputPlugin.key]: SlashInputElement,
-          [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
-          [SubscriptPlugin.key]: withProps(PlateLeaf, { as: 'sub' }),
-          [SuperscriptPlugin.key]: withProps(PlateLeaf, { as: 'sup' }),
-          [TableCellHeaderPlugin.key]: TableCellHeaderElement,
-          [TableCellPlugin.key]: TableCellElement,
-          [TablePlugin.key]: TableElement,
-          [TableRowPlugin.key]: TableRowElement,
-          [TocPlugin.key]: TocElement,
-          [TogglePlugin.key]: ToggleElement,
-          [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
-          [VideoPlugin.key]: MediaVideoElement,
-        })
-      ),
-    },
-    plugins: [
-      ...copilotPlugins,
-      ...editorPlugins,
-      FixedToolbarPlugin,
-      FloatingToolbarPlugin,
-    ],
-    value: [
-      {
-        children: [{ text: 'Playground' }],
-        type: 'h1',
+export const useCreateEditor = (initialContent?: any[]) => {
+  return useMemo(() => {
+    const editor = createPlateEditor({
+      plugins: [
+        ...copilotPlugins,
+        ...editorPlugins,
+        FixedToolbarPlugin,
+        FloatingToolbarPlugin,
+      ],
+      value: initialContent || [
+        {
+          children: [{ text: 'Playground' }],
+          type: 'h1',
+        },
+        {
+          children: [
+            { text: 'A rich-text editor with AI capabilities. Try the ' },
+            { bold: true, text: 'AI commands' },
+            { text: ' or use ' },
+            { kbd: true, text: 'Cmd+J' },
+            { text: ' to open the AI menu.' },
+          ],
+          type: ParagraphPlugin.key,
+        },
+      ],
+      override: {
+        components: withDraggables(
+          withPlaceholders({
+            [AIPlugin.key]: AILeaf,
+            [AudioPlugin.key]: MediaAudioElement,
+            [BlockquotePlugin.key]: BlockquoteElement,
+            [BoldPlugin.key]: withProps(PlateLeaf, { as: 'strong' }),
+            [CodeBlockPlugin.key]: CodeBlockElement,
+            [CodeLinePlugin.key]: CodeLineElement,
+            [CodePlugin.key]: CodeLeaf,
+            [CodeSyntaxPlugin.key]: CodeSyntaxLeaf,
+            [ColumnItemPlugin.key]: ColumnElement,
+            [ColumnPlugin.key]: ColumnGroupElement,
+            [CommentsPlugin.key]: CommentLeaf,
+            [DatePlugin.key]: DateElement,
+            [EmojiInputPlugin.key]: EmojiInputElement,
+            [ExcalidrawPlugin.key]: ExcalidrawElement,
+            [FilePlugin.key]: MediaFileElement,
+            [HEADING_KEYS.h1]: withProps(HeadingElement, { variant: 'h1' }),
+            [HEADING_KEYS.h2]: withProps(HeadingElement, { variant: 'h2' }),
+            [HEADING_KEYS.h3]: withProps(HeadingElement, { variant: 'h3' }),
+            [HEADING_KEYS.h4]: withProps(HeadingElement, { variant: 'h4' }),
+            [HEADING_KEYS.h5]: withProps(HeadingElement, { variant: 'h5' }),
+            [HEADING_KEYS.h6]: withProps(HeadingElement, { variant: 'h6' }),
+            [HighlightPlugin.key]: HighlightLeaf,
+            [HorizontalRulePlugin.key]: HrElement,
+            [ImagePlugin.key]: ImageElement,
+            [ItalicPlugin.key]: withProps(PlateLeaf, { as: 'em' }),
+            [KbdPlugin.key]: KbdLeaf,
+            [LinkPlugin.key]: LinkElement,
+            [MediaEmbedPlugin.key]: MediaEmbedElement,
+            [MentionInputPlugin.key]: MentionInputElement,
+            [MentionPlugin.key]: MentionElement,
+            [ParagraphPlugin.key]: ParagraphElement,
+            [PlaceholderPlugin.key]: MediaPlaceholderElement,
+            [SlashInputPlugin.key]: SlashInputElement,
+            [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
+            [SubscriptPlugin.key]: withProps(PlateLeaf, { as: 'sub' }),
+            [SuperscriptPlugin.key]: withProps(PlateLeaf, { as: 'sup' }),
+            [TableCellHeaderPlugin.key]: TableCellHeaderElement,
+            [TableCellPlugin.key]: TableCellElement,
+            [TablePlugin.key]: TableElement,
+            [TableRowPlugin.key]: TableRowElement,
+            [TocPlugin.key]: TocElement,
+            [TogglePlugin.key]: ToggleElement,
+            [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
+            [VideoPlugin.key]: MediaVideoElement,
+          })
+        ),
       },
-      {
-        children: [
-          { text: 'A rich-text editor with AI capabilities. Try the ' },
-          { bold: true, text: 'AI commands' },
-          { text: ' or use ' },
-          { kbd: true, text: 'Cmd+J' },
-          { text: ' to open the AI menu.' },
-        ],
-        type: ParagraphPlugin.key,
-      },
-    ],
-  });
+    });
+
+    if (initialContent) {
+      editor.children = initialContent;
+    }
+
+    return editor;
+  }, [initialContent]);
 };
