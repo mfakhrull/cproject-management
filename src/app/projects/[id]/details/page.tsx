@@ -15,6 +15,7 @@ import RequestMaterialModal from "@/components/RequestMaterialModal";
 import RequestMaterialDetailsModal from "@/components/RequestMaterialDetailsModal";
 import { IProject, IMaterialRequest } from "@/types";
 import { useAuth } from "@clerk/nextjs"; // Import Clerk hook
+import Link from "next/link";
 
 const ProjectDetailsPage = () => {
   const { id } = useParams();
@@ -206,6 +207,12 @@ const ProjectDetailsPage = () => {
         <p className="text-gray-600">
           {project?.description || "No description provided."}
         </p>
+        <Link
+          href={`/editor?projectId=${id}&projectName=${encodeURIComponent(project?.name || "")}`}
+          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+        >
+          Create Document for this Project
+        </Link>
       </div>
 
       {/* Project Details */}

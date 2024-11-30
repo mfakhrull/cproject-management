@@ -19,6 +19,7 @@ import {
   User,
   Users,
   X,
+  Files,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -154,6 +155,12 @@ const Sidebar: React.FC = () => {
             icon={Drill}
             label="Inventory"
             href="/inventory"
+            isCollapsed={isSidebarCollapsed}
+          />
+          <SidebarLink
+            icon={Files}
+            label="Opportunities"
+            href="/documents"
             isCollapsed={isSidebarCollapsed}
           />
         </nav>

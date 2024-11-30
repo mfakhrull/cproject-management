@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -18,10 +19,14 @@ export function PlateEditor() {
   const editor = useCreateEditor();
   const [isSaving, setIsSaving] = useState(false);
   const [title, setTitle] = useState('Untitled Document');
+  const [deadline, setDeadline] = useState('');
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
+  const projectName = searchParams.get("projectName");
 
   const handleSave = async () => {
-    if (!userId) {
-      toast.error('User must be logged in to save documents');
+    if (!userId || !projectId) {
+      toast.error('User must be logged in, and project ID must be provided to save documents');
       return;
     }
 
@@ -29,6 +34,8 @@ export function PlateEditor() {
     const formData = new FormData();
     formData.append('content', JSON.stringify(editor.children));
     formData.append('title', title);
+    formData.append('projectId', projectId);
+    formData.append('deadline', deadline);
 
     try {
       const result = await saveDocument(userId, formData);
@@ -53,26 +60,40 @@ export function PlateEditor() {
   return (
     <DndProvider backend={HTML5Backend}>
       <Plate editor={editor}>
-        <EditorContainer>
-          <div className="flex items-center justify-end mb-2 space-x-2">
-            <input 
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter document title"
-              className="flex-grow px-2 py-2 border rounded"
-            />
-            <button 
-              onClick={handleSave} 
-              disabled={isSaving}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-            >
-              {isSaving ? 'Saving...' : 'Save Document'}
-            </button>
-          </div>
-          <Editor variant="demo" />
-        </EditorContainer>
-        <SettingsDialog />
+        <div className="p-4 space-y-4">
+          {projectName && (
+            <div className="mb-4">
+              <h2 className="text-xl font-bold">Project: {projectName}</h2>
+              <p>Project ID: {projectId}</p>
+            </div>
+          )}
+          <EditorContainer>
+            <div className="flex items-center justify-end mb-2 space-x-2">
+              <input 
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter document title"
+                className="flex-grow px-2 py-2 border rounded"
+              />
+              <input 
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="px-2 py-2 border rounded"
+              />
+              <button 
+                onClick={handleSave} 
+                disabled={isSaving}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              >
+                {isSaving ? 'Saving...' : 'Save Document'}
+              </button>
+            </div>
+            <Editor variant="demo" />
+          </EditorContainer>
+          <SettingsDialog />
+        </div>
       </Plate>
     </DndProvider>
   );

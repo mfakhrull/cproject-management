@@ -15,11 +15,15 @@ export async function saveDocument(userId: string, formData: FormData) {
   try {
     const content = JSON.parse(formData.get('content') as string);
     const title = formData.get('title') as string;
+    const projectId = formData.get('projectId') as string;
+    const deadline = formData.get('deadline') as string;
 
     const newDocument = new EditorDocument({
       content,
       userId,
+      projectId,
       title: title || 'Untitled Document',
+      deadline: deadline ? new Date(deadline) : undefined,
     });
 
     await newDocument.save();
@@ -29,6 +33,7 @@ export async function saveDocument(userId: string, formData: FormData) {
     return { success: false, error: 'Failed to save document' };
   }
 }
+
 
 export async function getUserDocuments(userId: string) {
   if (!userId) {
