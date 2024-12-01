@@ -104,8 +104,18 @@ const projectSchema = new mongoose.Schema(
     location: { type: String, required: true },
     status: {
       type: String,
-      enum: ['PLANNING', 'IN_PROGRESS', 'COMPLETED'],
+      enum: ['PLANNING', 'IN_PROGRESS', 'COMPLETED'], // Existing statuses
       default: 'PLANNING',
+    },
+    bidStatus: {
+      type: String,
+      enum: ['OPEN', 'CLOSED'], // New statuses for bid opportunities
+      default: 'OPEN',
+    },
+    assignedContractorId: {
+      type: String, // Clerk user ID of the assigned contractor
+      ref: 'User',
+      default: null,
     },
     managerId: {
       type: String,
@@ -118,7 +128,7 @@ const projectSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
-    attachments: [projectDetailsAttachmentSchema], // Updated
+    attachments: [projectDetailsAttachmentSchema],
     materialRequests: [materialRequestSchema],
   },
   {
@@ -127,6 +137,7 @@ const projectSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
 
 projectSchema.index({ name: 'text', description: 'text' });
 

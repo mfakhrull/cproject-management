@@ -3,11 +3,11 @@
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getUserDocuments } from "@/app/action/documentActions";
+import { getOpenOpportunities } from "@/app/action/documentActions";
 
 export default function DocumentsPage() {
   const { userId } = useAuth();
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [opportunities, setOpportunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,18 +17,18 @@ export default function DocumentsPage() {
       return;
     }
 
-    async function fetchDocuments() {
+    async function fetchOpportunities() {
       try {
-        const docs = await getUserDocuments(userId!); // Add non-null assertion `!`
-        setDocuments(docs);
+        const docs = await getOpenOpportunities(userId!); // Add non-null assertion `!`
+        setOpportunities(docs);
       } catch (error) {
-        console.error("Error fetching documents:", error);
+        console.error("Error fetching opportunities:", error);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchDocuments();
+    fetchOpportunities();
   }, [userId]);
 
   if (loading) {
@@ -37,22 +37,25 @@ export default function DocumentsPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Opportunities</h1>
-      {documents.length === 0 ? (
-        <p>No documents found</p>
+      <h1 className="text-2xl font-bold mb-4">Open Bid Opportunities</h1>
+      {opportunities.length === 0 ? (
+        <p>No open opportunities found</p>
       ) : (
         <div className="grid gap-4">
-          {documents.map((doc) => (
+          {opportunities.map((opportunity) => (
             <Link
-              key={doc._id}
-              href={`/documents/${doc._id}`}
+              key={opportunity._id}
+              href={`/documents/${opportunity._id}`}
               className="block p-4 border rounded hover:bg-gray-100 transition"
             >
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">{doc.title}</h2>
-                <span className="text-gray-500">
-                  {new Date(doc.createdAt).toLocaleDateString()}
-                </span>
+                <h2 className="text-xl font-semibold">{opportunity.title}</h2>
+                <div className="flex flex-col text-gray-500">
+                  <span>Project: {opportunity.projectId?.name || "N/A"}</span>
+                  <span>Status: {opportunity.status}</span>
+                  <span>Deadline: {new Date(opportunity.deadline).toLocaleDateString()}</span>
+                  <span>Created: {new Date(opportunity.createdAt).toLocaleDateString()}</span>
+                </div>
               </div>
             </Link>
           ))}

@@ -1,11 +1,15 @@
 // src/models/EditorDocument.ts
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 export interface IEditorDocument extends mongoose.Document {
-  content: any[]
-  userId: string
-  title?: string
-  createdAt?: Date
+  content: any[];
+  userId: string;
+  projectId: mongoose.Types.ObjectId;
+  title?: string;
+  deadline?: Date;
+  status?: string; // New field for status
+  assignedContractorId?: string; // Optional field for assigned contractor
+  createdAt?: Date;
 }
 
 const EditorDocumentSchema = new mongoose.Schema({
@@ -29,11 +33,21 @@ const EditorDocumentSchema = new mongoose.Schema({
   deadline: {
     type: Date,
   },
+  status: {
+    type: String,
+    enum: ['OPEN', 'CLOSED'], // Status can be either "OPEN" or "CLOSED"
+    default: 'OPEN',
+  },
+  assignedContractorId: {
+    type: String, // Clerk user ID of the assigned contractor
+    ref: 'User',
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-
-export default mongoose.models.EditorDocument || mongoose.model<IEditorDocument>('EditorDocument', EditorDocumentSchema)
+export default mongoose.models.EditorDocument ||
+  mongoose.model<IEditorDocument>('EditorDocument', EditorDocumentSchema);

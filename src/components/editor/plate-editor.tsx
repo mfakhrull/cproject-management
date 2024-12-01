@@ -1,6 +1,7 @@
+// src/components/editor/plate-editor.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { DndProvider } from 'react-dnd';
@@ -20,6 +21,7 @@ export function PlateEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [title, setTitle] = useState('Untitled Document');
   const [deadline, setDeadline] = useState('');
+  const [status, setStatus] = useState('OPEN'); // New state for status
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId");
   const projectName = searchParams.get("projectName");
@@ -36,6 +38,7 @@ export function PlateEditor() {
     formData.append('title', title);
     formData.append('projectId', projectId);
     formData.append('deadline', deadline);
+    formData.append('status', status); // Pass the status to the backend
 
     try {
       const result = await saveDocument(userId, formData);
@@ -82,6 +85,14 @@ export function PlateEditor() {
                 onChange={(e) => setDeadline(e.target.value)}
                 className="px-2 py-2 border rounded"
               />
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="px-2 py-2 border rounded bg-white"
+              >
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+              </select>
               <button 
                 onClick={handleSave} 
                 disabled={isSaving}
