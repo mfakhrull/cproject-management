@@ -69,13 +69,22 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
         <PlateReader initialContent={document.content} />
       </div>
 
-      {/* Button to Bid Submission Page */}
-      <div className="mt-4">
+      {/* Buttons */}
+      <div className="mt-4 space-x-4">
+        {/* Submit a Bid Button */}
         <Link
           href={`/projects/${document.projectId?._id}/bid-submission?documentId=${document._id}`}
           className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
         >
           Submit a Bid
+        </Link>
+
+        {/* View Submitted Bids Button */}
+        <Link
+          href={`/projects/${document.projectId?._id}/submitted-bids`}
+          className="inline-block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+        >
+          View Submitted Bids
         </Link>
       </div>
     </div>

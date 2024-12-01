@@ -4,7 +4,6 @@ import { useAuth } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getDocumentById } from "@/app/action/documentActions";
-import { saveBidSubmission } from "@/app/action/bidActions"; // Use the server action
 import { toast } from "sonner";
 
 export default function BidSubmissionPage() {
@@ -63,48 +62,49 @@ export default function BidSubmissionPage() {
   };
 
   const handleSubmit = async () => {
-    if (!userId || !documentId) {
-      toast.error('User authentication or opportunity data is missing');
+  if (!userId || !documentId) {
+    toast.error("User authentication or opportunity data is missing");
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+
+    const projectIdToSubmit = opportunityData.projectId?._id
+      ? opportunityData.projectId._id.toString()
+      : opportunityData.projectId?.toString();
+
+    if (!projectIdToSubmit) {
+      toast.error("Project ID is missing or invalid");
       return;
     }
-  
-    try {
-      const formData = new FormData();
-  
-      // Extract projectId as a string
-      const projectIdToSubmit = opportunityData.projectId?._id 
-        ? opportunityData.projectId._id.toString() // If projectId is an object
-        : opportunityData.projectId?.toString();  // If projectId is already a string
-  
-      if (!projectIdToSubmit) {
-        toast.error('Project ID is missing or invalid');
-        return;
-      }
-  
-      formData.append('projectId', projectIdToSubmit);
-      formData.append('contractorId', userId); // Include userId as contractorId
-      formData.append('price', bidDetails.price);
-      formData.append('timeline', bidDetails.timeline);
-      bidDetails.files.forEach((file) => formData.append('file', file));
-  
-      const response = await fetch('/api/bids', {
-        method: 'POST',
-        body: formData,
-      });
-  
-      const result = await response.json();
-  
-      if (result.success) {
-        toast.success('Bid submitted successfully!');
-        router.push(`/projects/${projectIdToSubmit}/submitted-bids`);
-      } else {
-        toast.error(result.message || 'Failed to submit bid');
-      }
-    } catch (error) {
-      console.error('Error submitting bid:', error);
-      toast.error('An unexpected error occurred');
+
+    formData.append("projectId", projectIdToSubmit);
+    formData.append("documentId", documentId); // Include the documentId here
+    formData.append("contractorId", userId); // Include userId as contractorId
+    formData.append("price", bidDetails.price);
+    formData.append("timeline", bidDetails.timeline);
+    bidDetails.files.forEach((file) => formData.append("file", file));
+
+    const response = await fetch("/api/bids", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      toast.success("Bid submitted successfully!");
+      router.push(`/projects/${projectIdToSubmit}/submitted-bids`);
+    } else {
+      toast.error(result.message || "Failed to submit bid");
     }
-  };
+  } catch (error) {
+    console.error("Error submitting bid:", error);
+    toast.error("An unexpected error occurred");
+  }
+};
+
   
   
 

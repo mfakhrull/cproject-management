@@ -31,6 +31,7 @@ export async function getSubmittedBids(projectId: string, userId: string) {
       return {
         ...bid,
         contractorName: contractor ? contractor.username : "Unknown Contractor",
+        documentId: bid.documentId, // Add documentId here
       };
     });
 
@@ -65,7 +66,11 @@ export async function getBidDetails(bidId: string, userId: string) {
   }
 }
 
-export async function updateBidStatus(bidId: string, status: "APPROVED" | "REJECTED" | "PENDING") {
+export async function updateBidStatus(
+  bidId: string,
+  status: "APPROVED" | "REJECTED" | "PENDING",
+  documentId?: string
+) {
   await dbConnect();
 
   try {
@@ -80,21 +85,32 @@ export async function updateBidStatus(bidId: string, status: "APPROVED" | "REJEC
     await bid.save();
 
     // If approved, update the associated document
-    if (status === "APPROVED") {
-      const document = await EditorDocument.findById(bid.projectId);
-      if (!document) {
-        throw new Error("Associated document not found");
+    if (status === "APPROVED" && documentId) {
+      const updatedDocument = await EditorDocument.findByIdAndUpdate(
+        documentId,
+        {
+          $set: {
+            status: "CLOSED", // Update status to CLOSED
+            assignedContractorId: bid.contractorId, // Assign the contractor
+          },
+        },
+        { new: true } // Return the updated document
+      );
+
+      if (!updatedDocument) {
+        throw new Error("Associated document not found or failed to update");
       }
 
-      document.status = "CLOSED";
-      document.assignedContractorId = bid.contractorId;
-      await document.save();
+      console.log(`Document updated: ${updatedDocument}`);
     }
 
     return { success: true };
   } catch (error) {
     console.error("Error updating bid status:", error);
-    return { success: false, message: error instanceof Error ? error.message : "Failed to update bid status" };
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to update bid status",
+    };
   }
 }
 
@@ -103,6 +119,8 @@ export async function updateBidStatus(bidId: string, status: "APPROVED" | "REJEC
 
 
 
+
+// Below code can be delete later
 // Save a new bid submission with Cloudinary file upload
 export async function saveBidSubmission(formData: FormData) {
   const projectId = formData.get("projectId") as string;
