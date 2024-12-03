@@ -21,6 +21,7 @@ const ProjectDetailsPage = () => {
   const { id } = useParams();
   const { userId } = useAuth(); // Get Clerk userId
   const [project, setProject] = useState<IProject | null>(null);
+  const [approvedBid, setApprovedBid] = useState<any | null>(null);
   const [materialRequests, setMaterialRequests] = useState<IMaterialRequest[]>(
     [],
   );
@@ -51,6 +52,22 @@ const ProjectDetailsPage = () => {
     };
 
     fetchProjectDetails();
+  }, [id]);
+
+  // Fetch Approved Bid
+  useEffect(() => {
+    const fetchApprovedBid = async () => {
+      try {
+        const response = await fetch(`/api/projects/${id}/approved-bid`);
+        if (!response.ok) throw new Error("Failed to fetch approved bid");
+        const data = await response.json();
+        setApprovedBid(data || null);
+      } catch (err: any) {
+        console.error(err.message);
+      }
+    };
+
+    fetchApprovedBid();
   }, [id]);
 
   // Fetch Material Requests
@@ -211,7 +228,13 @@ const ProjectDetailsPage = () => {
           href={`/editor?projectId=${id}&projectName=${encodeURIComponent(project?.name || "")}`}
           className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
-          Create Document for this Project
+          Create Opportunity for this Project
+        </Link>
+        <Link
+          href={`/projects/${id}/submitted-bids`}
+          className="ml-4 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+        >
+          View Submitted Bids
         </Link>
       </div>
 
@@ -331,6 +354,68 @@ const ProjectDetailsPage = () => {
             )}
           </button>
         </div>
+      </div>
+
+      {/* Approved Bid Card */}
+      <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
+        <h2 className="mb-4 text-xl font-semibold text-gray-800">
+          Approved Bid
+        </h2>
+        {approvedBid ? (
+          <div>
+            <p className="mb-2 flex items-center gap-2 text-gray-600">
+              <Users className="h-5 w-5 text-blue-500" />
+              <span className="font-medium">Contractor:</span>{" "}
+              {approvedBid.contractorName}
+            </p>
+            <p className="mb-2 flex items-center gap-2 text-gray-600">
+              <FileText className="h-5 w-5 text-orange-500" />
+              <span className="font-medium">Price:</span> $
+              {approvedBid.price.toLocaleString()}
+            </p>
+            <p className="mb-2 flex items-center gap-2 text-gray-600">
+              <Calendar className="h-5 w-5 text-purple-500" />
+              <span className="font-medium">Timeline:</span>{" "}
+              {approvedBid.timeline}
+            </p>
+            <p className="mb-2 flex items-center gap-2 text-gray-600">
+              <ClipboardCheck className="h-5 w-5 text-green-500" />
+              <span className="font-medium">Status:</span> {approvedBid.status}
+            </p>
+            <div>
+              <h3 className="mb-2 text-lg font-medium text-gray-800">
+                Attachments
+              </h3>
+              {approvedBid.attachments.length > 0 ? (
+                <ul className="space-y-2">
+                  {approvedBid.attachments.map(
+                    (attachment: any, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-center justify-between rounded-md bg-gray-100 px-4 py-2 hover:bg-gray-200"
+                      >
+                        <span className="truncate">{attachment.fileName}</span>
+                        <a
+                          href={attachment.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-blue-500 hover:underline"
+                        >
+                          <Download className="mr-1 h-5 w-5" />
+                          Download
+                        </a>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              ) : (
+                <p className="text-gray-600">No attachments available.</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-600">No approved bid for this project yet.</p>
+        )}
       </div>
 
       {/* Material Requests */}

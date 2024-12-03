@@ -2,6 +2,7 @@
 import mongoose, { Document } from 'mongoose';
 
 export interface IBid extends Document {
+  _id: mongoose.Types.ObjectId;
   projectId: mongoose.Types.ObjectId;
   documentId: mongoose.Types.ObjectId; // Add this field to reference the document
   contractorId: string; // Clerk user ID
