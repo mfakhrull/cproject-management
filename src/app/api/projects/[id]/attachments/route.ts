@@ -13,6 +13,10 @@ export async function POST(req: Request, context: { params: { id: string } }) {
     const file = formData.get("file") as File;
     const uploadedBy = formData.get("uploadedBy") as string;
 
+    console.log("Received contract file:", file);
+    console.log("FormData keys:", Array.from(formData.keys()));
+
+
     // Validate input
     if (!file || !uploadedBy) {
       return NextResponse.json(
