@@ -20,6 +20,7 @@ import {
   Users,
   X,
   Files,
+  FileChartPie,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -163,6 +164,12 @@ const Sidebar: React.FC = () => {
             href="/documents"
             isCollapsed={isSidebarCollapsed}
           />
+          <SidebarLink
+            icon={FileChartPie}
+            label="Contract Analysis"
+            href="/dashboard"
+            isCollapsed={isSidebarCollapsed}
+          />
         </nav>
 
         {/* PROJECTS LINKS */}
@@ -263,7 +270,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
 }) => {
   const pathname = usePathname();
   const isActive =
-    pathname === href || (pathname === "/" && href === "/dashboard");
+    pathname === href || (pathname === "/" && href === "/dashboard1");
 
   return (
     <Link href={href} className="w-full">
