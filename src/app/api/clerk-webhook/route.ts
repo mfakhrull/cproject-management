@@ -51,7 +51,11 @@ export async function POST(req: Request) {
   if (evt.type === 'user.created') {
     await dbConnect();
 
-    const { id, username, image_url, email_addresses, first_name, last_name } = evt.data;
+    const { id, username, image_url, email_addresses, first_name, last_name, public_metadata } = evt.data;
+
+    // Extract employeeId from the public_metadata
+    const employeeId = public_metadata?.employeeId;
+    const role = public_metadata?.role || 'employee'; // Default role is "employee"
 
     // Generate a username if none exists
     let finalUsername = username;
@@ -81,6 +85,8 @@ export async function POST(req: Request) {
         username: finalUsername.toLowerCase(),
         profilePictureUrl: image_url || '',
         teamId: null, // Set teamId to null initially if the user has no team upon creation
+        employeeId: employeeId || null, // Store the employeeId from public_metadata if available
+        role, // Store the role from public_metadata if available
       });
 
       await newUser.save();

@@ -5,6 +5,8 @@ export interface IUser {
   username: string;
   profilePictureUrl?: string;
   teamId?: string; // Updated to string for consistency
+  employeeId?: string; // New field to reference the employee
+  role?: string; // New field to store the role (e.g., "admin", "manager", "employee")
   createdAt: Date;
   updatedAt: Date;
 }

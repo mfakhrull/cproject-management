@@ -170,6 +170,18 @@ const Sidebar: React.FC = () => {
             href="/dashboard"
             isCollapsed={isSidebarCollapsed}
           />
+          <SidebarLink
+            icon={User}
+            label="My Profile"
+            href="/employees/me"
+            isCollapsed={isSidebarCollapsed}
+          />
+          <SidebarLink
+            icon={Users}
+            label="Employee Management"
+            href="/employees"
+            isCollapsed={isSidebarCollapsed}
+          />
         </nav>
 
         {/* PROJECTS LINKS */}

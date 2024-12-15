@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         email_address: email,
-        public_metadata: { role }, // Add metadata for the invited user
+        public_metadata: { role, employeeId }, // Add metadata for the invited user
         notify: true, // Send the invitation email
       }),
     });
