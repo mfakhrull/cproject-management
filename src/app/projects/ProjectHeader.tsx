@@ -13,7 +13,7 @@ import {
   Table,
   FileText,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ModalNewProject from "./ModalNewProject";
 
 type Props = {
@@ -24,6 +24,26 @@ type Props = {
 
 const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
   const [isModalNewProjectOpen, setIsModalNewProjectOpen] = useState(false);
+  const [projectName, setProjectName] = useState<string>("Loading...");
+  
+  // Fetch project name
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/details`);
+        if (!response.ok) throw new Error("Failed to fetch project details");
+
+        const data = await response.json();
+        setProjectName(data.name); // Extract the project name
+      } catch (error) {
+        console.error("Error fetching project details:", error);
+        setProjectName("Project Name Not Found");
+      }
+    };
+
+    if (projectId) fetchProject();
+  }, [projectId]);
+
 
   return (
     <div className="px-4 xl:px-6">
@@ -33,7 +53,7 @@ const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
       />
       <div className="pb-6 pt-6 lg:pb-4 lg:pt-8">
         <Header
-          name="Product Design Development"
+          name={projectName} // Dynamic Project Name
           buttonComponent={
             <div className="flex space-x-4">
               {/* New Boards Button */}

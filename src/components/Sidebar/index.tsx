@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   User,
   Users,
+  History,
   X,
   Files,
   FileChartPie,
@@ -262,6 +263,17 @@ const Sidebar: React.FC = () => {
             />
           </>
         )}
+        <div>
+        <hr className="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
+        </div>
+        <nav>
+          <SidebarLink
+            icon={History}
+            label="History"
+            href="/projects/history"
+            isCollapsed={isSidebarCollapsed}
+          />
+        </nav>
       </div>
     </div>
   );
