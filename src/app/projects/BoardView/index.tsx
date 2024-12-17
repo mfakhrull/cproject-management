@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { ITask } from "@/types";
 import { useTaskContext } from "@/context/TaskContext";
 import TaskDetailsWrapper from "../tasks/TaskDetailsWrapper";
+import TaskActionsMenu from "./TaskActionsMenu"; // Import the new component
 
 type BoardProps = {
   id: string;
@@ -20,7 +21,8 @@ type BoardProps = {
 const taskStatus: ITask["status"][] = ["TODO", "IN_PROGRESS", "COMPLETED"];
 
 const BoardView = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
-  const { tasks, fetchTasks, updateTaskStatus, isLoading, error } = useTaskContext();
+  const { tasks, fetchTasks, updateTaskStatus, isLoading, error } =
+    useTaskContext();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -37,7 +39,7 @@ const BoardView = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
   };
 
   const openFullScreen = (taskId: string) => {
-    router.push(`/projects/${id}/tasks/${taskId}`); // Redirect to full-screen task details
+    router.push(`/projects/tasks/${taskId}`); // Redirect to full-screen task details
   };
 
   const closeTaskDetails = () => {
@@ -180,18 +182,26 @@ const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
   const formattedStartDate = task.startDate
     ? format(new Date(task.startDate), "P")
     : "";
-  const formattedDueDate = task.dueDate ? format(new Date(task.dueDate), "P") : "";
+  const formattedDueDate = task.dueDate
+    ? format(new Date(task.dueDate), "P")
+    : "";
 
   return (
     <div
       ref={ref}
-      className={`mb-4 rounded-md bg-white shadow dark:bg-dark-secondary cursor-pointer transition hover:shadow-lg ${
+      className={`mb-4 rounded-md bg-white shadow transition hover:shadow-lg dark:bg-dark-secondary ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
-      onClick={() => openTaskDetails(task._id.toString())}
     >
       <div className="p-4 md:p-6">
-        <h4 className="text-md font-bold dark:text-white">{task.title}</h4>
+        <div className="flex items-center justify-between">
+          <h4 className="text-md font-bold dark:text-white">{task.title}</h4>
+          <TaskActionsMenu
+            taskId={task._id.toString()}
+            openPeek={openTaskDetails}
+            openFullScreen={openFullScreen}
+          />
+        </div>
         <p className="text-sm text-gray-600 dark:text-neutral-500">
           {task.description}
         </p>
@@ -203,5 +213,6 @@ const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
     </div>
   );
 };
+
 
 export default BoardView;

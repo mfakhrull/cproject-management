@@ -4,7 +4,8 @@ import { ITask } from "@/types";
 export type TaskContextType = {
   tasks: ITask[];
   fetchTasks: (projectId: string) => Promise<void>;
-  updateTaskStatus: (taskId: string, toStatus: ITask["status"]) => Promise<void>; // Add this
+  updateTaskStatus: (taskId: string, toStatus: ITask["status"]) => Promise<void>; 
+  deleteTask: (taskId: string) => Promise<void>; // 🔥 Add this function
   isLoading: boolean;
   error: string | null;
 };
@@ -16,6 +17,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Function to fetch all tasks for a project
   const fetchTasks = useCallback(async (projectId: string) => {
     setIsLoading(true);
     try {
@@ -31,6 +33,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Function to update the task status (used for drag-and-drop or status change)
   const updateTaskStatus = useCallback(async (taskId: string, toStatus: ITask["status"]) => {
     try {
       const response = await fetch(`/api/tasks/updateTaskStatus?taskId=${taskId}`, {
@@ -54,8 +57,28 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // 🔥 New Function to delete a task
+  const deleteTask = useCallback(async (taskId: string) => {
+    try {
+      const response = await fetch(`/api/tasks/deleteTask`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: taskId }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete task");
+
+      // Remove the task from the tasks state
+      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+
+      console.log(`Task with ID ${taskId} deleted successfully`);
+    } catch (err: any) {
+      console.error("Error deleting task:", err.message);
+    }
+  }, []);
+
   return (
-    <TaskContext.Provider value={{ tasks, fetchTasks, updateTaskStatus, isLoading, error }}>
+    <TaskContext.Provider value={{ tasks, fetchTasks, updateTaskStatus, deleteTask, isLoading, error }}>
       {children}
     </TaskContext.Provider>
   );
