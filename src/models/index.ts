@@ -133,7 +133,7 @@ const projectSchema = new mongoose.Schema(
     teamMembers: [
       {
         type: String,
-        ref: "User",
+        ref: "Employee",
       },
     ],
     attachments: [projectDetailsAttachmentSchema],
@@ -155,11 +155,12 @@ projectSchema.virtual("teams", {
   foreignField: "projectId",
 });
 
+// Virtual for teamMembers to link to Employee, not User
 projectSchema.virtual("teamMembersInfo", {
-  ref: "User",
-  localField: "teamMembers", // Clerk user IDs stored as strings
-  foreignField: "clerk_id", // Clerk ID in the User model
-  justOne: false, // Array of users
+  ref: "Employee", // 👈 Reference Employee instead of User
+  localField: "teamMembers", 
+  foreignField: "employeeId", // 👈 Employee's employeeId field
+  justOne: false, 
 });
 
 projectSchema.virtual("attachmentsInfo", {

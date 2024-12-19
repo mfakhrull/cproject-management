@@ -1,3 +1,5 @@
+import { IEmployee } from "@/models/Employee";
+
 // types/index.ts
 export interface IUser {
   _id: string; // MongoDB ObjectId is now a string
@@ -53,7 +55,7 @@ export interface IProject {
   location: string; // New field
   status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED'; // New field
   managerId: string; // User ID of the project manager
-  teamMembers: string[]; // User IDs of team members
+  teamMembers: IEmployee[]; // Instead of string[], we now store full employee objects
   attachments: IProjectDetailsAttachment[]; // Project-related attachments
   materialRequests: IMaterialRequest[]; // Material requests associated with the project
   createdAt: Date;

@@ -18,12 +18,12 @@ const TaskActionsMenu = ({
   openFullScreen,
 }: TaskActionsMenuProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  const { deleteTask } = useTaskContext(); // 🔥 Call deleteTask from the context
+  const { deleteTask } = useTaskContext(); // Call deleteTask from the context
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      await deleteTask(taskId); // 🔥 Call the context function
+      await deleteTask(taskId); // Call the context function
       toast.success("Task deleted successfully");
     } catch (error) {
       console.error("Error deleting task:", error);

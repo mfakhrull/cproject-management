@@ -147,7 +147,7 @@ const RequestMaterialDetailsModal: React.FC<RequestMaterialDetailsModalProps> = 
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none"
+              className="w-full px-4 py-14 border rounded-md focus:outline-none"
             />
           </div>
         </div>

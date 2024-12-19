@@ -44,7 +44,8 @@ export async function POST(req: Request, context: { params: { id: string } }) {
       resource_type: "auto",
     });
 
-    const { secure_url: fileUrl, original_filename: fileName } = uploadResult;
+    const { secure_url: fileUrl } = uploadResult;
+    const fileName = file.name; 
 
     // Update the project with the new attachment
     const updatedProject = await Project.findByIdAndUpdate(
