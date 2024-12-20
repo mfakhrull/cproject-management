@@ -15,7 +15,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ teamMembers, onAddTeamMember,
       <h2 className="mb-4 text-xl font-semibold text-gray-800">Team Members</h2>
       <button
         onClick={onAddTeamMember}
-        className="mb-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+        className="mb-4 rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
       >
         Add Team Member
       </button>

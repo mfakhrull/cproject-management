@@ -1,7 +1,7 @@
 // src/app/api/projects/create/route.ts
 import { NextResponse } from "next/server";
-import { Project } from "../../../../models";
-import dbConnect from "../../../../lib/mongodb";
+import { Project } from "@/models";
+import dbConnect from "@/lib/mongodb";
 
 export async function POST(req: Request) {
   await dbConnect();
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       endDate,
       location,
       status,
-      managerId,
+      managerId, // Save managerId as employeeId
     });
 
     return NextResponse.json(newProject, { status: 201 });

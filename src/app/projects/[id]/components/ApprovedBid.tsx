@@ -33,24 +33,24 @@ const ApprovedBid: React.FC<ApprovedBidProps> = ({ approvedBid }) => {
       </h2>
 
       <div>
-        <p className="mb-2 flex items-center gap-2 text-gray-600">
-          <Users className="h-5 w-5 text-blue-500" />
-          <span className="font-medium">Contractor:</span> {approvedBid.contractorName}
+        <p className="mb-3 flex items-center gap-2 text-gray-600">
+          <Users className="h-6 w-6 text-black" />
+          <span className="font-semibold">Contractor:</span> {approvedBid.contractorName}
         </p>
-        <p className="mb-2 flex items-center gap-2 text-gray-600">
-          <FileText className="h-5 w-5 text-orange-500" />
-          <span className="font-medium">Price:</span> ${approvedBid.price.toLocaleString()}
+        <p className="mb-3 flex items-center gap-2 text-gray-600">
+          <FileText className="h-6 w-6 text-black" />
+          <span className="font-semibold">Price:</span> ${approvedBid.price.toLocaleString()}
         </p>
-        <p className="mb-2 flex items-center gap-2 text-gray-600">
-          <Calendar className="h-5 w-5 text-purple-500" />
-          <span className="font-medium">Timeline:</span> {approvedBid.timeline}
+        <p className="mb-3 flex items-center gap-2 text-gray-600">
+          <Calendar className="h-6 w-6 text-black" />
+          <span className="font-semibold">Timeline:</span> {approvedBid.timeline}
         </p>
-        <p className="mb-2 flex items-center gap-2 text-gray-600">
-          <ClipboardCheck className="h-5 w-5 text-green-500" />
-          <span className="font-medium">Status:</span> {approvedBid.status}
+        <p className="mb-3 flex items-center gap-2 text-gray-600">
+          <ClipboardCheck className="h-6 w-6 text-black" />
+          <span className="font-semibold">Status:</span> {approvedBid.status}
         </p>
 
-        <h3 className="mb-2 text-lg font-medium text-gray-800">Attachments</h3>
+        <h3 className="mb-3 text-lg font-semibold text-gray-800">Attachments</h3>
         {approvedBid.attachments.length > 0 ? (
           <ul className="space-y-2">
             {approvedBid.attachments.map((attachment, index) => (

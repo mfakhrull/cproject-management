@@ -16,12 +16,11 @@ export async function POST(req: Request, context: { params: { id: string } }) {
     console.log("Received contract file:", file);
     console.log("FormData keys:", Array.from(formData.keys()));
 
-
     // Validate input
     if (!file || !uploadedBy) {
       return NextResponse.json(
         { message: "File and uploadedBy are required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -30,7 +29,7 @@ export async function POST(req: Request, context: { params: { id: string } }) {
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         { message: "File size exceeds the 10MB limit." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -45,7 +44,7 @@ export async function POST(req: Request, context: { params: { id: string } }) {
     });
 
     const { secure_url: fileUrl } = uploadResult;
-    const fileName = file.name; 
+    const fileName = file.name;
 
     // Update the project with the new attachment
     const updatedProject = await Project.findByIdAndUpdate(
@@ -59,13 +58,13 @@ export async function POST(req: Request, context: { params: { id: string } }) {
           },
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedProject) {
       return NextResponse.json(
         { message: "Project not found." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -74,7 +73,79 @@ export async function POST(req: Request, context: { params: { id: string } }) {
     console.error("Error uploading attachment:", error);
     return NextResponse.json(
       { message: `Error uploading attachment: ${error.message}` },
-      { status: 500 }
+      { status: 500 },
+    );
+  }
+}
+
+//Delete Attachment
+// Delete Attachment
+export async function PUT(req: Request, context: { params: { id: string } }) {
+  await dbConnect();
+
+  const { id } = context.params; // Project ID from the URL
+  const { attachmentId } = await req.json(); // Attachment ID from the request body
+
+  if (!id || !attachmentId) {
+    return NextResponse.json(
+      { message: "Project ID and Attachment ID are required." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    // Find the project by its ID
+    const project = await Project.findById(id);
+    if (!project) {
+      return NextResponse.json({ message: "Project not found." }, { status: 404 });
+    }
+
+    // Find the attachment to delete
+    const attachment = project.attachments.find(
+      (attachment) => attachment._id.toString() === attachmentId
+    );
+
+    if (!attachment) {
+      return NextResponse.json(
+        { message: "Attachment not found in the project." },
+        { status: 404 },
+      );
+    }
+
+    // Extract Cloudinary `publicId` safely
+    if (attachment.fileUrl) {
+      const urlParts = attachment.fileUrl.split("/");
+      const fileNameWithExtension = urlParts[urlParts.length - 1].split("?")[0]; // Handle query strings
+      const publicId = fileNameWithExtension.split(".")[0]; // Remove file extension
+
+      // Delete the file from Cloudinary
+      try {
+        await cloudinary.uploader.destroy(`project_attachments/projects/${id}/${publicId}`);
+      } catch (cloudinaryError) {
+        console.error("Error removing attachment from Cloudinary:", cloudinaryError);
+      }
+    }
+
+    // Remove the attachment from the project directly using `$pull`
+    const updatedProject = await Project.findByIdAndUpdate(
+      id,
+      { $pull: { attachments: { _id: attachmentId } } },
+      { new: true },
+    );
+
+    if (!updatedProject) {
+      return NextResponse.json(
+        { message: "Failed to update project after deleting the attachment." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ message: "Attachment deleted successfully." }, { status: 200 });
+  } catch (error: any) {
+    console.error("Error deleting attachment:", error);
+    return NextResponse.json(
+      { message: `Error deleting attachment: ${error.message}` },
+      { status: 500 },
     );
   }
 }

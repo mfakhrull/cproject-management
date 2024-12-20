@@ -106,16 +106,14 @@ export const useCreateEditor = (initialContent?: any[]) => {
       ],
       value: initialContent || [
         {
-          children: [{ text: 'Playground' }],
+          children: [{ text: 'Opportunity Document' }],
           type: 'h1',
         },
         {
           children: [
-            { text: 'A rich-text editor with AI capabilities. Try the ' },
-            { bold: true, text: 'AI commands' },
-            { text: ' or use ' },
-            { kbd: true, text: 'Cmd+J' },
-            { text: ' to open the AI menu.' },
+            { text: 'Draft and Manage ' },
+            { bold: true, text: 'Subcontractor ' },
+            { text: 'Opportunities.' },
           ],
           type: ParagraphPlugin.key,
         },

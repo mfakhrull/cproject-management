@@ -254,6 +254,36 @@ const ProjectDetailsPage = () => {
     }
   };
 
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    try {
+      const response = await fetch(`/api/projects/${id}/attachments`, {
+        method: "PUT", // Assuming you're using PUT for updating the project by removing an attachment
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ attachmentId }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete attachment");
+
+      // Update the local project state
+      setProject((prevProject) => {
+        if (!prevProject) return null;
+        return {
+          ...prevProject,
+          attachments: prevProject.attachments.filter(
+            (attachment) => attachment._id !== attachmentId,
+          ),
+        };
+      });
+
+      toast.success("Attachment deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      toast.error("Failed to delete attachment.");
+    }
+  };
+
   if (!userId) return <div>Please log in to view this page.</div>;
   if (isLoading)
     return <div className="p-6 text-center">Loading project details...</div>;
@@ -262,25 +292,30 @@ const ProjectDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-gray-800">
-          {project?.name || "Project Name"}
-        </h1>
-        <p className="text-gray-600">
-          {project?.description || "No description provided."}
-        </p>
-        <Link
-          href={`/editor?projectId=${id}&projectName=${encodeURIComponent(project?.name || "")}`}
-          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-        >
-          Create Opportunity for this Project
-        </Link>
-        <Link
-          href={`/projects/${id}/submitted-bids`}
-          className="ml-4 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-        >
-          View Submitted Bids
-        </Link>
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+        <div className="mb-4 md:mb-0">
+          <h1 className="mb-2 text-3xl font-bold text-gray-800">
+            {project?.name || "Project Name"}
+          </h1>
+          <p className="text-gray-600">
+            {project?.description || "No description provided."}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-4">
+          <Link
+            href={`/editor?projectId=${id}&projectName=${encodeURIComponent(project?.name || "")}`}
+            className="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
+          >
+            Create Opportunity for this Project
+          </Link>
+          <Link
+            href={`/projects/${id}/submitted-bids`}
+            className="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
+          >
+            View Submitted Bids
+          </Link>
+        </div>
       </div>
 
       {/* Project Details */}
@@ -302,11 +337,13 @@ const ProjectDetailsPage = () => {
         />
       </div>
 
-      {project && (
+      {project && typeof id === "string" && (
         <Attachments
+          projectId={id} // Pass the project ID
           attachments={project.attachments}
           onFileUpload={handleFileUpload}
           isUploading={isUploading}
+          onDeleteAttachment={handleDeleteAttachment} // Pass the delete handler
         />
       )}
 

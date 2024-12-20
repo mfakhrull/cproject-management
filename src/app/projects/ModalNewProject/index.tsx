@@ -8,9 +8,10 @@ type Props = {
   onClose: () => void;
 };
 
-interface IUser {
-  clerk_id: string; // Use clerk_id
-  username: string;
+interface IEmployee {
+  employeeId: string;
+  name: string;
+  role: string;
 }
 
 const ModalNewProject = ({ isOpen, onClose }: Props) => {
@@ -23,23 +24,23 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
   const [managerId, setManagerId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [users, setUsers] = useState<IUser[]>([]);
+  const [employees, setEmployees] = useState<IEmployee[]>([]);
 
   useEffect(() => {
-    // Fetch the list of users
-    const fetchUsers = async () => {
+    // Fetch the list of employees
+    const fetchEmployees = async () => {
       try {
-        const response = await fetch("/api/users/getUsers");
-        if (!response.ok) throw new Error("Failed to fetch users");
-        const data: IUser[] = await response.json();
-        setUsers(data);
+        const response = await fetch("/api/employees/getemployees");
+        if (!response.ok) throw new Error("Failed to fetch employees");
+        const data: IEmployee[] = await response.json();
+        setEmployees(data);
       } catch (error) {
-        console.error("Error fetching users:", error);
-        setError("Error fetching users");
+        console.error("Error fetching employees:", error);
+        setError("Error fetching employees");
       }
     };
 
-    fetchUsers();
+    fetchEmployees();
   }, []);
 
   const handleSubmit = async () => {
@@ -161,9 +162,9 @@ const ModalNewProject = ({ isOpen, onClose }: Props) => {
           onChange={(e) => setManagerId(e.target.value)}
         >
           <option value="">Select Project Manager</option>
-          {users.map((user) => (
-            <option key={user.clerk_id} value={user.clerk_id}>
-              {user.username}
+          {employees.map((employee) => (
+            <option key={employee.employeeId} value={employee.employeeId}>
+              {employee.name} ({employee.role})
             </option>
           ))}
         </select>
