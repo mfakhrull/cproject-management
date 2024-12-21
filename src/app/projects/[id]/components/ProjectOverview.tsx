@@ -1,9 +1,18 @@
-import { Calendar, ClipboardCheck, FileText, Users } from "lucide-react";
+import React, { useState } from 'react';
+import { Calendar, ClipboardCheck, FileText, Users, Edit2 } from 'lucide-react';
+import UpdateProjectModal from './UpdateProjectModal';
+import { IProject } from '@/types';
+import { useAppDispatch } from '@/app/redux/redux';
+import { triggerProjectRefresh } from '@/app/state';
 
 interface ProjectOverviewProps {
   project: {
+    _id: string;
+    name: string;
+    description?: string;
     startDate: Date;
     endDate?: Date;
+    extendedDate?: Date;
     status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED';
     location: string;
     manager?: {
@@ -12,6 +21,7 @@ interface ProjectOverviewProps {
       role: string;
     };
   };
+  onUpdate: (updatedProject: IProject) => void; // Add this prop
 }
 
 // Helper function to get the appropriate classes for each status
@@ -28,44 +38,78 @@ const getStatusBadgeClasses = (status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED')
   }
 };
 
-const ProjectOverview: React.FC<ProjectOverviewProps> = ({ project }) => {
+const ProjectOverview: React.FC<ProjectOverviewProps> = ({ project, onUpdate }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const handleUpdate = (updatedProject: IProject) => {
+    setIsModalOpen(false);
+    onUpdate(updatedProject);
+    if (project.status !== updatedProject.status) {
+      dispatch(triggerProjectRefresh()); // Trigger sidebar project refresh
+    }
+  };
+
   return (
-    <div className="rounded-lg bg-white p-6 shadow-md">
+    <div className="relative rounded-lg bg-white p-6 shadow-md">
+      {/* Update Project Modal */}
+      <UpdateProjectModal 
+        project={project} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onUpdate={handleUpdate} // Corrected this line
+      />
+
+      {/* Edit Button */}
+      <button 
+        onClick={() => setIsModalOpen(true)} 
+        className="absolute top-4 right-4 p-2 text-gray-500 hover:text-black"
+        aria-label="Edit Project"
+      >
+        <Edit2 className="h-5 w-5" />
+      </button>
+
       <h2 className="mb-6 text-xl font-semibold text-gray-800">Project Overview</h2>
 
-      <div className="mb-4">
-        <p className="mb-3 flex items-center gap-3 text-gray-700">
+      <div className="space-y-4">
+        <p className="flex items-center gap-3 text-gray-700">
           <Calendar className="h-6 w-6 text-black" />
           <span className="font-semibold">Start Date:</span> 
-          <span className="font-normal">{project.startDate ? new Date(project.startDate).toLocaleDateString() : "N/A"}</span>
+          <span className="font-normal">{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'}</span>
         </p>
 
-        <p className="mb-3 flex items-center gap-3 text-gray-700">
+        <p className="flex items-center gap-3 text-gray-700">
           <Calendar className="h-6 w-6 text-black" />
           <span className="font-semibold">End Date:</span> 
-          <span className="font-normal">{project.endDate ? new Date(project.endDate).toLocaleDateString() : "N/A"}</span>
+          <span className="font-normal">{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A'}</span>
         </p>
 
-        <p className="mb-3 flex items-center gap-3 text-gray-700">
+        <p className="flex items-center gap-3 text-gray-700">
+          <Calendar className="h-6 w-6 text-black" />
+          <span className="font-semibold">Extended Date:</span> 
+          <span className="font-normal">{project.extendedDate ? new Date(project.extendedDate).toLocaleDateString() : 'N/A'}</span>
+        </p>
+
+        <p className="flex items-center gap-3 text-gray-700">
           <ClipboardCheck className="h-6 w-6 text-black" />
           <span className="font-semibold">Status:</span> 
           <span 
-            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold leading-5 ${getStatusBadgeClasses(project.status)}`}
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold leading-5 ${getStatusBadgeClasses(project.status)}`}
           >
-            {project.status || "N/A"}
+            {project.status || 'N/A'}
           </span>
         </p>
 
-        <p className="mb-3 flex items-center gap-3 text-gray-700">
+        <p className="flex items-center gap-3 text-gray-700">
           <Users className="h-6 w-6 text-black" />
           <span className="font-semibold">Manager:</span> 
-          <span className="font-normal">{project.manager ? `${project.manager.name} (${project.manager.role})` : "Unassigned"}</span>
+          <span className="font-normal">{project.manager ? `${project.manager.name} (${project.manager.role})` : 'Unassigned'}</span>
         </p>
 
         <p className="flex items-center gap-3 text-gray-700">
           <FileText className="h-6 w-6 text-black" />
           <span className="font-semibold">Location:</span> 
-          <span className="font-normal">{project.location || "N/A"}</span>
+          <span className="font-normal">{project.location || 'N/A'}</span>
         </p>
       </div>
     </div>

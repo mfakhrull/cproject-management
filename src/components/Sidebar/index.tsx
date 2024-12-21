@@ -33,6 +33,7 @@ import { setIsSidebarCollapsed } from "@/app/state";
 interface Project {
   _id: string;
   name: string;
+  status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED'; // Type the status properly
 }
 
 const Sidebar: React.FC = () => {
@@ -47,6 +48,7 @@ const Sidebar: React.FC = () => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
   );
+  const refreshProjects = useAppSelector((state) => state.global.refreshProjects); // Listen for project refresh changes
 
   const sidebarClassNames = `fixed flex flex-col h-[100%] justify-between shadow-xl
     transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto bg-white ${
@@ -72,7 +74,7 @@ const Sidebar: React.FC = () => {
     };
 
     fetchProjects();
-  }, []);
+  }, [refreshProjects]); // Refetch whenever refreshProjects changes
 
   return (
     <div className={sidebarClassNames}>

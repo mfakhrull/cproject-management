@@ -109,6 +109,7 @@ const projectSchema = new mongoose.Schema(
     description: String,
     startDate: { type: Date, required: true },
     endDate: Date,
+    extendedDate: Date, // New Field
     location: { type: String, required: true },
     status: {
       type: String,

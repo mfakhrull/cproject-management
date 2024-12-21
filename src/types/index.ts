@@ -52,6 +52,7 @@ export interface IProject {
   description?: string;
   startDate: Date;
   endDate?: Date;
+  extendedDate: Date, // New Field
   location: string; // New field
   status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED'; // New field
   managerId: string; // User ID of the project manager

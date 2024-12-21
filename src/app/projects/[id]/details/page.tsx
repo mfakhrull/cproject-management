@@ -44,6 +44,18 @@ const ProjectDetailsPage = () => {
   const [isAddTeamMemberModalOpen, setIsAddTeamMemberModalOpen] =
     useState(false);
 
+    // Function to refetch project details
+  const fetchProjectDetails = async () => {
+    try {
+      const response = await fetch(`/api/projects/${id}/details`);
+      if (!response.ok) throw new Error("Failed to fetch project details");
+      const data: IProject = await response.json();
+      setProject(data);
+    } catch (err: any) {
+      console.error("Error fetching project details:", err);
+    }
+  };
+
   // Fetch Project Details
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -96,21 +108,23 @@ const ProjectDetailsPage = () => {
     fetchMaterialRequests();
   }, [id]);
 
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        const response = await fetch(`/api/projects/${id}/team`);
-        if (!response.ok) throw new Error("Failed to fetch team members");
-        const employees: IEmployee[] = await response.json();
-        setProject((prevProject) =>
-          prevProject ? { ...prevProject, teamMembers: employees } : null,
-        );
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to fetch team members.");
-      }
-    };
 
+//Fetch team members
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await fetch(`/api/projects/${id}/team`);
+      if (!response.ok) throw new Error("Failed to fetch team members");
+      const employees: IEmployee[] = await response.json();
+      setProject((prevProject) =>
+        prevProject ? { ...prevProject, teamMembers: employees } : null,
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch team members.");
+    }
+  };
+
+  useEffect(() => {
     fetchTeamMembers();
   }, [id]);
 
@@ -321,7 +335,22 @@ const ProjectDetailsPage = () => {
       {/* Project Details */}
       <div className="mb-8 grid min-h-[250px] grid-cols-1 gap-6 md:grid-cols-2">
         {/* Use ProjectOverview component */}
-        {project && <ProjectOverview project={project} />}
+        {project && (
+          <ProjectOverview
+            project={project}
+            onUpdate={(updatedProject) => {
+              // Option 1: Preserve existing team members
+              setProject((prevProject) => ({
+                ...prevProject,
+                ...updatedProject,
+                teamMembers: prevProject?.teamMembers ?? [], // Keep teamMembers intact
+              }));
+
+              // Option 2: Re-fetch team members
+              fetchTeamMembers();
+            }}
+          />
+        )}
 
         {/* Team Members */}
         <TeamMembers
