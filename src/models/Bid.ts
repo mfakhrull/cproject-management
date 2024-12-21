@@ -8,6 +8,8 @@ export interface IBid extends Document {
   contractorId: string; // Clerk user ID
   price: number;
   timeline: string;
+  startDate: Date; // Add startDate
+  endDate: Date; // Add endDate
   attachments: { fileName: string; fileUrl: string }[];
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt?: Date;
@@ -37,6 +39,14 @@ const BidSchema = new mongoose.Schema<IBid>(
     },
     timeline: {
       type: String,
+      required: true,
+    },
+    startDate: { // Add startDate field
+      type: Date,
+      required: true,
+    },
+    endDate: { // Add endDate field
+      type: Date,
       required: true,
     },
     attachments: [

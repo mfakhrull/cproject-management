@@ -306,7 +306,7 @@ const ProjectDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="rounded-lg bg-white p-6 shadow-md mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
         <div className="mb-4 md:mb-0">
           <h1 className="mb-2 text-3xl font-bold text-gray-800">
             {project?.name || "Project Name"}

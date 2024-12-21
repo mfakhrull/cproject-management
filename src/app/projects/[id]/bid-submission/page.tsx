@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getDocumentById } from "@/app/action/documentActions";
 import { toast } from "sonner";
+import { Calendar } from "lucide-react";
 
 export default function BidSubmissionPage() {
   const { userId } = useAuth();
@@ -14,10 +15,12 @@ export default function BidSubmissionPage() {
   const [opportunityData, setOpportunityData] = useState<any>(null);
   const [bidDetails, setBidDetails] = useState({
     price: "",
-    timeline: "",
+    startDate: "",
+    endDate: "",
     notes: "",
     files: [] as File[], // Initialize as an array of files
   });
+  const [timeline, setTimeline] = useState<string>("");
 
   const documentId = searchParams.get("documentId");
 
@@ -48,6 +51,19 @@ export default function BidSubmissionPage() {
     fetchOpportunityData();
   }, [userId, documentId, router]);
 
+  // Calculate timeline dynamically
+  useEffect(() => {
+    if (bidDetails.startDate && bidDetails.endDate) {
+      const start = new Date(bidDetails.startDate);
+      const end = new Date(bidDetails.endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert to days
+      setTimeline(`${diffDays} days`);
+    } else {
+      setTimeline("");
+    }
+  }, [bidDetails.startDate, bidDetails.endDate]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
@@ -62,50 +78,62 @@ export default function BidSubmissionPage() {
   };
 
   const handleSubmit = async () => {
-  if (!userId || !documentId) {
-    toast.error("User authentication or opportunity data is missing");
-    return;
-  }
-
-  try {
-    const formData = new FormData();
-
+    if (!userId || !documentId) {
+      toast.error("User authentication or opportunity data is missing");
+      return;
+    }
+  
     const projectIdToSubmit = opportunityData.projectId?._id
       ? opportunityData.projectId._id.toString()
       : opportunityData.projectId?.toString();
-
+  
     if (!projectIdToSubmit) {
       toast.error("Project ID is missing or invalid");
       return;
     }
-
-    formData.append("projectId", projectIdToSubmit);
-    formData.append("documentId", documentId); // Include the documentId here
-    formData.append("contractorId", userId); // Include userId as contractorId
-    formData.append("price", bidDetails.price);
-    formData.append("timeline", bidDetails.timeline);
-    bidDetails.files.forEach((file) => formData.append("file", file));
-
-    const response = await fetch("/api/bids", {
-      method: "POST",
-      body: formData,
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      toast.success("Bid submitted successfully!");
-      router.push(`/projects/${projectIdToSubmit}/submitted-bids`);
-    } else {
-      toast.error(result.message || "Failed to submit bid");
-    }
-  } catch (error) {
-    console.error("Error submitting bid:", error);
-    toast.error("An unexpected error occurred");
-  }
-};
-
   
+    const formData = new FormData();
+    formData.append("projectId", projectIdToSubmit);
+    formData.append("documentId", documentId);
+    formData.append("contractorId", userId);
+    formData.append("price", bidDetails.price);
+    formData.append("startDate", bidDetails.startDate); // Include startDate
+    formData.append("endDate", bidDetails.endDate); // Include endDate
+    formData.append("timeline", timeline); // Include the calculated timeline
+    bidDetails.files.forEach((file) => formData.append("file", file));
+  
+    // Use toast.promise to handle loading, success, and error states
+    const submitBid = async () => {
+      const response = await fetch("/api/bids", {
+        method: "POST",
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Failed to submit bid");
+      }
+  
+      const result = await response.json();
+      if (result.success) {
+        return result;
+      } else {
+        throw new Error(result.message || "Failed to submit bid");
+      }
+    };
+  
+    toast.promise(
+      submitBid(),
+      {
+        loading: "Submitting bid...",
+        success: () => {
+          router.push(`/projects/${projectIdToSubmit}/submitted-bids`);
+          return "Bid submitted successfully!";
+        },
+        error: (err) => err.message || "An unexpected error occurred",
+      }
+    );
+  };
   
 
   const handleRemoveFile = (index: number) => {
@@ -120,7 +148,7 @@ export default function BidSubmissionPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Submit Bid</h1>
       <p className="mb-4">Opportunity: {opportunityData.title}</p>
       <div className="space-y-4">
@@ -133,15 +161,45 @@ export default function BidSubmissionPage() {
           }
           className="w-full px-4 py-2 border rounded"
         />
-        <input
-          type="text"
-          placeholder="Timeline"
-          value={bidDetails.timeline}
-          onChange={(e) =>
-            setBidDetails((prev) => ({ ...prev, timeline: e.target.value }))
-          }
-          className="w-full px-4 py-2 border rounded"
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={bidDetails.startDate}
+              onChange={(e) =>
+                setBidDetails((prev) => ({
+                  ...prev,
+                  startDate: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={bidDetails.endDate}
+              onChange={(e) =>
+                setBidDetails((prev) => ({
+                  ...prev,
+                  endDate: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-2 border rounded"
+            />
+          </div>
+        </div>
+        {timeline && (
+          <p className="text-gray-700">
+            <strong>Timeline:</strong> {timeline}
+          </p>
+        )}
         <textarea
           placeholder="Notes (optional)"
           value={bidDetails.notes}

@@ -12,17 +12,47 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData();
     const projectId = formData.get("projectId")?.toString().trim();
-    const documentId = formData.get("documentId")?.toString().trim(); // Get documentId from the form
-    const contractorId = formData.get("contractorId")?.toString().trim(); // From the form data
+    const documentId = formData.get("documentId")?.toString().trim();
+    const contractorId = formData.get("contractorId")?.toString().trim();
     const price = parseFloat(formData.get("price")?.toString() ?? "");
     const timeline = formData.get("timeline")?.toString().trim();
+    const startDate = formData.get("startDate")?.toString().trim();
+    const endDate = formData.get("endDate")?.toString().trim();
     const files = formData.getAll("file") as File[];
 
     // Validate input
-    if (!projectId || !documentId || !contractorId || isNaN(price) || !timeline) {
+    if (
+      !projectId ||
+      !documentId ||
+      !contractorId ||
+      isNaN(price) ||
+      !timeline ||
+      !startDate ||
+      !endDate
+    ) {
+      console.error("Validation Error: Missing or invalid fields", {
+        projectId,
+        documentId,
+        contractorId,
+        price,
+        timeline,
+        startDate,
+        endDate,
+      });
       return NextResponse.json(
         { success: false, message: "Missing or invalid required fields" },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    // Validate dates
+    const parsedStartDate = new Date(startDate);
+    const parsedEndDate = new Date(endDate);
+
+    if (isNaN(parsedStartDate.getTime()) || isNaN(parsedEndDate.getTime())) {
+      return NextResponse.json(
+        { success: false, message: "Invalid date format" },
+        { status: 400 },
       );
     }
 
@@ -36,7 +66,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: `Invalid projectId (${projectId}) or documentId (${documentId})`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,9 +77,9 @@ export async function POST(request: NextRequest) {
     const uploadedAttachments = [];
     for (const file of files) {
       const arrayBuffer = await file.arrayBuffer();
-      const base64File = `data:${file.type};base64,${Buffer.from(arrayBuffer).toString(
-        "base64"
-      )}`;
+      const base64File = `data:${file.type};base64,${Buffer.from(
+        arrayBuffer,
+      ).toString("base64")}`;
 
       const uploadResult = await cloudinary.uploader.upload(base64File, {
         folder: `bid_attachments/projects/${projectId}/bids`,
@@ -59,17 +89,19 @@ export async function POST(request: NextRequest) {
       uploadedAttachments.push({
         fileName: uploadResult.original_filename || file.name,
         fileUrl: uploadResult.secure_url,
-        uploadedBy: contractorId, // Traceability
+        uploadedBy: contractorId,
       });
     }
 
     // Prepare bid data
     const bidData = {
       projectId: projectObjectId,
-      documentId: documentObjectId, // Include documentId in the bid data
+      documentId: documentObjectId,
       contractorId,
       price,
       timeline,
+      startDate: parsedStartDate,
+      endDate: parsedEndDate,
       attachments: uploadedAttachments,
       status: "PENDING",
     };
@@ -80,16 +112,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, bidId: savedBid._id },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Bid Submission Error:", error);
     return NextResponse.json(
       {
         success: false,
-        message: error instanceof Error ? error.message : "Failed to submit bid",
+        message:
+          error instanceof Error ? error.message : "Failed to submit bid",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

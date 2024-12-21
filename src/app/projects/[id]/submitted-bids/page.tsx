@@ -7,14 +7,20 @@ import { useAuth } from "@clerk/nextjs";
 import { getSubmittedBids, updateBidStatus } from "@/app/action/bidActions";
 import ApproveIcon from "@mui/icons-material/CheckCircle";
 import RejectIcon from "@mui/icons-material/Cancel";
+import DetailsIcon from "@mui/icons-material/Info";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   DataGrid,
   GridActionsCellItem,
   GridColDef,
   GridRowId,
 } from "@mui/x-data-grid";
+import { useRouter } from "next/navigation";
+
 
 export default function SubmittedBidsPage() {
+  const router = useRouter();
+
   const { id } = useParams();
   const [bids, setBids] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +74,27 @@ export default function SubmittedBidsPage() {
     }
   };
 
+  const handleDeleteBid = (bidId: GridRowId) => async () => {
+    try {
+      const response = await fetch(`/api/bids/${bidId}`, {
+        method: "DELETE",
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete bid");
+      }
+  
+      toast.success("Bid deleted successfully!");
+      setBids((prevBids) => prevBids.filter((bid) => bid._id !== bidId));
+    } catch (error) {
+      console.error("Error deleting bid:", error);
+      toast.error("Failed to delete bid");
+    }
+  };
+  
+
 
   const rows = bids.map((bid) => ({
     id: bid._id,
@@ -81,23 +108,9 @@ export default function SubmittedBidsPage() {
 
   const columns: GridColDef[] = [
     { field: "contractorName", headerName: "Contractor", flex: 1 },
-    {
-      field: "price",
-      headerName: "Price",
-      type: "number", // Define column type as 'number'
-      flex: 1,
-      headerAlign: "left", // Align the header text
-      align: "left", // Align the cell text
-    },
+    { field: "price", headerName: "Price", type: "number", flex: 1 },
     { field: "timeline", headerName: "Timeline", flex: 1 },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 1,
-      type: "singleSelect",
-      valueOptions: ["APPROVED", "REJECTED", "PENDING"],
-      editable: true,
-    },
+    { field: "status", headerName: "Status", flex: 1 },
     {
       field: "attachments",
       headerName: "Attachments",
@@ -117,24 +130,24 @@ export default function SubmittedBidsPage() {
         )),
     },
     {
-        field: "actions",
-        type: "actions",
-        width: 100,
-        getActions: (params) => [
-          <GridActionsCellItem
-            icon={<ApproveIcon color="success" />}
-            label="Approve"
-            onClick={handleUpdateStatus(params.id, "APPROVED", params.row.documentId)}
-            showInMenu
-          />,
-          <GridActionsCellItem
-            icon={<RejectIcon color="error" />}
-            label="Reject"
-            onClick={handleUpdateStatus(params.id, "REJECTED", params.row.documentId)}
-            showInMenu
-          />,
-        ],
-      },      
+      field: "actions",
+      type: "actions",
+      width: 150,
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<DetailsIcon />}
+          label="Details"
+          onClick={() => router.push(`/projects/${projectId}/submitted-bids/${params.id}`)}
+          showInMenu
+        />,
+        <GridActionsCellItem
+          icon={<DeleteIcon color="error" />}
+          label="Delete"
+          onClick={handleDeleteBid(params.id)}
+          showInMenu
+        />,
+      ],
+    },
   ];
 
   if (loading) {

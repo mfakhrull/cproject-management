@@ -84,24 +84,43 @@ export async function updateBidStatus(
     bid.status = status;
     await bid.save();
 
-    // If approved, update the associated document
-    if (status === "APPROVED" && documentId) {
-      const updatedDocument = await EditorDocument.findByIdAndUpdate(
-        documentId,
-        {
-          $set: {
-            status: "CLOSED", // Update status to CLOSED
-            assignedContractorId: bid.contractorId, // Assign the contractor
+    if (documentId) {
+      // Update the associated document based on status
+      if (status === "APPROVED") {
+        const updatedDocument = await EditorDocument.findByIdAndUpdate(
+          documentId,
+          {
+            $set: {
+              status: "CLOSED",
+              assignedContractorId: bid.contractorId,
+            },
           },
-        },
-        { new: true } // Return the updated document
-      );
+          { new: true }
+        );
 
-      if (!updatedDocument) {
-        throw new Error("Associated document not found or failed to update");
+        if (!updatedDocument) {
+          throw new Error("Associated document not found or failed to update");
+        }
+
+        console.log(`Document updated to CLOSED: ${updatedDocument}`);
+      } else if (status === "PENDING") {
+        const updatedDocument = await EditorDocument.findByIdAndUpdate(
+          documentId,
+          {
+            $set: {
+              status: "OPEN",
+              assignedContractorId: null,
+            },
+          },
+          { new: true }
+        );
+
+        if (!updatedDocument) {
+          throw new Error("Associated document not found or failed to update");
+        }
+
+        console.log(`Document reverted to OPEN: ${updatedDocument}`);
       }
-
-      console.log(`Document updated: ${updatedDocument}`);
     }
 
     return { success: true };
@@ -109,10 +128,12 @@ export async function updateBidStatus(
     console.error("Error updating bid status:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to update bid status",
+      message:
+        error instanceof Error ? error.message : "Failed to update bid status",
     };
   }
 }
+
 
 
 
