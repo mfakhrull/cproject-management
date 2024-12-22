@@ -192,7 +192,7 @@ export const EmployeeModal = ({ isOpen, onClose, onEmployeeAdded }: EmployeeModa
               Cancel
             </Button>
             <Button type="submit" disabled={loading} className="px-8 py-3">
-              {loading ? "Adding..." : "Add Employee"}
+              {loading ? "Adding..." : "Add Employee and Send Invitation"}
             </Button>
           </div>
         </form>

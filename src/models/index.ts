@@ -218,6 +218,7 @@ const taskSchema = new mongoose.Schema(
     tags: [String],
     startDate: Date,
     dueDate: Date,
+    timeEstimate: String, // Changed to string to allow "2h 3m"
     points: Number,
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
