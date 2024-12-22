@@ -232,11 +232,21 @@ const taskSchema = new mongoose.Schema(
     assignedUserId: {
       type: String, // Updated to string (clerk_id)
     },
+    attachments: [
+      {
+        _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+        fileName: { type: String, required: true },
+        fileUrl: { type: String, required: true },
+        uploadedBy: { type: String, required: true }, // Clerk ID of uploader
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,
-  },
+  }
 );
+
 
 taskSchema.index({ title: "text", description: "text" });
 

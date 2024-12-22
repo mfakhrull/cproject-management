@@ -34,7 +34,7 @@ const TaskDetailsHeader: React.FC<TaskDetailsHeaderProps> = ({ task, onSave }) =
             {task.description || "No description provided"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           <button
             onClick={() => setModalOpen(true)}
             className="p-2 text-gray-500 hover:text-gray-700"

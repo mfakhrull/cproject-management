@@ -87,6 +87,13 @@ export interface ITask {
   assignedUserId?: string; // Updated to string (clerk_id)
   createdAt: Date;
   updatedAt: Date;
+  attachments?: {
+    _id: string;
+    fileName: string;
+    fileUrl: string;
+    uploadedBy: string;
+    uploadedAt: Date;
+  }[]; // Array of attachment objects
 }
 
 export interface IComment {

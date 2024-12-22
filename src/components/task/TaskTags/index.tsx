@@ -6,7 +6,7 @@ interface TaskTagsProps {
 
 const TaskTags: React.FC<TaskTagsProps> = ({ tags }) => {
   return (
-    <div>
+    <div className="border-b border-gray-200 pb-6">
       <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
         Labels
       </p>

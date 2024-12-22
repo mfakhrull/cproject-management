@@ -9,13 +9,18 @@ import TaskTags from "@/components/task/TaskTags";
 import ActivityLog from "@/components/ActivityLog";
 import { PlusCircle, Link2, Paperclip } from "lucide-react";
 import { ITask } from "@/types"; // Adjust the path to your ITask definition
+import TaskAttachments from "@/components/task/TaskAttachments";
+import { useAuth } from "@clerk/nextjs";
 
 const TaskDetailsPage: React.FC = () => {
   const params = useParams();
-  const tasksId = typeof params.tasksId === "string" ? params.tasksId : params.tasksId?.[0];
+  const { userId } = useAuth();
+  const tasksId =
+    typeof params.tasksId === "string" ? params.tasksId : params.tasksId?.[0];
 
   const [task, setTask] = useState<ITask | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showDropzone, setShowDropzone] = useState(true);
 
   // Ref for ActivityLog component
   const activityLogRef = useRef<any>(null);
@@ -90,12 +95,19 @@ const TaskDetailsPage: React.FC = () => {
     );
   }
 
+  if (!userId) {
+    return (
+      <div className="flex h-screen items-center justify-center text-red-500">
+        Error: User is not authenticated
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-      <div className="w-2/3 overflow-y-auto p-6">
+      <div className=" mt-1 w-2/3 overflow-y-auto rounded bg-white p-6 px-10 shadow-sm">
         {/* Task Header with Save Handler */}
         <TaskDetailsHeader task={task} onSave={handleSave} />
-
         {/* Action Buttons */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
           <button className="flex items-center gap-2 rounded bg-gray-100 px-3 py-2 text-sm text-gray-600 hover:bg-gray-200">
@@ -106,16 +118,22 @@ const TaskDetailsPage: React.FC = () => {
             <Link2 size={16} />
             Add Relation
           </button>
-          <button className="flex items-center gap-2 rounded bg-gray-100 px-3 py-2 text-sm text-gray-600 hover:bg-gray-200">
+          <button
+            className="flex items-center gap-2 rounded bg-gray-100 px-3 py-2 text-sm text-gray-600 hover:bg-gray-200"
+            onClick={() => setShowDropzone((prev) => !prev)} // Toggle dropzone visibility
+          >
             <Paperclip size={16} />
             Attach
           </button>
           {/* Time Tracking Component */}
           <TimeTracker taskId={tasksId} activityLogRef={activityLogRef} />
         </div>
-
         {/* Task Tags Component */}
         <TaskTags tags={task.tags || []} />
+        {/* Dropzone Visibility */}
+        {showDropzone && (
+          <TaskAttachments taskId={tasksId} userId={userId} />
+        )}
       </div>
 
       {/* Activity Log Component */}
