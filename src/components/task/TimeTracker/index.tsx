@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import { PlayCircle, StopCircle, RotateCcw, Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -9,7 +11,10 @@ const formatTime = (time: number) => {
   return `${hours}h ${minutes}m ${seconds}s`;
 };
 
-const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({ taskId, activityLogRef }) => {
+const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({
+  taskId,
+  activityLogRef,
+}) => {
   const [isTracking, setIsTracking] = useState(false);
   const [trackedTime, setTrackedTime] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -64,7 +69,7 @@ const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({ taskId
     }
   };
 
-  const startTracking = () => {
+  const startTracking = async () => {
     if (!isTracking) {
       const currentStartTime = Date.now();
       setIsTracking(true);
@@ -73,6 +78,9 @@ const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({ taskId
         setTrackedTime((prev) => prev + 1);
       }, 1000);
       toast.success("Time tracking started.");
+
+      // Log start activity to the database
+      await saveToDatabase(trackedTime, "started");
     }
   };
 

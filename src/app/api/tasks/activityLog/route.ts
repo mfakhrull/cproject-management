@@ -12,13 +12,21 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Invalid or missing Task ID" }, { status: 400 });
     }
 
-    const activities = await Activity.find({ taskId }).sort({ timestamp: -1 }).lean();
+    // Fetch top-level comments only (parentCommentId is null) and other activities
+    const activities = await Activity.find({
+      taskId,
+      $or: [{ type: { $ne: "comment" } }, { parentCommentId: null }],
+    })
+      .sort({ timestamp: -1 })
+      .lean();
+
     return NextResponse.json(activities);
   } catch (error) {
     console.error("Error fetching activities:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
 
 // Log an activity for a task
 export async function POST(req: Request) {

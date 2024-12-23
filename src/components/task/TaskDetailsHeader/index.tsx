@@ -41,13 +41,13 @@ const TaskDetailsHeader: React.FC<TaskDetailsHeaderProps> = ({ task, onSave }) =
           >
             <Edit3 size={20} />
           </button>
-          <button
+          {/* <button
             className="p-2 text-gray-500 hover:text-gray-700"
             disabled
             title="Delete functionality not implemented yet"
           >
             <Trash2 size={20} />
-          </button>
+          </button> */}
         </div>
       </div>
 

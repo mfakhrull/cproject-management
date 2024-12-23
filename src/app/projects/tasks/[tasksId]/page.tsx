@@ -105,7 +105,7 @@ const TaskDetailsPage: React.FC = () => {
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-      <div className=" mt-1 w-2/3 overflow-y-auto rounded bg-white p-6 px-10 shadow-sm">
+      <div className="mt-1 w-2/3 overflow-y-auto rounded bg-white p-6 px-10 shadow-sm">
         {/* Task Header with Save Handler */}
         <TaskDetailsHeader task={task} onSave={handleSave} />
         {/* Action Buttons */}
@@ -132,7 +132,11 @@ const TaskDetailsPage: React.FC = () => {
         <TaskTags tags={task.tags || []} />
         {/* Dropzone Visibility */}
         {showDropzone && (
-          <TaskAttachments taskId={tasksId} userId={userId} />
+          <TaskAttachments
+            taskId={tasksId}
+            userId={userId}
+            refreshActivityLog={() => activityLogRef.current?.refresh()} // Pass refresh method
+          />
         )}
       </div>
 

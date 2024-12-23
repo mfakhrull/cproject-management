@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 
@@ -16,11 +15,13 @@ interface Attachment {
 interface TaskAttachmentsProps {
   taskId: string;
   userId: string;
+  refreshActivityLog?: () => void; // Callback to refresh the activity log
 }
 
 const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
   taskId,
   userId,
+  refreshActivityLog,
 }) => {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -46,6 +47,30 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
     fetchAttachments();
   }, [taskId]);
 
+  const logAttachmentActivity = async (action: string, fileName: string) => {
+    try {
+      await fetch(`/api/tasks/attachmentsLog`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          taskId,
+          action,
+          fileName,
+        }),
+      });
+  
+      // Refresh activity log after successfully logging
+      if (refreshActivityLog) {
+        refreshActivityLog(); // Ensure activity log updates
+      }
+    } catch (error) {
+      console.error("Failed to log attachment activity:", error);
+    }
+  };
+  
+
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -69,6 +94,10 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
       const newAttachment = await response.json();
       setAttachments((prev) => [...prev, newAttachment]);
       toast.success("File uploaded successfully!");
+
+      // Log the upload activity
+      await logAttachmentActivity("uploaded", file.name);
+      refreshActivityLog?.(); // Refresh activity log explicitly
     } catch (error) {
       toast.error("File upload failed");
     } finally {
@@ -99,6 +128,10 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
       const newAttachment = await response.json();
       setAttachments((prev) => [...prev, newAttachment]);
       toast.success("File uploaded successfully!");
+
+      // Log the upload activity
+      await logAttachmentActivity("uploaded", file.name);
+      refreshActivityLog?.(); // Refresh activity log explicitly
     } catch (error) {
       toast.error("File upload failed");
     } finally {
@@ -107,6 +140,15 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
   };
 
   const handleDelete = async (attachmentId: string) => {
+    const attachmentToDelete = attachments.find(
+      (attachment) => attachment._id === attachmentId
+    );
+
+    if (!attachmentToDelete) {
+      toast.error("Attachment not found");
+      return;
+    }
+
     try {
       const response = await fetch(`/api/tasks/${taskId}/attachments`, {
         method: "PUT",
@@ -121,9 +163,13 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
       }
 
       setAttachments((prev) =>
-        prev.filter((attachment) => attachment._id !== attachmentId),
+        prev.filter((attachment) => attachment._id !== attachmentId)
       );
       toast.success("Attachment deleted");
+
+      // Log the delete activity
+      await logAttachmentActivity("deleted", attachmentToDelete.fileName);
+      refreshActivityLog?.(); // Refresh activity log explicitly
     } catch (error) {
       toast.error("Failed to delete attachment");
     }

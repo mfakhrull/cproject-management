@@ -1,7 +1,23 @@
-import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+"use client";
+
+import React, {
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import { SendHorizontal } from "lucide-react";
+import CommentCard from "@/components/CommentCard";
+import ReplyModal from "@/components/ReplyModal";
+import { useAuth } from "@clerk/nextjs";
 
 const ActivityLog = forwardRef(({ taskId }: { taskId: string }, ref) => {
   const [activities, setActivities] = useState<any[]>([]);
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [selectedComment, setSelectedComment] = useState<any | null>(null);
+  const [commentText, setCommentText] = useState<string>("");
+  const [userName, setUserName] = useState<string>(""); // Store user's name
+  const { userId: clerkId } = useAuth(); // Get Clerk user ID
 
   // Fetch activities from the API
   const fetchActivities = async () => {
@@ -15,7 +31,20 @@ const ActivityLog = forwardRef(({ taskId }: { taskId: string }, ref) => {
     }
   };
 
-  // Log a new activity (e.g., comments or other actions)
+    // Fetch user details
+    const fetchUserName = async () => {
+      if (!clerkId) return; // Ensure `clerkId` is available
+      try {
+        const response = await fetch(`/api/users/getUser?clerk_id=${clerkId}`);
+        if (!response.ok) throw new Error("Failed to fetch user details");
+        const user = await response.json();
+        setUserName(user.username || "Unknown User");
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
+  // Log a new activity (e.g., comments or replies)
   const logActivity = async (activity: any) => {
     try {
       const response = await fetch("/api/tasks/activityLog", {
@@ -41,13 +70,58 @@ const ActivityLog = forwardRef(({ taskId }: { taskId: string }, ref) => {
   // Initial fetch of activities when the component mounts
   useEffect(() => {
     fetchActivities();
-  }, [taskId]);
+    fetchUserName();
+  }, [taskId, clerkId]);
+
+  const handleReply = (parentCommentId: string) => {
+    const parentComment = activities.find(
+      (activity) => activity._id === parentCommentId,
+    );
+    const replies = activities.filter(
+      (activity) => activity.parentCommentId === parentCommentId,
+    );
+
+    setSelectedComment({ ...parentComment, replies });
+    setReplyModalOpen(true);
+  };
+
+  const handleSendReply = (replyText: string, parentCommentId: string) => {
+    logActivity({
+      taskId,
+      type: "comment",
+      text: replyText,
+      parentCommentId,
+      user: {
+        userId: "currentUserId", // Replace with actual user ID
+        name: "Current User", // Replace with actual user name
+      },
+    });
+
+    setReplyModalOpen(false); 
+    setReplyModalOpen(true); 
+  };
+
+  const handleSendComment = () => {
+    if (!commentText.trim()) return;
+
+    logActivity({
+      taskId,
+      type: "comment",
+      text: commentText.trim(),
+      user: {
+        userId: clerkId,
+        name: userName,
+      },
+    });
+
+    setCommentText(""); // Clear input field
+  };
 
   return (
-    <div className="mt-10 flex h-full w-1/3 flex-col border-l border-gray-200 bg-gray-50">
+    <div className="mt-1 flex h-full w-1/3 flex-col border-l border-gray-200 bg-gray-50">
       {/* Activity Header */}
       <div>
-        <p className="mb-8 p-5 text-xs font-semibold uppercase text-gray-500 bg-white border-b border-gray-200">
+        <p className="mb-8 border-b border-gray-200 bg-white px-6 pb-9 pt-10 text-xs font-semibold uppercase text-gray-500">
           Activity
         </p>
       </div>
@@ -55,14 +129,25 @@ const ActivityLog = forwardRef(({ taskId }: { taskId: string }, ref) => {
       {/* Activity List */}
       <div className="flex-1 space-y-4 overflow-y-auto px-6">
         {activities.length > 0 ? (
-          activities.map((activity, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <p className="text-sm text-gray-600">{activity.text}</p>
-              <p className="text-xs text-gray-400">
-                {new Date(activity.timestamp).toLocaleString()}
-              </p>
-            </div>
-          ))
+          activities.map((activity) =>
+            activity.type === "comment" ? (
+              <CommentCard
+                key={activity._id}
+                comment={activity}
+                onReply={handleReply}
+              />
+            ) : (
+              <div
+                key={activity._id}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-start gap-2">
+                  <span className="text-gray-400">•</span> {/* Bullet point */}
+                  <span className="text-sm text-gray-600">{activity.text}</span>
+                </div>
+              </div>
+            ),
+          )
         ) : (
           <p className="text-sm text-gray-400">No activity yet.</p>
         )}
@@ -73,46 +158,34 @@ const ActivityLog = forwardRef(({ taskId }: { taskId: string }, ref) => {
         <div className="flex items-center gap-2">
           <input
             type="text"
+            value={commentText}
             placeholder="Write a comment..."
             className="flex-grow rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                const input = e.target as HTMLInputElement;
-                if (input.value.trim()) {
-                  logActivity({
-                    taskId,
-                    type: "comment",
-                    text: input.value.trim(),
-                    user: { name: "User", avatar: "https://via.placeholder.com/40" },
-                    timestamp: new Date().toISOString(),
-                  });
-                  input.value = ""; // Clear the input field
-                }
+                handleSendComment();
               }
             }}
           />
-          <button
-            className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-            onClick={() => {
-              const input = document.querySelector(
-                "input[type='text']"
-              ) as HTMLInputElement;
-              if (input && input.value.trim()) {
-                logActivity({
-                  taskId,
-                  type: "comment",
-                  text: input.value.trim(),
-                  user: { name: "User", avatar: "https://via.placeholder.com/40" },
-                  timestamp: new Date().toISOString(),
-                });
-                input.value = ""; // Clear the input field
-              }
-            }}
-          >
-            Send
-          </button>
+
+          <SendHorizontal
+            size={30}
+            className="cursor-pointer text-gray-500 hover:text-blue-600"
+            onClick={handleSendComment}
+          />
         </div>
       </div>
+
+      {/* Reply Modal */}
+      {replyModalOpen && selectedComment && (
+        <ReplyModal
+          isOpen={replyModalOpen}
+          parentComment={selectedComment}
+          onClose={() => setReplyModalOpen(false)}
+          onSendReply={handleSendReply}
+        />
+      )}
     </div>
   );
 });
