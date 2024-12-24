@@ -183,6 +183,81 @@ export default function EmployeeDetailsPage() {
                     required
                   />
                 </div>
+                <div>
+                  <label
+                    htmlFor="rolePermissions"
+                    className="block text-sm font-medium text-gray-900"
+                  >
+                    Role Permissions
+                  </label>
+                  {employee.rolePermissions?.map((permission, index) => (
+                    <div
+                      key={index}
+                      className="mt-2 flex items-center space-x-4"
+                    >
+                      <input
+                        type="text"
+                        name={`rolePermissions[${index}]`}
+                        value={permission}
+                        onChange={(e) => {
+                          const updatedPermissions = [
+                            ...(employee.rolePermissions || []),
+                          ];
+                          updatedPermissions[index] = e.target.value;
+                          setEmployee((prev) => ({
+                            ...prev!,
+                            rolePermissions: updatedPermissions,
+                          }));
+                        }}
+                        readOnly={!editMode}
+                        className={`block w-full rounded-md px-3 py-2 ${
+                          editMode
+                            ? "bg-white outline outline-1 outline-gray-300"
+                            : "bg-gray-100"
+                        }`}
+                      />
+                      {editMode && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedPermissions = [
+                              ...(employee.rolePermissions || []),
+                            ];
+                            updatedPermissions.splice(index, 1); // Remove this permission
+                            setEmployee((prev) => ({
+                              ...prev!,
+                              rolePermissions: updatedPermissions,
+                            }));
+                          }}
+                          className="text-red-500 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {editMode && (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedPermissions = [
+                            ...(employee.rolePermissions || []),
+                            "",
+                          ];
+                          setEmployee((prev) => ({
+                            ...prev!,
+                            rolePermissions: updatedPermissions,
+                          }));
+                        }}
+                        className="flex items-center space-x-2 text-blue-500 hover:underline"
+                      >
+                        <Plus className="h-5 w-5" />
+                        <span>Add Role Permission</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -425,13 +500,13 @@ export default function EmployeeDetailsPage() {
                 ))}
                 {editMode && (
                   <Button
-                  type="button"
-                  onClick={handleAddWorkHistory}
-                  className="mt-4 flex items-center space-x-2"
-                >
-                  <Plus className="h-5 w-5" />
-                  <span>Add Work History</span>
-                </Button>
+                    type="button"
+                    onClick={handleAddWorkHistory}
+                    className="mt-4 flex items-center space-x-2"
+                  >
+                    <Plus className="h-5 w-5" />
+                    <span>Add Work History</span>
+                  </Button>
                 )}
               </div>
             </div>

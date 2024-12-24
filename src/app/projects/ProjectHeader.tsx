@@ -58,7 +58,7 @@ const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
             <div className="flex space-x-4">
               {/* New Boards Button */}
               <button
-                className="flex items-center rounded-md bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
+                className="flex items-center rounded-md bg-slate-800 px-3 py-2 text-white hover:bg-slate-700"
                 onClick={() => setIsModalNewProjectOpen(true)}
               >
                 <PlusSquare className="mr-2 h-5 w-5" /> New Project
@@ -67,7 +67,7 @@ const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
               {/* Link to Project Details */}
               <Link
                 href={`/projects/${projectId}/details`}
-                className="flex items-center rounded-md bg-green-500 px-3 py-2 text-white hover:bg-green-600"
+                className="flex items-center rounded-md bg-slate-800 px-3 py-2 text-white hover:bg-slate-700"
               >
                 <FileText className="mr-2 h-5 w-5" /> Project Details
               </Link>

@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
     teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team" },
     employeeId: { type: String, default: null }, // New field to store employeeId
     role: { type: String, default: "employee" }, // New field to store the role (e.g., "admin", "manager", "employee")
+    rolePermissions: {
+      type: [String], // Array of permission keys
+      default: [], // Example: ["inventory", "projects", "employees"]
+    },
   },
   {
     timestamps: true,

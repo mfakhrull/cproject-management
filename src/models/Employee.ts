@@ -25,6 +25,7 @@ export interface IEmployee extends Document {
   employeeId: string;
   name: string;
   role: string;
+  rolePermissions: string[]; // New field for role permissions
   contact: IContact;
   workHistory: IWorkHistory[];
   availability: IAvailability;
@@ -37,6 +38,10 @@ const EmployeeSchema: Schema = new Schema(
     employeeId: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     role: { type: String, required: true },
+    rolePermissions: {
+      type: [String], // Array of strings to store role permissions
+      default: [], // Example: ["inventory", "projects", "employees"]
+    },
     contact: {
       email: { type: String, required: true },
       phone: { type: String, required: true },
@@ -51,11 +56,16 @@ const EmployeeSchema: Schema = new Schema(
     ],
     availability: {
       hoursPerWeek: { type: Number, required: true },
-      shiftPreference: { type: String, enum: ["Morning", "Evening", "Night"], required: true },
+      shiftPreference: {
+        type: String,
+        enum: ["Morning", "Evening", "Night"],
+        required: true,
+      },
       vacationDaysRemaining: { type: Number, required: true },
     },
   },
   { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );
 
-export default mongoose.models.Employee || mongoose.model<IEmployee>("Employee", EmployeeSchema);
+export default mongoose.models.Employee ||
+  mongoose.model<IEmployee>("Employee", EmployeeSchema);

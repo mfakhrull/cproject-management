@@ -189,18 +189,24 @@ const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
   return (
     <div
       ref={ref}
-      className={`mb-4 rounded-md bg-white shadow transition hover:shadow-lg dark:bg-dark-secondary ${
+      className={`mb-4 rounded-md bg-white shadow transition hover:shadow-lg dark:bg-dark-secondary cursor-pointer ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
+      onClick={() => openFullScreen(task._id.toString())} // Trigger openFullScreen on card click
     >
-      <div className="p-4 md:p-6">
+      <div className="p-4 md:p-6 relative">
         <div className="flex items-center justify-between">
           <h4 className="text-md font-bold dark:text-white">{task.title}</h4>
-          <TaskActionsMenu
-            taskId={task._id.toString()}
-            openPeek={openTaskDetails}
-            openFullScreen={openFullScreen}
-          />
+          {/* Prevent click propagation for the action menu */}
+          <div
+            onClick={(e) => e.stopPropagation()} // Stop click propagation
+          >
+            <TaskActionsMenu
+              taskId={task._id.toString()}
+              openPeek={openTaskDetails}
+              openFullScreen={openFullScreen}
+            />
+          </div>
         </div>
         <p className="text-sm text-gray-600 dark:text-neutral-500">
           {task.description}
@@ -213,6 +219,7 @@ const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
     </div>
   );
 };
+
 
 
 export default BoardView;

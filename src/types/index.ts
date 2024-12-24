@@ -9,6 +9,7 @@ export interface IUser {
   teamId?: string; // Updated to string for consistency
   employeeId?: string; // New field to reference the employee
   role?: string; // New field to store the role (e.g., "admin", "manager", "employee")
+  rolePermissions: string[]; // Array of permission keys (e.g., ["inventory", "projects", "employees"])
   createdAt: Date;
   updatedAt: Date;
 }
