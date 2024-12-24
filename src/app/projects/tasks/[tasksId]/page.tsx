@@ -7,7 +7,7 @@ import TaskDetailsHeader from "@/components/task/TaskDetailsHeader";
 import TimeTracker from "@/components/task/TimeTracker";
 import TaskTags from "@/components/task/TaskTags";
 import ActivityLog from "@/components/ActivityLog";
-import { PlusCircle, Link2, Paperclip } from "lucide-react";
+import { PlusCircle, Link2, Paperclip, MessageCircle, X } from "lucide-react";
 import { ITask } from "@/types"; // Adjust the path to your ITask definition
 import TaskAttachments from "@/components/task/TaskAttachments";
 import { useAuth } from "@clerk/nextjs";
@@ -21,6 +21,7 @@ const TaskDetailsPage: React.FC = () => {
   const [task, setTask] = useState<ITask | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showDropzone, setShowDropzone] = useState(true);
+  const [activityLogOpen, setActivityLogOpen] = useState(true); // Track sidebar state
 
   // Ref for ActivityLog component
   const activityLogRef = useRef<any>(null);
@@ -105,7 +106,11 @@ const TaskDetailsPage: React.FC = () => {
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-      <div className="mt-1 w-2/3 overflow-y-auto rounded bg-white p-6 px-10 shadow-sm">
+      <div
+        className={`mt-1 overflow-y-auto rounded bg-white p-6 px-10 shadow-sm transition-all duration-300 ${
+          activityLogOpen ? "w-2/3" : "w-full"
+        }`}
+      >
         {/* Task Header with Save Handler */}
         <TaskDetailsHeader task={task} onSave={handleSave} />
         {/* Action Buttons */}
@@ -140,8 +145,44 @@ const TaskDetailsPage: React.FC = () => {
         )}
       </div>
 
-      {/* Activity Log Component */}
-      <ActivityLog ref={activityLogRef} taskId={tasksId} />
+      {/* Activity Log Sidebar */}
+      <div
+        className={`relative flex h-full transition-all duration-300 ${
+          activityLogOpen ? "w-1/3" : "w-14 bg-white mt-1 me-2"
+        }`}
+      >
+        {/* Toggle Button for Closed State */}
+        {!activityLogOpen && (
+          <button
+            className="absolute left-1/2 top-4 flex -translate-x-1/2 transform flex-col items-center justify-center rounded bg-gray-100 p-2 shadow hover:bg-gray-200"
+            onClick={() => setActivityLogOpen(true)}
+          >
+            <MessageCircle className="mx-auto text-gray-600 hover:text-gray-900" size={20} />
+            <span className="mt-1 text-center text-xs text-gray-600">
+              Activity
+            </span>
+          </button>
+        )}
+
+        {/* Activity Log Content */}
+        {activityLogOpen && (
+          <ActivityLog
+            ref={activityLogRef}
+            taskId={tasksId}
+            isOpen={activityLogOpen}
+          />
+        )}
+
+        {/* Close Button for Open State */}
+        {activityLogOpen && (
+          <button
+            className="absolute right-4 top-8"
+            onClick={() => setActivityLogOpen(false)}
+          >
+            <X size={20} className="text-gray-600 hover:text-gray-900" />
+          </button>
+        )}
+      </div>
     </div>
   );
 };
