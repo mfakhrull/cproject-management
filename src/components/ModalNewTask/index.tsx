@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { formatISO } from "date-fns";
 import { toast } from "sonner";
 import { useTaskContext } from "@/context/TaskContext"; // Import the context
+import { Button } from "@/components/ui/button"; // Assuming you have a shared Button component
 
 type Props = {
   isOpen: boolean;
@@ -101,107 +102,178 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
   };
 
   const selectStyles =
-    "mb-4 block w-full rounded border border-gray-300 px-3 py-2 dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
+    "mt-2 block w-full rounded-md bg-white px-3 py-2 outline outline-1 outline-gray-300 focus-within:outline-2 focus-within:outline-blue-600 sm:text-base";
 
   const inputStyles =
-    "w-full rounded border border-gray-300 p-2 shadow-sm dark:border-dark-tertiary dark:bg-dark-tertiary dark:text-white dark:focus:outline-none";
+    "mt-2 block w-full rounded-md bg-white px-3 py-2 outline outline-1 outline-gray-300 focus-within:outline-2 focus-within:outline-blue-600 sm:text-base";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} name="Create New Task">
       <form
-        className="mt-4 space-y-6"
+        className="space-y-8"
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();
         }}
       >
-        <input
-          type="text"
-          className={inputStyles}
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          className={inputStyles}
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2">
-          <select
-            className={selectStyles}
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="TODO">To Do</option>
-            <option value="IN_PROGRESS">Work In Progress</option>
-            <option value="COMPLETED">Completed</option>
-          </select>
-          <select
-            className={selectStyles}
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-          >
-            <option value="HIGH">High</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="LOW">Low</option>
-          </select>
-        </div>
-        <input
-          type="text"
-          className={inputStyles}
-          placeholder="Tags (comma separated)"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-        />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2">
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium text-gray-900">
+            Task Title
+          </label>
           <input
-            type="date"
+            type="text"
+            id="title"
+            name="title"
             className={inputStyles}
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <input
-            type="date"
-            className={inputStyles}
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
+            placeholder="Task Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
           />
         </div>
-        <select
-          className={selectStyles}
-          value={authorUserId}
-          onChange={(e) => setAuthorUserId(e.target.value)}
-        >
-          <option value="">Select Author</option>
-          {users.map((user) => (
-            <option key={user.clerk_id} value={user.clerk_id}>
-              {user.username}
-            </option>
-          ))}
-        </select>
-        <select
-          className={selectStyles}
-          value={assignedUserId}
-          onChange={(e) => setAssignedUserId(e.target.value)}
-        >
-          <option value="">Select Assignee</option>
-          {users.map((user) => (
-            <option key={user.clerk_id} value={user.clerk_id}>
-              {user.username}
-            </option>
-          ))}
-        </select>
-        <button
+
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-900">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            className={inputStyles}
+            placeholder="Task Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-900">
+              Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className={selectStyles}
+            >
+              <option value="TODO">To Do</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="priority" className="block text-sm font-medium text-gray-900">
+              Priority
+            </label>
+            <select
+              id="priority"
+              name="priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className={selectStyles}
+            >
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="tags" className="block text-sm font-medium text-gray-900">
+            Tags (comma separated)
+          </label>
+          <input
+            type="text"
+            id="tags"
+            name="tags"
+            className={inputStyles}
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="Task tags"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-900">
+              Start Date
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-900">
+              Due Date
+            </label>
+            <input
+              type="date"
+              id="dueDate"
+              name="dueDate"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="authorUserId" className="block text-sm font-medium text-gray-900">
+            Author
+          </label>
+          <select
+            id="authorUserId"
+            name="authorUserId"
+            value={authorUserId}
+            onChange={(e) => setAuthorUserId(e.target.value)}
+            className={selectStyles}
+          >
+            <option value="">Select Author</option>
+            {users.map((user) => (
+              <option key={user.clerk_id} value={user.clerk_id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="assignedUserId" className="block text-sm font-medium text-gray-900">
+            Assignee
+          </label>
+          <select
+            id="assignedUserId"
+            name="assignedUserId"
+            value={assignedUserId}
+            onChange={(e) => setAssignedUserId(e.target.value)}
+            className={selectStyles}
+          >
+            <option value="">Select Assignee</option>
+            {users.map((user) => (
+              <option key={user.clerk_id} value={user.clerk_id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <Button
           type="submit"
-          className={`focus-offset-2 mt-4 flex w-full justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-            !isFormValid() || isLoading ? "cursor-not-allowed opacity-50" : ""
-          }`}
           disabled={!isFormValid() || isLoading}
+          className="w-full mt-6"
         >
           {isLoading ? "Creating..." : "Create Task"}
-        </button>
+        </Button>
       </form>
     </Modal>
   );

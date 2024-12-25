@@ -39,7 +39,7 @@ const ApprovedBid: React.FC<ApprovedBidProps> = ({ approvedBid }) => {
         </p>
         <p className="mb-3 flex items-center gap-2 text-gray-600">
           <FileText className="h-6 w-6 text-black" />
-          <span className="font-semibold">Price:</span> ${approvedBid.price.toLocaleString()}
+          <span className="font-semibold">Price:</span> RM {approvedBid.price.toLocaleString()}
         </p>
         <p className="mb-3 flex items-center gap-2 text-gray-600">
           <Calendar className="h-6 w-6 text-black" />

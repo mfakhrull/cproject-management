@@ -10,6 +10,7 @@ import {
   Calendar,
   ClipboardCheck,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import RequestMaterialModal from "@/components/RequestMaterialModal";
 import RequestMaterialDetailsModal from "@/components/RequestMaterialDetailsModal";
@@ -24,6 +25,8 @@ import MaterialRequests from "../components/MaterialRequests";
 import TeamMembers from "../components/TeamMembers";
 import AddTeamMemberModal from "../components/AddTeamMemberModal";
 import { IEmployee } from "@/models/Employee";
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the hook
+import FloatingTooltip from "@/components/FloatingTooltip";
 
 const ProjectDetailsPage = () => {
   const { id } = useParams();
@@ -33,6 +36,8 @@ const ProjectDetailsPage = () => {
   const [materialRequests, setMaterialRequests] = useState<IMaterialRequest[]>(
     [],
   );
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { permissions, loading } = useUserPermissions(); // Fetch permissions
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +49,7 @@ const ProjectDetailsPage = () => {
   const [isAddTeamMemberModalOpen, setIsAddTeamMemberModalOpen] =
     useState(false);
 
-    // Function to refetch project details
+  // Function to refetch project details
   const fetchProjectDetails = async () => {
     try {
       const response = await fetch(`/api/projects/${id}/details`);
@@ -108,8 +113,7 @@ const ProjectDetailsPage = () => {
     fetchMaterialRequests();
   }, [id]);
 
-
-//Fetch team members
+  //Fetch team members
   const fetchTeamMembers = async () => {
     try {
       const response = await fetch(`/api/projects/${id}/team`);
@@ -213,9 +217,10 @@ const ProjectDetailsPage = () => {
         body: formData,
       });
 
-      const updatedProject = await response.json();
-      setProject(updatedProject);
+      if (!response.ok) throw new Error("Error uploading file");
+
       toast.success("File uploaded successfully!");
+      fetchProjectDetails(); // Refetch project details
     } catch (error) {
       console.error("Error uploading file:", error);
       toast.error("Error uploading file.");
@@ -262,6 +267,7 @@ const ProjectDetailsPage = () => {
           : null,
       );
       toast.success("Team member deleted successfully!");
+      fetchProjectDetails(); // Refetch project details
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete team member.");
@@ -292,6 +298,7 @@ const ProjectDetailsPage = () => {
       });
 
       toast.success("Attachment deleted successfully!");
+      fetchProjectDetails(); // Refetch project details
     } catch (error) {
       console.error("Error deleting attachment:", error);
       toast.error("Failed to delete attachment.");
@@ -303,10 +310,14 @@ const ProjectDetailsPage = () => {
     return <div className="p-6 text-center">Loading project details...</div>;
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
 
+  // Disable button logic
+  const isButtonDisabled =
+    !permissions.includes("admin") && !permissions.includes("project_manager");
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
-      <div className="rounded-lg bg-white p-6 shadow-md mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="mb-8 flex flex-col rounded-lg bg-white p-6 shadow-md md:flex-row md:items-center md:justify-between">
         <div className="mb-4 md:mb-0">
           <h1 className="mb-2 text-3xl font-bold text-gray-800">
             {project?.name || "Project Name"}
@@ -317,18 +328,47 @@ const ProjectDetailsPage = () => {
         </div>
 
         <div className="flex flex-wrap gap-4">
-          <Link
-            href={`/editor?projectId=${id}&projectName=${encodeURIComponent(project?.name || "")}`}
-            className="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
-          >
-            Create Opportunity for this Project
-          </Link>
-          <Link
-            href={`/projects/${id}/submitted-bids`}
-            className="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
-          >
-            View Submitted Bids
-          </Link>
+          {isButtonDisabled ? (
+            <FloatingTooltip message="You don't have access to create opportunities">
+              <Link
+                href={`/editor?projectId=${id}&projectName=${encodeURIComponent(project?.name || "")}`}
+                className="cursor-not-allowed rounded bg-gray-200 px-4 py-2 text-gray-400"
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent navigation if disabled
+                }}
+              >
+                Create Opportunity for this Project
+              </Link>
+            </FloatingTooltip>
+          ) : (
+            <Link
+              href={`/editor?projectId=${id}&projectName=${encodeURIComponent(project?.name || "")}`}
+              className="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
+            >
+              Create Opportunity for this Project
+            </Link>
+          )}
+
+          {isButtonDisabled ? (
+            <FloatingTooltip message="You don't have access to view submitted bids">
+              <Link
+                href={`/projects/${id}/submitted-bids`}
+                className="cursor-not-allowed rounded bg-gray-200 px-4 py-2 text-gray-400"
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent navigation if disabled
+                }}
+              >
+                View Submitted Bids
+              </Link>
+            </FloatingTooltip>
+          ) : (
+            <Link
+              href={`/projects/${id}/submitted-bids`}
+              className="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
+            >
+              View Submitted Bids
+            </Link>
+          )}
         </div>
       </div>
 
@@ -338,6 +378,7 @@ const ProjectDetailsPage = () => {
         {project && (
           <ProjectOverview
             project={project}
+            isButtonDisabled={isButtonDisabled} // Pass the value to child
             onUpdate={(updatedProject) => {
               // Option 1: Preserve existing team members
               setProject((prevProject) => ({
@@ -357,6 +398,7 @@ const ProjectDetailsPage = () => {
           teamMembers={project?.teamMembers || []} // Use an empty array as fallback
           onAddTeamMember={() => setIsAddTeamMemberModalOpen(true)}
           onDeleteTeamMember={handleDeleteTeamMember}
+          isButtonDisabled={isButtonDisabled} // Pass the value to child
         />
 
         <AddTeamMemberModal
@@ -373,6 +415,7 @@ const ProjectDetailsPage = () => {
           onFileUpload={handleFileUpload}
           isUploading={isUploading}
           onDeleteAttachment={handleDeleteAttachment} // Pass the delete handler
+          isButtonDisabled={isButtonDisabled} // Pass the value to child
         />
       )}
 

@@ -3,6 +3,8 @@
 import React from "react";
 import { IMaterialRequest } from "@/types";
 import { PlusCircle } from "lucide-react";
+import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the permissions hook
 
 interface MaterialRequestsProps {
   materialRequests: IMaterialRequest[];
@@ -15,6 +17,13 @@ const MaterialRequests: React.FC<MaterialRequestsProps> = ({
   onOpenDetailsModal,
   onOpenRequestModal,
 }) => {
+  const { permissions } = useUserPermissions(); // Get user permissions
+  const canRequestMaterial =
+    permissions.includes("inventory_manager") ||
+    permissions.includes("can_request_material") || // Permission check
+    permissions.includes("admin") ||
+    permissions.includes("project_manager");
+
   return (
     <div className="rounded-lg bg-white p-6 shadow-md">
       <h2 className="mb-4 text-xl font-semibold text-gray-800">
@@ -46,13 +55,26 @@ const MaterialRequests: React.FC<MaterialRequestsProps> = ({
       ) : (
         <p className="text-gray-600">No material requests submitted.</p>
       )}
-      <button
-        onClick={onOpenRequestModal}
-        className="mt-4 flex items-center rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-      >
-        <PlusCircle className="mr-2" />
-        Request Material
-      </button>
+      {!canRequestMaterial ? (
+        <FloatingTooltip message="Permission Required">
+          <button
+            onClick={onOpenRequestModal}
+            disabled
+            className="mt-4 flex cursor-not-allowed items-center rounded-md bg-gray-200 px-4 py-2 text-gray-400"
+          >
+            <PlusCircle size={20} className="mr-2" />
+            Request Material
+          </button>
+        </FloatingTooltip>
+      ) : (
+        <button
+          onClick={onOpenRequestModal}
+          className="mt-4 flex items-center rounded-md bg-slate-800 px-4 py-2 text-white hover:bg-slate-700"
+        >
+          <PlusCircle size={20} className="mr-2" />
+          Request Material
+        </button>
+      )}
     </div>
   );
 };

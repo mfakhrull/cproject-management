@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import ModalNewProject from "./ModalNewProject";
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the hook
+import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
 
 type Props = {
   activeTab: string;
@@ -23,9 +25,15 @@ type Props = {
 };
 
 const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
+  const { permissions } = useUserPermissions(); // Get user permissions
+  const canCreateProject =
+    permissions.includes("can_create_project") || // Permission check
+    permissions.includes("admin") ||
+    permissions.includes("project_manager");
+
   const [isModalNewProjectOpen, setIsModalNewProjectOpen] = useState(false);
   const [projectName, setProjectName] = useState<string>("Loading...");
-  
+
   // Fetch project name
   useEffect(() => {
     const fetchProject = async () => {
@@ -44,6 +52,9 @@ const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
     if (projectId) fetchProject();
   }, [projectId]);
 
+  // Disable button logic
+  const isButtonDisabled =
+    !permissions.includes("admin") && !permissions.includes("project_manager");
 
   return (
     <div className="px-4 xl:px-6">
@@ -57,12 +68,23 @@ const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
           buttonComponent={
             <div className="flex space-x-4">
               {/* New Boards Button */}
-              <button
-                className="flex items-center rounded-md bg-slate-800 px-3 py-2 text-white hover:bg-slate-700"
-                onClick={() => setIsModalNewProjectOpen(true)}
-              >
-                <PlusSquare className="mr-2 h-5 w-5" /> New Project
-              </button>
+              {!canCreateProject ? (
+                <FloatingTooltip message="Permission Required">
+                  <button
+                    className="flex cursor-not-allowed items-center rounded-md bg-gray-200 px-3 py-2 text-gray-400"
+                    disabled
+                  >
+                    <PlusSquare className="mr-2 h-5 w-5" /> New Project
+                  </button>
+                </FloatingTooltip>
+              ) : (
+                <button
+                  className="flex items-center rounded-md bg-slate-800 px-3 py-2 text-white hover:bg-slate-700"
+                  onClick={() => setIsModalNewProjectOpen(true)}
+                >
+                  <PlusSquare className="mr-2 h-5 w-5" /> New Project
+                </button>
+              )}
 
               {/* Link to Project Details */}
               <Link

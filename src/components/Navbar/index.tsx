@@ -3,7 +3,7 @@
 import React from "react";
 import { Menu, Moon, Search, Settings, Sun, User } from "lucide-react";
 import Link from "next/link";
-import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, SignInButton, useUser } from "@clerk/nextjs";
 import { useAppDispatch, useAppSelector } from "@/app/redux/redux";
 import { setIsDarkMode, setIsSidebarCollapsed } from "@/app/state";
 
@@ -13,6 +13,9 @@ const Navbar: React.FC = () => {
     (state) => state.global.isSidebarCollapsed,
   );
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+  
+    // Use Clerk's useUser hook to access user details
+    const { user } = useUser();
 
   return (
     <div className="flex w-[100%] items-center justify-between bg-white px-4 py-3 shadow-md dark:bg-black">
@@ -84,8 +87,12 @@ const Navbar: React.FC = () => {
                 },
               }}
             />
-            {/* Placeholder for showing username */}
-            <span className="ml-3 text-gray-800 dark:text-white">Username</span>
+            {/* Display username if available */}
+            {user?.username || user?.firstName? (
+              <span className="ml-3 text-gray-800 dark:text-white">
+                {user.username || user.firstName}
+              </span>
+            ) : null}
           </div>
         </SignedIn>
       </div>

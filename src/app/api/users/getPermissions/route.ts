@@ -1,32 +1,34 @@
-// src/pages/api/users/getPermissions.ts
-
-import { getAuth } from "@clerk/nextjs/server";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
+import { NextRequest } from "next/server"; // Import NextRequest
 import dbConnect from "@/lib/mongodb";
-import {User} from "@/models"; // Import your User model
+import { User } from "@/models"; // Import your User model
+import { getAuth } from "@clerk/nextjs/server"; // Import Clerk getAuth
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { userId } = getAuth(req);
-
-  if (!userId) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
+export async function GET(req: NextRequest) {
+  await dbConnect(); // Ensure database connection
 
   try {
-    await dbConnect();
+    // Get authenticated user ID from Clerk
+    const { userId } = getAuth(req);
 
-    const user = await User.findOne({ clerk_id: userId });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    if (!userId) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    return res.status(200).json({ permissions: user.rolePermissions });
+    // Find the user in your database using the Clerk ID
+    const user = await User.findOne({ clerk_id: userId });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Return role permissions from the user document
+    return NextResponse.json({ permissions: user.rolePermissions });
   } catch (error) {
     console.error("Error fetching role permissions:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
