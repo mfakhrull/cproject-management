@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { PlayCircle, StopCircle, RotateCcw, Clock } from "lucide-react";
 import { toast } from "sonner";
+import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the permissions hook
 
 const formatTime = (time: number) => {
   const hours = Math.floor(time / 3600);
@@ -19,6 +21,7 @@ const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({
   const [trackedTime, setTrackedTime] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const intervalRef = useRef<number | null>(null);
+  const { permissions } = useUserPermissions(); // Get user permissions
 
   // Load saved state from localStorage
   useEffect(() => {
@@ -45,7 +48,7 @@ const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({
   useEffect(() => {
     localStorage.setItem(
       `timeTracker-${taskId}`,
-      JSON.stringify({ isTracking, startTime, trackedTime })
+      JSON.stringify({ isTracking, startTime, trackedTime }),
     );
   }, [isTracking, startTime, trackedTime, taskId]);
 
@@ -60,7 +63,10 @@ const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({
       toast.success(`Time ${action} saved to database.`);
 
       // Refresh ActivityLog after saving to the database
-      if (activityLogRef && typeof activityLogRef.current?.refresh === "function") {
+      if (
+        activityLogRef &&
+        typeof activityLogRef.current?.refresh === "function"
+      ) {
         activityLogRef.current.refresh();
       }
     } catch (error) {
@@ -112,18 +118,39 @@ const TimeTracker: React.FC<{ taskId: string; activityLogRef: any }> = ({
     };
   }, []);
 
+  const canStartTime =
+    permissions.includes("can_start_time") ||
+    permissions.includes("can_edit_task") ||
+    permissions.includes("admin") ||
+    permissions.includes("project_manager");
+
   return (
     <div className="flex flex-wrap items-center gap-4">
       <Clock size={16} className="text-gray-600" />
       <div className="flex items-center gap-2">
         {!isTracking && trackedTime === 0 && (
-          <button
-            onClick={startTracking}
-            className="flex items-center gap-2 rounded bg-purple-100 px-4 py-2 text-purple-600 hover:bg-purple-200"
-          >
-            <PlayCircle size={16} />
-            Start
-          </button>
+          <>
+            {!canStartTime ? (
+              <FloatingTooltip message="Permission Required">
+                <button
+                  onClick={startTracking}
+                  disabled
+                  className="flex cursor-not-allowed items-center gap-2 rounded bg-gray-200 px-4 py-2 text-gray-400"
+                >
+                  <PlayCircle size={16} />
+                  Start
+                </button>
+              </FloatingTooltip>
+            ) : (
+              <button
+                onClick={startTracking}
+                className="flex items-center gap-2 rounded bg-purple-100 px-4 py-2 text-purple-600 hover:bg-purple-200"
+              >
+                <PlayCircle size={16} />
+                Start
+              </button>
+            )}
+          </>
         )}
         {(isTracking || trackedTime > 0) && (
           <>

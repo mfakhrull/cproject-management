@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the permissions hook
 
 interface Attachment {
   _id: string;
@@ -26,6 +28,7 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { permissions } = useUserPermissions(); // Get user permissions
 
   useEffect(() => {
     // Fetch existing attachments
@@ -60,7 +63,7 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
           fileName,
         }),
       });
-  
+
       // Refresh activity log after successfully logging
       if (refreshActivityLog) {
         refreshActivityLog(); // Ensure activity log updates
@@ -69,7 +72,6 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
       console.error("Failed to log attachment activity:", error);
     }
   };
-  
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -141,7 +143,7 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
 
   const handleDelete = async (attachmentId: string) => {
     const attachmentToDelete = attachments.find(
-      (attachment) => attachment._id === attachmentId
+      (attachment) => attachment._id === attachmentId,
     );
 
     if (!attachmentToDelete) {
@@ -163,7 +165,7 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
       }
 
       setAttachments((prev) =>
-        prev.filter((attachment) => attachment._id !== attachmentId)
+        prev.filter((attachment) => attachment._id !== attachmentId),
       );
       toast.success("Attachment deleted");
 
@@ -175,6 +177,12 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
     }
   };
 
+  const canAddAttachments =
+    permissions.includes("can_edit_task") ||
+    permissions.includes("can_add_attachments") ||
+    permissions.includes("admin") ||
+    permissions.includes("project_manager");
+
   return (
     <div className="mt-10">
       <h2 className="text-lg font-medium text-gray-900">Attachments</h2>
@@ -182,44 +190,88 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
       {/* File Dropzone */}
       <div className="mt-4">
         <div
-          className="flex h-56 w-1/3 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100"
-          onDragOver={(e) => e.preventDefault()}
+          className={`flex h-56 w-1/3 items-center justify-center rounded-lg border-2 border-dashed ${
+            canAddAttachments
+              ? "cursor-pointer bg-gray-50 hover:bg-gray-100"
+              : "bg-gray-50"
+          }`}
+          onDragOver={(e) => {
+            if (canAddAttachments) e.preventDefault();
+          }}
           onDrop={(e) => {
-            e.preventDefault();
-            handleFileDrop(e.dataTransfer.files);
+            if (canAddAttachments) {
+              e.preventDefault();
+              handleFileDrop(e.dataTransfer.files);
+            }
           }}
         >
-          <label
-            htmlFor="dropzone-file"
-            className="flex h-full w-full cursor-pointer flex-col items-center justify-center"
-          >
-            <svg
-              className="mb-4 h-8 w-8 text-gray-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 16"
+          {!canAddAttachments ? (
+            <FloatingTooltip message="Permission Required">
+              <label
+                htmlFor="dropzone-file"
+                className="flex h-full w-full cursor-not-allowed flex-col items-center justify-center"
+              >
+                <svg
+                  className="mb-4 h-8 w-8 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 16"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                  />
+                </svg>
+                <p className="mb-2 text-sm text-gray-400">
+                  <span className="font-semibold">Click to upload</span> or drag
+                  and drop
+                </p>
+                <p className="text-xs text-gray-400">PDF only (MAX. 10MB)</p>
+                <input
+                  id="dropzone-file"
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  disabled
+                />
+              </label>
+            </FloatingTooltip>
+          ) : (
+            <label
+              htmlFor="dropzone-file"
+              className="flex h-full w-full cursor-pointer flex-col items-center justify-center"
             >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+              <svg
+                className="mb-4 h-8 w-8 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 16"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                />
+              </svg>
+              <p className="mb-2 text-sm text-gray-500">
+                <span className="font-semibold">Click to upload</span> or drag
+                and drop
+              </p>
+              <p className="text-xs text-gray-500">PDF only (MAX. 10MB)</p>
+              <input
+                id="dropzone-file"
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={(e) => handleFileDrop(e.target.files)}
               />
-            </svg>
-            <p className="mb-2 text-sm text-gray-500">
-              <span className="font-semibold">Click to upload</span> or drag and
-              drop
-            </p>
-            <p className="text-xs text-gray-500">PDF only (MAX. 10MB)</p>
-            <input
-              id="dropzone-file"
-              type="file"
-              accept=".pdf"
-              className="hidden"
-              onChange={(e) => handleFileDrop(e.target.files)}
-            />
-          </label>
+            </label>
+          )}
         </div>
         {uploading && (
           <p className="mt-2 text-sm text-gray-500">Uploading...</p>
@@ -254,11 +306,20 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({
                   {new Date(attachment.uploadedAt).toLocaleString()}
                 </p>
               </div>
-              <Trash2
-                size={20}
-                className="cursor-pointer text-gray-500 hover:text-red-600"
-                onClick={() => handleDelete(attachment._id)}
-              />
+              {!canAddAttachments ? (
+                <FloatingTooltip message="Permission Required">
+                  <Trash2
+                    size={20}
+                    className="cursor-not-allowed text-gray-300"
+                  />
+                </FloatingTooltip>
+              ) : (
+                <Trash2
+                  size={20}
+                  className="cursor-pointer text-gray-500 hover:text-red-600"
+                  onClick={() => handleDelete(attachment._id)}
+                />
+              )}
             </li>
           ))}
         </ul>
