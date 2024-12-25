@@ -11,7 +11,9 @@ import { useRouter } from "next/navigation";
 import { ITask } from "@/types";
 import { useTaskContext } from "@/context/TaskContext";
 import TaskDetailsWrapper from "../tasks/TaskDetailsWrapper";
-import TaskActionsMenu from "./TaskActionsMenu"; // Import the new component
+import TaskActionsMenu from "./TaskActionsMenu";
+import FloatingTooltip from "@/components/FloatingTooltip";
+import { useUserPermissions } from "@/context/UserPermissionsContext";
 
 type BoardProps = {
   id: string;
@@ -112,6 +114,12 @@ const TaskColumn = ({
     COMPLETED: "#000000",
   };
 
+  const { permissions } = useUserPermissions(); // Get user permissions
+  const canCreateTask =
+    permissions.includes("can_create_task") || // Permission check
+    permissions.includes("admin") ||
+    permissions.includes("project_manager");
+
   return (
     <div
       ref={ref}
@@ -138,12 +146,23 @@ const TaskColumn = ({
             <button className="flex h-6 w-5 items-center justify-center dark:text-neutral-500">
               <EllipsisVertical size={26} />
             </button>
-            <button
-              className="flex h-6 w-6 items-center justify-center rounded bg-gray-200 dark:bg-dark-tertiary dark:text-white"
-              onClick={() => setIsModalNewTaskOpen(true)}
-            >
-              <Plus size={16} />
-            </button>
+            {!canCreateTask ? (
+              <FloatingTooltip message="Permission Required">
+                <button
+                  className="flex h-6 w-6 cursor-not-allowed items-center justify-center rounded bg-gray-200 text-gray-400 dark:bg-dark-tertiary dark:text-gray-500"
+                  disabled
+                >
+                  <Plus size={16} />
+                </button>
+              </FloatingTooltip>
+            ) : (
+              <button
+                className="flex h-6 w-6 items-center justify-center rounded bg-gray-200 hover:bg-gray-300 dark:bg-dark-tertiary dark:text-white dark:hover:bg-dark-secondary"
+                onClick={() => setIsModalNewTaskOpen(true)}
+              >
+                <Plus size={16} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -189,12 +208,12 @@ const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
   return (
     <div
       ref={ref}
-      className={`mb-4 rounded-md bg-white shadow transition hover:shadow-lg dark:bg-dark-secondary cursor-pointer ${
+      className={`mb-4 cursor-pointer rounded-md bg-white shadow transition hover:shadow-lg dark:bg-dark-secondary ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
       onClick={() => openFullScreen(task._id.toString())} // Trigger openFullScreen on card click
     >
-      <div className="p-4 md:p-6 relative">
+      <div className="relative p-4 md:p-6">
         <div className="flex items-center justify-between">
           <h4 className="text-md font-bold dark:text-white">{task.title}</h4>
           {/* Prevent click propagation for the action menu */}
@@ -219,7 +238,5 @@ const Task = ({ task, openTaskDetails, openFullScreen }: TaskProps) => {
     </div>
   );
 };
-
-
 
 export default BoardView;

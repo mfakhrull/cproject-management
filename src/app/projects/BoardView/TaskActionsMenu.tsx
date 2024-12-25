@@ -5,6 +5,8 @@ import { Menu, Transition } from "@headlessui/react";
 import { MoreVertical, Trash2, Info, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useTaskContext } from "@/context/TaskContext";
+import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the permissions hook
 
 type TaskActionsMenuProps = {
   taskId: string;
@@ -32,6 +34,12 @@ const TaskActionsMenu = ({
       setIsDeleting(false);
     }
   };
+
+  const { permissions } = useUserPermissions(); // Get user permissions
+  const canDeleteTask =
+    permissions.includes("can_delete_task") || // Permission check
+    permissions.includes("admin") ||
+    permissions.includes("project_manager");
 
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -77,18 +85,32 @@ const TaskActionsMenu = ({
               )}
             </Menu.Item>
             <Menu.Item>
-              {({ active }) => (
-                <button
-                  className={`${
-                    active ? "bg-red-100 dark:bg-gray-700" : ""
-                  } flex w-full items-center px-3 py-2 text-sm text-red-600`}
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {isDeleting ? "Deleting..." : "Delete"}
-                </button>
-              )}
+              {({ active }) =>
+                !canDeleteTask ? (
+                  <FloatingTooltip message="Permission Required">
+                    <button
+                      className={`${
+                        active ? "bg-red-100 dark:bg-gray-700" : ""
+                      } flex w-full cursor-not-allowed items-center px-3 py-2 text-sm text-red-400`}
+                      disabled
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </button>
+                  </FloatingTooltip>
+                ) : (
+                  <button
+                    className={`${
+                      active ? "bg-red-100 dark:bg-gray-700" : ""
+                    } flex w-full items-center px-3 py-2 text-sm text-red-600`}
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </button>
+                )
+              }
             </Menu.Item>
           </div>
         </Menu.Items>
