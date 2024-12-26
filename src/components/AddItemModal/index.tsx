@@ -71,7 +71,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSubmit }
         <div className="mt-6 flex justify-end">
           <button
             onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-700"
           >
             Add Item
           </button>

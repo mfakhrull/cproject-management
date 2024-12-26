@@ -7,6 +7,8 @@ import { InventoryItem } from "@/types/inventory";
 import AddItemModal from "@/components/AddItemModal";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the hook
+import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
 
 const InventoryDashboard = () => {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -14,6 +16,7 @@ const InventoryDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
   const router = useRouter();
+  const { permissions } = useUserPermissions(); // Get user permissions
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -69,24 +72,43 @@ const InventoryDashboard = () => {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
+  const canAddInventoryItem =
+    permissions.includes("can_add_inventory_item") || // Permission check
+    permissions.includes("admin") ||
+    permissions.includes("inventory_manager");
+    permissions.includes("procurement_team");
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Inventory Dashboard</h1>
+        <h1 className="text-2xl font-semibold">Inventory Dashboard</h1>
         <div className="flex gap-4">
-          <button
-            onClick={() => setIsModalOpen(true)} // Open modal
-            className="flex items-center rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
-            <Plus className="mr-2" />
-            Add Item
-          </button>
+          {!canAddInventoryItem ? (
+            <FloatingTooltip message="Permission Required">
+              <button
+                disabled
+                className="flex cursor-not-allowed items-center rounded-md bg-gray-200 px-4 py-2 text-gray-400"
+              >
+                <Plus size={20} className="mr-2" />
+                Add Item
+              </button>
+            </FloatingTooltip>
+          ) : (
+            <button
+              onClick={() => setIsModalOpen(true)} // Open modal
+              className="flex items-center rounded-md bg-slate-900 px-4 py-2 text-white hover:bg-slate-800"
+            >
+              <Plus size={20} className="mr-2" />
+              Add Item
+            </button>
+          )}
+
           <Link
             href="/inventory/suppliers"
-            className="flex items-center rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+            className="flex items-center rounded-md bg-gray-900 px-4 py-1 text-white hover:bg-gray-800"
           >
-            <Truck className="mr-2" />
+            <Truck size={20} className="mr-2" />
             Suppliers
           </Link>
         </div>

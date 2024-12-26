@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import DatePicker from "react-datepicker"; // Install react-datepicker if not already installed
-import "react-datepicker/dist/react-datepicker.css";
 
 interface AddSpecificItemModalProps {
   isOpen: boolean;
@@ -24,9 +22,7 @@ const AddSpecificItemModal: React.FC<AddSpecificItemModalProps> = ({
   const [specificItemId, setSpecificItemId] = useState("");
   const [price, setPrice] = useState<number | "">("");
   const [location, setLocation] = useState("");
-  const [maintenanceSchedule, setMaintenanceSchedule] = useState<Date | null>(
-    null
-  );
+  const [maintenanceSchedule, setMaintenanceSchedule] = useState<string>("");
 
   const handleSubmit = () => {
     if (!specificItemId || !price || !location || !maintenanceSchedule) {
@@ -38,14 +34,14 @@ const AddSpecificItemModal: React.FC<AddSpecificItemModalProps> = ({
       specificItemId,
       price: Number(price),
       location,
-      maintenanceSchedule: maintenanceSchedule.toISOString(),
+      maintenanceSchedule,
     });
 
     // Clear form and close modal
     setSpecificItemId("");
     setPrice("");
     setLocation("");
-    setMaintenanceSchedule(null);
+    setMaintenanceSchedule("");
     onClose();
   };
 
@@ -62,46 +58,50 @@ const AddSpecificItemModal: React.FC<AddSpecificItemModalProps> = ({
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-gray-700 font-medium">Specific Item ID</label>
+            <label className="block text-sm font-medium text-gray-700">Specific Item ID</label>
             <input
               type="text"
               value={specificItemId}
               onChange={(e) => setSpecificItemId(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium">Price</label>
+            <label className="block text-sm font-medium text-gray-700">Price</label>
             <input
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium">Location</label>
+            <label className="block text-sm font-medium text-gray-700">Location</label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium">Maintenance Schedule</label>
-            <DatePicker
-              selected={maintenanceSchedule}
-              onChange={(date) => setMaintenanceSchedule(date)}
-              dateFormat="yyyy-MM-dd"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none"
+            <label htmlFor="maintenanceSchedule" className="block text-sm font-medium text-gray-700">
+              Maintenance Schedule
+            </label>
+            <input
+              type="date"
+              id="maintenanceSchedule"
+              name="maintenanceSchedule"
+              value={maintenanceSchedule}
+              onChange={(e) => setMaintenanceSchedule(e.target.value)}
+              className="mt-2 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
             />
           </div>
         </div>
         <div className="mt-6 flex justify-end">
           <button
             onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="w-full bg-slate-800 px-4 py-3 text-white rounded-md hover:bg-slate-700"
           >
             Add Specific Item
           </button>
