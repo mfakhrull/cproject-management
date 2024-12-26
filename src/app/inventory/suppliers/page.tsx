@@ -17,9 +17,11 @@ interface Supplier {
 const SupplierListPage = () => {
   const router = useRouter();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState<Supplier[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -33,6 +35,7 @@ const SupplierListPage = () => {
         }
         const data: Supplier[] = await response.json();
         setSuppliers(data);
+        setFilteredSuppliers(data); // Initialize filtered list
       } catch (err: any) {
         setError(err.message || "An error occurred");
       } finally {
@@ -42,6 +45,21 @@ const SupplierListPage = () => {
 
     fetchSuppliers();
   }, []);
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const searchValue = event.target.value.toLowerCase();
+    setSearchTerm(searchValue);
+
+    // Filter suppliers based on the search term
+    const filtered = suppliers.filter((supplier) =>
+      supplier.name.toLowerCase().includes(searchValue) ||
+      supplier.email.toLowerCase().includes(searchValue) ||
+      supplier.phone.includes(searchValue) ||
+      supplier.materials.some((material) => material.toLowerCase().includes(searchValue)) // Check each material
+    );
+
+    setFilteredSuppliers(filtered);
+  };
 
   const handleAddSupplier = async (newSupplier: {
     name: string;
@@ -64,6 +82,7 @@ const SupplierListPage = () => {
 
       const addedSupplier: Supplier = await response.json();
       setSuppliers([...suppliers, addedSupplier]);
+      setFilteredSuppliers([...filteredSuppliers, addedSupplier]); // Update filtered list
       toast.success("Supplier added successfully!");
     } catch (err: any) {
       toast.error(err.message || "Failed to add supplier.");
@@ -86,10 +105,10 @@ const SupplierListPage = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Suppliers</h1>
         <button
-          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          className="flex items-center bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-700"
           onClick={() => setIsModalOpen(true)}
         >
-          <Plus className="mr-2" />
+          <Plus size={20} className="mr-2" />
           Add Supplier
         </button>
       </div>
@@ -97,18 +116,20 @@ const SupplierListPage = () => {
       {/* Search and Filters */}
       <div className="mb-6 flex items-center space-x-4">
         <div className="flex w-full items-center rounded-md bg-white p-2 shadow-sm">
-          <Search className="mr-2 text-gray-400" />
+          <Search size={20} className="mr-2 text-gray-400" />
           <input
             type="text"
             placeholder="Search supplier..."
             className="w-full outline-none"
+            value={searchTerm}
+            onChange={handleSearch}
           />
         </div>
       </div>
 
       {/* Supplier List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {suppliers.map((supplier) => (
+        {filteredSuppliers.map((supplier) => (
           <div
             key={supplier._id}
             onClick={() => router.push(`/inventory/suppliers/${supplier._id}`)}

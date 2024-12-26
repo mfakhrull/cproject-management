@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import SupplierModel from "@/models/supplier";
+import SupplierModel, { SupplierDocument } from "@/models/supplier";
 
 export async function GET(req: Request) {
   await dbConnect();
@@ -13,11 +13,17 @@ export async function GET(req: Request) {
   }
 
   try {
-    const supplier = await SupplierModel.findById(supplierId).lean();
+    // Explicitly type the result of the query as SupplierDocument
+    const supplier = (await SupplierModel.findById(supplierId).lean()) as SupplierDocument | null;
 
     if (!supplier) {
       return NextResponse.json({ message: "Supplier not found." }, { status: 404 });
     }
+
+    // Ensure array fields are always defined as empty arrays if null or undefined
+    supplier.orderHistory = supplier.orderHistory || [];
+    supplier.materials = supplier.materials || [];
+    supplier.complianceDocs = supplier.complianceDocs || [];
 
     return NextResponse.json(supplier, { status: 200 });
   } catch (error) {

@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   Home,
+  LayoutDashboard,
   Layers3,
   Lock,
   Menu,
@@ -23,6 +24,7 @@ import {
   Files,
   FileChartPie,
 } from "lucide-react";
+import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,7 +35,7 @@ import { setIsSidebarCollapsed } from "@/app/state";
 interface Project {
   _id: string;
   name: string;
-  status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED'; // Type the status properly
+  status: "PLANNING" | "IN_PROGRESS" | "COMPLETED"; // Type the status properly
 }
 
 const Sidebar: React.FC = () => {
@@ -48,7 +50,9 @@ const Sidebar: React.FC = () => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
   );
-  const refreshProjects = useAppSelector((state) => state.global.refreshProjects); // Listen for project refresh changes
+  const refreshProjects = useAppSelector(
+    (state) => state.global.refreshProjects,
+  ); // Listen for project refresh changes
 
   const sidebarClassNames = `fixed flex flex-col h-[100%] justify-between shadow-xl
     transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto bg-white ${
@@ -120,8 +124,8 @@ const Sidebar: React.FC = () => {
         {/* NAVBAR LINKS */}
         <nav className="z-10 w-full">
           <SidebarLink
-            icon={Home}
-            label="Home"
+            icon={LayoutDashboard}
+            label="Dashboard"
             href="/"
             isCollapsed={isSidebarCollapsed}
           />
@@ -131,7 +135,7 @@ const Sidebar: React.FC = () => {
             href="/timeline"
             isCollapsed={isSidebarCollapsed}
           />
-          <SidebarLink
+          {/* <SidebarLink
             icon={Search}
             label="Search"
             href="/search"
@@ -142,23 +146,18 @@ const Sidebar: React.FC = () => {
             label="Settings"
             href="/settings"
             isCollapsed={isSidebarCollapsed}
-          />
-          <SidebarLink
-            icon={User}
-            label="Users"
-            href="/users"
-            isCollapsed={isSidebarCollapsed}
-          />
-          <SidebarLink
-            icon={Users}
-            label="Teams"
-            href="/teams"
-            isCollapsed={isSidebarCollapsed}
-          />
+          /> */}
+
           <SidebarLink
             icon={Drill}
             label="Inventory"
             href="/inventory"
+            isCollapsed={isSidebarCollapsed}
+          />
+          <SidebarLink
+            icon={PrecisionManufacturingOutlinedIcon}
+            label="Supplier Management"
+            href="/inventory/suppliers"
             isCollapsed={isSidebarCollapsed}
           />
           <SidebarLink
@@ -167,18 +166,14 @@ const Sidebar: React.FC = () => {
             href="/documents"
             isCollapsed={isSidebarCollapsed}
           />
+
           <SidebarLink
             icon={FileChartPie}
             label="Contract Analysis"
             href="/dashboard"
             isCollapsed={isSidebarCollapsed}
           />
-          <SidebarLink
-            icon={User}
-            label="My Profile"
-            href="/employees/me"
-            isCollapsed={isSidebarCollapsed}
-          />
+
           <SidebarLink
             icon={Users}
             label="Employee Management"
@@ -190,7 +185,7 @@ const Sidebar: React.FC = () => {
         {/* PROJECTS LINKS */}
         <button
           onClick={() => setShowProjects((prev) => !prev)}
-          className="flex w-full items-center justify-between px-8 py-3 text-gray-500"
+          className="mt-2 flex w-full items-center justify-between px-8 py-3 text-gray-500"
         >
           <span>Projects</span>
           {showProjects ? (
@@ -216,8 +211,30 @@ const Sidebar: React.FC = () => {
                 />
               ))
             )}
+            <div className="mx-6 my-2 mb-4 border-b border-gray-800/10"></div>
           </div>
         )}
+
+        <nav>
+          <SidebarLink
+            icon={User}
+            label="My Profile"
+            href="/employees/me"
+            isCollapsed={isSidebarCollapsed}
+          />
+          <SidebarLink
+            icon={User}
+            label="Users"
+            href="/users"
+            isCollapsed={isSidebarCollapsed}
+          />
+          <SidebarLink
+            icon={Users}
+            label="Teams"
+            href="/teams"
+            isCollapsed={isSidebarCollapsed}
+          />
+        </nav>
 
         {/* PRIORITIES LINKS */}
         <button
@@ -266,7 +283,7 @@ const Sidebar: React.FC = () => {
           </>
         )}
         <div>
-        <hr className="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
+          <hr className="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
         </div>
         <nav>
           <SidebarLink

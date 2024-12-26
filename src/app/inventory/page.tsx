@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, MapPin, Truck } from "lucide-react";
+import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
 import { InventoryItem } from "@/types/inventory";
 import AddItemModal from "@/components/AddItemModal";
 import Link from "next/link";
@@ -106,9 +107,9 @@ const InventoryDashboard = () => {
 
           <Link
             href="/inventory/suppliers"
-            className="flex items-center rounded-md bg-gray-900 px-4 py-1 text-white hover:bg-gray-800"
+            className="flex items-center rounded-md bg-gray-800 px-4 py-1 text-white hover:bg-slate-700"
           >
-            <Truck size={20} className="mr-2" />
+            <PrecisionManufacturingIcon className="mr-2" />
             Suppliers
           </Link>
         </div>

@@ -80,7 +80,7 @@ const SupplierDetailsPage = ({
         `/api/supplier/getSupplierDetails?supplierId=${supplierId}`,
       );
       const data: Supplier = await response.json();
-      setSupplier(data);
+      setSupplier({ ...data, orderHistory: data.orderHistory || [] });
     } catch (error) {
       console.error("Error fetching supplier:", error);
       toast.error("Error fetching supplier details");
@@ -545,7 +545,7 @@ const SupplierDetailsPage = ({
                       </div>
                     )}
                   </div>
-                ))}
+                ))|| <p>No order history available.</p>}
                 {editMode && (
                   <Button
                     type="button"

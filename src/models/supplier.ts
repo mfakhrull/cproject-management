@@ -1,13 +1,33 @@
 import mongoose, { Schema, model, models } from "mongoose";
 import OrderHistoryModel, { OrderHistorySchema } from "./orderHistory";
 
-interface ComplianceDoc {
+// Define plain TypeScript interfaces
+export interface ComplianceDoc {
   fileName: string;
   fileUrl: string;
   uploadedBy: string;
-  _id: mongoose.Types.ObjectId;
 }
 
+export interface OrderHistory {
+  orderDate: string;
+  quantity: number;
+  description: string;
+  status: string;
+  totalAmount: number;
+}
+
+export interface Supplier {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  materials: string[];
+  complianceDocs: ComplianceDoc[];
+  orderHistory: OrderHistory[];
+  supplierClerkId: string | null;
+}
+
+// Define Mongoose schema
 const SupplierSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -25,13 +45,22 @@ const SupplierSchema = new Schema({
     default: [],
   },
   orderHistory: { type: [OrderHistorySchema], default: [] },
-  supplierClerkId: { type: String, ref: "User", default: null }, // Add supplierClerkId
+  supplierClerkId: { type: String, ref: "User", default: null },
 });
 
+// Create Mongoose model
 const SupplierModel = models.Supplier || model("Supplier", SupplierSchema);
 
-export interface SupplierDocument extends Document {
+// Define interface for Mongoose documents
+export interface SupplierDocument extends mongoose.Document {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  materials: string[];
   complianceDocs: ComplianceDoc[];
+  orderHistory: OrderHistory[];
+  supplierClerkId: string | null;
 }
 
 export default SupplierModel;
