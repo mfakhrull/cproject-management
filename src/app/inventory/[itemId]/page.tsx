@@ -223,8 +223,8 @@ const ItemDetailsPage = ({
     permissions.includes("can_edit_inventory") ||
     permissions.includes("can_add_inventory") ||
     permissions.includes("admin") ||
-    permissions.includes("inventory_manager");
-  permissions.includes("procurement_team");
+    permissions.includes("inventory_manager") ||
+    permissions.includes("procurement_team");
 
   return (
     <div className="flex min-h-screen bg-gray-50 p-8">

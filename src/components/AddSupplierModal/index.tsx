@@ -2,16 +2,18 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 
 interface AddSupplierModalProps {
-  isOpen: boolean; // Modal visibility state
-  onClose: () => void; // Function to close the modal
+  isOpen: boolean;
+  onClose: () => void;
   onSubmit: (supplier: {
     name: string;
     email: string;
     phone: string;
+    address: string;
     materials: string[];
-  }) => void; // Function to handle form submission
+  }) => Promise<void>; // Make this async for handling promise
 }
 
 const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
@@ -22,23 +24,35 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [materials, setMaterials] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (!name || !email || !phone || !materials) {
-      alert("Please fill in all fields!");
+  const handleSubmit = async () => {
+    if (!name || !email || !phone || !address || !materials) {
+      toast.error("Please fill in all fields!");
       return;
     }
 
-    const materialsArray = materials.split(",").map((m) => m.trim());
-    onSubmit({ name, email, phone, materials: materialsArray });
+    setIsLoading(true);
+    try {
+      const materialsArray = materials.split(",").map((m) => m.trim());
+      await onSubmit({ name, email, phone, address, materials: materialsArray });
 
-    // Clear form
-    setName("");
-    setEmail("");
-    setPhone("");
-    setMaterials("");
-    onClose();
+      // Clear form and show success message
+      setName("");
+      setEmail("");
+      setPhone("");
+      setAddress("");
+      setMaterials("");
+      toast.success("Supplier added and invitation sent successfully!");
+      onClose();
+    } catch (error) {
+      console.error("Error adding supplier:", error);
+      toast.error("Failed to add supplier. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -81,6 +95,15 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
             />
           </div>
           <div>
+            <label className="block text-gray-700 font-medium">Address</label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none"
+            />
+          </div>
+          <div>
             <label className="block text-gray-700 font-medium">
               Materials (comma-separated)
             </label>
@@ -95,9 +118,14 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
         <div className="mt-6 flex justify-end">
           <button
             onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className={`w-full px-4 py-2 rounded-md ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed text-white"
+                : "bg-slate-800 text-white hover:bg-slate-700"
+            }`}
+            disabled={isLoading}
           >
-            Add Supplier
+            {isLoading ? "Adding Supplier..." : "Add Supplier and Send Invitation"}
           </button>
         </div>
       </div>
