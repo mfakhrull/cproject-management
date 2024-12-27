@@ -2,22 +2,24 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search, MapPin, Truck } from "lucide-react";
+import { Plus, Search, MapPin } from "lucide-react";
 import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
 import { InventoryItem } from "@/types/inventory";
 import AddItemModal from "@/components/AddItemModal";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the hook
-import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
+import { useUserPermissions } from "@/context/UserPermissionsContext";
+import FloatingTooltip from "@/components/FloatingTooltip";
 
 const InventoryDashboard = () => {
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Search term state
   const router = useRouter();
-  const { permissions } = useUserPermissions(); // Get user permissions
+  const { permissions } = useUserPermissions();
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -31,6 +33,7 @@ const InventoryDashboard = () => {
         }
         const data: InventoryItem[] = await response.json();
         setItems(data);
+        setFilteredItems(data); // Initialize filtered list
       } catch (err: any) {
         setError(err.message || "An error occurred");
       } finally {
@@ -40,6 +43,26 @@ const InventoryDashboard = () => {
 
     fetchItems();
   }, []);
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const searchValue = event.target.value.toLowerCase();
+    setSearchTerm(searchValue);
+  
+    const filtered = items.filter((item) => {
+      const name = item.name?.toLowerCase() || "";
+      const location = item.location?.toLowerCase() || "";
+      const tags = item.tags || [];
+  
+      return (
+        name.includes(searchValue) ||
+        location.includes(searchValue) ||
+        tags.some((tag) => tag.toLowerCase().includes(searchValue))
+      );
+    });
+  
+    setFilteredItems(filtered);
+  };
+  
 
   const handleAddItem = async (newItem: {
     name: string;
@@ -54,7 +77,7 @@ const InventoryDashboard = () => {
         },
         body: JSON.stringify({
           ...newItem,
-          items: [], // Initialize with an empty array for specific items
+          items: [],
         }),
       });
 
@@ -63,7 +86,8 @@ const InventoryDashboard = () => {
       }
 
       const addedItem: InventoryItem = await response.json();
-      setItems((prevItems) => [...prevItems, addedItem]); // Update the inventory list
+      setItems((prevItems) => [...prevItems, addedItem]);
+      setFilteredItems((prevItems) => [...prevItems, addedItem]);
       toast.success("Item added successfully!");
     } catch (err: any) {
       toast.error(err.message || "Failed to add item.");
@@ -74,9 +98,9 @@ const InventoryDashboard = () => {
   if (error) return <div>Error: {error}</div>;
 
   const canAddInventoryItem =
-    permissions.includes("can_add_inventory_item") || // Permission check
+    permissions.includes("can_add_inventory_item") ||
     permissions.includes("admin") ||
-    permissions.includes("inventory_manager");
+    permissions.includes("inventory_manager") ||
     permissions.includes("procurement_team");
 
   return (
@@ -97,7 +121,7 @@ const InventoryDashboard = () => {
             </FloatingTooltip>
           ) : (
             <button
-              onClick={() => setIsModalOpen(true)} // Open modal
+              onClick={() => setIsModalOpen(true)}
               className="flex items-center rounded-md bg-slate-900 px-4 py-2 text-white hover:bg-slate-800"
             >
               <Plus size={20} className="mr-2" />
@@ -115,36 +139,36 @@ const InventoryDashboard = () => {
         </div>
       </div>
 
-      {/* Search and Filters */}
+      {/* Search */}
       <div className="mb-6 flex items-center space-x-4">
         <div className="flex w-full items-center rounded-md bg-white p-2 shadow-sm">
-          <Search className="mr-2 text-gray-400" />
+          <Search size={18} className="mr-2 text-gray-400" />
           <input
             type="text"
             placeholder="Search inventory..."
             className="w-full outline-none"
+            value={searchTerm}
+            onChange={handleSearch} // Search handler
           />
         </div>
       </div>
 
       {/* Inventory List */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {filteredItems.map((item) => (
           <div
             key={item._id}
-            onClick={() => router.push(`/inventory/${item._id}`)} // Redirect to details page
+            onClick={() => router.push(`/inventory/${item._id}`)}
             className="cursor-pointer rounded-md bg-white p-4 shadow transition hover:shadow-lg"
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">{item.name}</h2>
-              <span className="text-sm text-gray-500">
-                Qty: {item.quantity}
-              </span>
+              <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
             </div>
-            <div className="mb-2 text-gray-600">
+            {/* <div className="mb-2 text-gray-600">
               <MapPin className="mr-2 inline" />
               {item.location}
-            </div>
+            </div> */}
             <div className="flex space-x-2">
               {item.tags.map((tag, index) => (
                 <span
@@ -162,8 +186,8 @@ const InventoryDashboard = () => {
       {/* Add Item Modal */}
       <AddItemModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)} // Close modal
-        onSubmit={handleAddItem} // Handle form submission
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddItem}
       />
     </div>
   );

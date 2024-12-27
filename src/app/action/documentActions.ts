@@ -51,17 +51,13 @@ export async function getUserDocuments(userId: string) {
   }
 }
 
-export async function getDocumentById(documentId: string, userId: string) {
-  if (!userId) {
-    throw new Error('Unauthorized');
-  }
-
+export async function getDocumentById(documentId: string) {
+ 
   await dbConnect();
 
   try {
     const document = await EditorDocument.findOne({
       _id: new mongoose.Types.ObjectId(documentId),
-      userId,
     })
     .populate({ path: 'projectId', select: 'name _id' }) // Populate project name and ID
     .lean();
@@ -77,17 +73,14 @@ export async function getDocumentById(documentId: string, userId: string) {
   }
 }
 
-export async function getOpenOpportunities(userId: string) {
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+export async function getOpenOpportunities() {
+ 
 
   await dbConnect();
 
   try {
     // Fetch only documents with `status: "OPEN"` and include project details
     return await EditorDocument.find({ 
-      userId, 
       status: "OPEN" // Filter by status
     })
     .populate({

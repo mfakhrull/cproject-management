@@ -16,7 +16,9 @@ import {
   GridRowId,
 } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
-
+import { useUserPermissions } from "@/context/UserPermissionsContext";
+import FloatingTooltip from "@/components/FloatingTooltip";
+import { Info } from "lucide-react";
 
 export default function SubmittedBidsPage() {
   const router = useRouter();
@@ -26,17 +28,22 @@ export default function SubmittedBidsPage() {
   const [loading, setLoading] = useState(true);
   const { userId } = useAuth();
   const projectId = Array.isArray(id) ? id[0] : id;
+  const { permissions, loading: permissionsLoading } = useUserPermissions();
 
   useEffect(() => {
     if (!projectId) {
       toast.error("Project ID is missing");
-      window.location.href = "/projects";
+      router.push("/projects");
       return;
     }
 
     async function fetchBids() {
       try {
-        const response = await getSubmittedBids(projectId, userId!);
+        const response = await getSubmittedBids(
+          projectId,
+          userId!,
+          permissions,
+        );
         console.log("Fetched Bids:", response); // Debugging
         setBids(response);
       } catch (error) {
@@ -48,44 +55,42 @@ export default function SubmittedBidsPage() {
     }
 
     fetchBids();
-  }, [projectId, userId]);
+  }, [projectId, userId, permissions]);
 
   const handleUpdateStatus =
-  (id: GridRowId, status: "APPROVED" | "REJECTED", documentId: string) =>
-  async () => {
-    try {
-      const result = await updateBidStatus(id as string, status, documentId); // Pass documentId
+    (id: GridRowId, status: "APPROVED" | "REJECTED", documentId: string) =>
+    async () => {
+      try {
+        const result = await updateBidStatus(id as string, status, documentId); // Pass documentId
 
-      if (!result.success) {
-        throw new Error(result.message || "Failed to update status");
+        if (!result.success) {
+          throw new Error(result.message || "Failed to update status");
+        }
+
+        toast.success(`Bid status updated to ${status}`);
+        setBids((prevBids) =>
+          prevBids.map((bid) => (bid._id === id ? { ...bid, status } : bid)),
+        );
+      } catch (error) {
+        console.error("Error updating bid status:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Error updating status",
+        );
       }
-
-      toast.success(`Bid status updated to ${status}`);
-      setBids((prevBids) =>
-        prevBids.map((bid) =>
-          bid._id === id ? { ...bid, status } : bid
-        )
-      );
-    } catch (error) {
-      console.error("Error updating bid status:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Error updating status"
-      );
-    }
-  };
+    };
 
   const handleDeleteBid = (bidId: GridRowId) => async () => {
     try {
       const response = await fetch(`/api/bids/${bidId}`, {
         method: "DELETE",
       });
-  
+
       const result = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(result.message || "Failed to delete bid");
       }
-  
+
       toast.success("Bid deleted successfully!");
       setBids((prevBids) => prevBids.filter((bid) => bid._id !== bidId));
     } catch (error) {
@@ -93,8 +98,6 @@ export default function SubmittedBidsPage() {
       toast.error("Failed to delete bid");
     }
   };
-  
-
 
   const rows = bids.map((bid) => ({
     id: bid._id,
@@ -137,7 +140,9 @@ export default function SubmittedBidsPage() {
         <GridActionsCellItem
           icon={<DetailsIcon />}
           label="Details"
-          onClick={() => router.push(`/projects/${projectId}/submitted-bids/${params.id}`)}
+          onClick={() =>
+            router.push(`/projects/${projectId}/submitted-bids/${params.id}`)
+          }
           showInMenu
         />,
         <GridActionsCellItem
@@ -150,13 +155,39 @@ export default function SubmittedBidsPage() {
     },
   ];
 
+  if (permissionsLoading) {
+    return <p className="mt-4 text-center">Checking permissions...</p>;
+  }
+
   if (loading) {
     return <p className="mt-4 text-center">Loading...</p>;
   }
 
+  const canViewAllBids =
+    permissions.includes("admin") ||
+    permissions.includes("project_manager") ||
+    permissions.includes("procurement_team") ||
+    permissions.includes("can_see_all_submitted_bid");
+
   return (
     <div className="container mx-auto flex flex-col gap-4 p-4">
-      <h1 className="text-2xl font-bold">Submitted Bids</h1>
+      <div className="flex items-center gap-4 py-2">
+        <h1 className="text-2xl font-bold">Submitted Bids</h1>
+        {canViewAllBids ? (
+          <FloatingTooltip width="200px" message="You are viewing all submitted bids for this project.">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100">
+              <Info className="h-5 w-5 cursor-pointer text-slate-800/40 hover:text-slate-800" />
+            </div>
+          </FloatingTooltip>
+        ) : (
+          <FloatingTooltip width="200px" message="You are limited to viewing only your own submitted bids unless you have the necessary permissions.">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100">
+              <Info className="h-5 w-5 cursor-pointer text-slate-800/40 hover:text-slate-800" />
+            </div>
+          </FloatingTooltip>
+        )}
+      </div>
+
       {bids.length === 0 ? (
         <p>No bids submitted for this project.</p>
       ) : (

@@ -23,7 +23,7 @@ export default function OverallScoreChart({
     {
       name: "Opportunities",
       value: overallScore,
-      fill: "hsl(var(--chart-2))",
+      fill: "hsl(var(--chart-3))",
     },
   ];
 

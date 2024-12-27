@@ -5,12 +5,14 @@ interface FloatingTooltipProps {
   message: string;
   children: React.ReactNode;
   delay?: number; // Optional delay in milliseconds
+  width?: string | number; // Optional width (e.g., "200px" or a number for pixels)
 }
 
 const FloatingTooltip: React.FC<FloatingTooltipProps> = ({
   message,
   children,
-  delay = 400, // Default delay of 300ms
+  delay = 400, // Default delay of 400ms
+  width, // Optional width prop
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);
@@ -45,6 +47,7 @@ const FloatingTooltip: React.FC<FloatingTooltipProps> = ({
             position: strategy,
             top: y ?? 0,
             left: x ?? 0,
+            width: width ? width : "auto", // Apply width if provided
           }}
           className="absolute z-10 rounded bg-opacity-85 bg-gray-600 px-4 py-1 text-xs text-white shadow-lg flex items-center justify-center text-center"
         >

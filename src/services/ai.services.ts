@@ -4,7 +4,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // Function to detect contract type (unchanged)
-export const detectContractType = async (contractText: string): Promise<string> => {
+export const detectContractType = async (
+  contractText: string,
+): Promise<string> => {
   const prompt = `
     Analyze the following contract text and determine the type of contract it is.
     Provide only the contract type as a single string (e.g., "Employment", "Non-Disclosure Agreement", "Sales", "Lease", etc.).
@@ -35,54 +37,63 @@ export const detectContractType = async (contractText: string): Promise<string> 
 };
 
 // Function to analyze the contract (unchanged)
-export const analyzeContractWithAI = async (contractText: string, contractType: string) => {
+export const analyzeContractWithAI = async (
+  contractText: string,
+  contractType: string,
+) => {
   const prompt = `
-    Analyze the following ${contractType} contract and provide:
-    1. A list of at least 10 potential risks for the party receiving the contract, each with a brief explanation and severity level (low, medium, high).
-    2. A list of at least 10 potential opportunities or benefits for the receiving party, each with a brief explanation and impact level (low, medium, high).
-    3. A comprehensive summary of the contract, including key terms and conditions.
-    4. Any recommendations for improving the contract from the receiving party's perspective.
-    5. A list of key clauses in the contract.
-    6. An assessment of the contract's legal compliance.
-    7. A list of potential negotiation points.
-    8. The contract duration or term, if applicable.
-    9. A summary of termination conditions, if applicable.
-    10. A breakdown of any financial terms or compensation structure, if applicable.
-    11. Any performance metrics or KPIs mentioned, if applicable.
-    12. A summary of any specific clauses relevant to this type of contract (e.g., intellectual property for employment contracts, warranties for sales contracts).
-    13. An overall score from 1 to 100, with 100 being the highest. This score represents the overall favorability of the contract based on the identified risks and opportunities.
+    Analyze the following ${contractType} contract and provide a detailed analysis tailored to the provided content. Ensure your response reflects the specific clauses, terms, and context within the text, avoiding generic responses. Focus on identifying actionable insights, unique details, and contract-specific implications.
 
-    Format your response as a JSON object with the following structure:
-    {
-      "risks": [{"risk": "Risk description", "explanation": "Brief explanation", "severity": "low|medium|high"}],
-      "opportunities": [{"opportunity": "Opportunity description", "explanation": "Brief explanation", "impact": "low|medium|high"}],
-      "summary": "Comprehensive summary of the contract",
-      "recommendations": ["Recommendation 1", "Recommendation 2", ...],
-      "keyClauses": ["Clause 1", "Clause 2", ...],
-      "legalCompliance": "Assessment of legal compliance",
-      "negotiationPoints": ["Point 1", "Point 2", ...],
-      "contractDuration": "Duration of the contract, if applicable",
-      "terminationConditions": "Summary of termination conditions, if applicable",
-      "overallScore": "Overall score from 1 to 100",
-      "financialTerms": {
-        "description": "Overview of financial terms",
-        "details": ["Detail 1", "Detail 2", ...]
-      },
-      "performanceMetrics": ["Metric 1", "Metric 2", ...],
-      "specificClauses": "Summary of clauses specific to this contract type"
-    }
+Provide:
+1. A list of at least 10 potential risks for the party receiving the contract, each with a specific explanation based on the contract's terms, and severity level (low, medium, high).
+2. A list of at least 10 potential opportunities or benefits for the receiving party, directly tied to the contract's provisions, each with a specific explanation and impact level (low, medium, high).
+3. A comprehensive summary of the contract, including key terms and conditions explicitly mentioned in the text.
+4. Recommendations for improving the contract from the receiving party's perspective, referencing specific clauses where possible.
+5. A list of key clauses in the contract, directly extracted from the document.
+6. An assessment of the contract's legal compliance, based on its adherence to standard practices and the governing law stated in the contract.
+7. A list of potential negotiation points, focusing on areas that could be improved for the receiving party.
+8. The contract duration or term, extracted directly from the contract text if applicable.
+9. A summary of termination conditions, explicitly referencing the conditions stated in the contract.
+10. A detailed breakdown of any financial terms or compensation structure, tied to the specific payment schedule or terms mentioned in the contract.
+11. Any performance metrics or KPIs explicitly mentioned in the contract, if applicable.
+12. A summary of specific clauses relevant to this type of contract (e.g., intellectual property for employment contracts, warranties for sales contracts), explicitly referencing their location in the text.
+13. An overall score from 1 to 100, with 100 being the highest. This score should represent the contract's overall favorability based on the identified risks, opportunities, and terms.
 
-    Important: Provide only the JSON object in your response, without any additional text or formatting.
+Format your response as a JSON object with the following structure:
+{
+  "risks": [{"risk": "Risk description", "explanation": "Specific explanation based on the contract", "severity": "low|medium|high"}],
+  "opportunities": [{"opportunity": "Opportunity description", "explanation": "Specific explanation based on the contract", "impact": "low|medium|high"}],
+  "summary": "Comprehensive summary of the contract",
+  "recommendations": ["Recommendation 1", "Recommendation 2", ...],
+  "keyClauses": ["Clause 1", "Clause 2", ...],
+  "legalCompliance": "Assessment of legal compliance",
+  "negotiationPoints": ["Point 1", "Point 2", ...],
+  "contractDuration": "Duration of the contract, if applicable",
+  "terminationConditions": "Summary of termination conditions, if applicable",
+  "financialTerms": {
+    "description": "Overview of financial terms",
+    "details": ["Detail 1", "Detail 2", ...]
+  },
+  "performanceMetrics": ["Metric 1", "Metric 2", ...],
+  "specificClauses": "Summary of clauses specific to this contract type",
+  "overallScore": "Overall score from 1 to 100"
+}
 
-    Contract text:
-    ${contractText}
-  `;
+Important: Ensure your response reflects the specific content, details, and context of the provided contract. Do not provide generic or overly generalized information. Focus only on the contract details provided.
+Important: Provide only the JSON object in your response, without any additional text or formatting.
+
+Contract text:
+${contractText}
+`;
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     const results = await model.generateContent(prompt, { timeout: 40000 }); // 20-second timeout
 
-    const text = results.response.text().replace(/```json\n?|\n?```/g, "").trim();
+    const text = results.response
+      .text()
+      .replace(/```json\n?|\n?```/g, "")
+      .trim();
     return JSON.parse(text); // Parse the AI's response as JSON
   } catch (error) {
     console.error("Error analyzing contract with AI:", error);

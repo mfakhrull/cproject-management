@@ -12,7 +12,7 @@ export function PlateReader({ initialContent }: { initialContent: any[] }) {
   return (
     <Plate editor={editor}>
       <EditorContainer>
-        <Editor variant="demo" readOnly />
+        <Editor variant="default" readOnly />
       </EditorContainer>
     </Plate>
   );

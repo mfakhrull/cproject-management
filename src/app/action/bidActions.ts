@@ -8,8 +8,12 @@ import EditorDocument from "@/models/EditorDocument";
 import {User} from "@/models"; // Import the User model
 import cloudinary from '@/utils/cloudinary'; // Assuming Cloudinary is configured in this utility
 
-// Fetch all submitted bids for a project
-export async function getSubmittedBids(projectId: string, userId: string) {
+// Fetch all submitted bids for a project according to permissions
+export async function getSubmittedBids(
+  projectId: string,
+  userId: string,
+  permissions: string[] = [],
+) {
   if (!userId) {
     throw new Error("Unauthorized");
   }
@@ -17,7 +21,24 @@ export async function getSubmittedBids(projectId: string, userId: string) {
   await dbConnect();
 
   try {
-    const bids = await Bid.find({ projectId }).sort({ createdAt: -1 }).lean();
+    let bids;
+
+    // Check if the user has permissions to view all submitted bids
+    const canViewAllBids =
+      permissions.includes("admin") ||
+      permissions.includes("project_manager") ||
+      permissions.includes("procurement_team") ||
+      permissions.includes("can_see_all_submitted_bid");
+
+    if (canViewAllBids) {
+      // User has permissions, fetch all bids for the project
+      bids = await Bid.find({ projectId }).sort({ createdAt: -1 }).lean();
+    } else {
+      // User does not have permissions, only fetch their own bids
+      bids = await Bid.find({ projectId, contractorId: userId })
+        .sort({ createdAt: -1 })
+        .lean();
+    }
 
     // Fetch user details for all contractors
     const contractorIds = bids.map((bid) => bid.contractorId);
@@ -27,7 +48,9 @@ export async function getSubmittedBids(projectId: string, userId: string) {
 
     // Map contractor details to bids
     const bidsWithContractors = bids.map((bid) => {
-      const contractor = contractors.find((user) => user.clerk_id === bid.contractorId);
+      const contractor = contractors.find(
+        (user) => user.clerk_id === bid.contractorId
+      );
       return {
         ...bid,
         contractorName: contractor ? contractor.username : "Unknown Contractor",
@@ -41,6 +64,7 @@ export async function getSubmittedBids(projectId: string, userId: string) {
     throw new Error("Failed to fetch submitted bids");
   }
 }
+
 
 // Fetch specific bid details
 export async function getBidDetails(bidId: string, userId: string) {

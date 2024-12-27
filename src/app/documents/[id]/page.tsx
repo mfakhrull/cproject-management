@@ -6,6 +6,8 @@ import { PlateReader } from "@/components/editor/plate-reader";
 import { getDocumentById } from "@/app/action/documentActions";
 import Link from "next/link";
 import { Calendar, ClipboardCheck, FileText, Users } from "lucide-react";
+import { useUserPermissions } from "@/context/UserPermissionsContext";
+import FloatingTooltip from "@/components/FloatingTooltip";
 
 export default function DocumentDetailPage({
   params,
@@ -15,6 +17,7 @@ export default function DocumentDetailPage({
   const { userId } = useAuth();
   const [document, setDocument] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { permissions } = useUserPermissions();
 
   useEffect(() => {
     if (!userId) {
@@ -25,7 +28,7 @@ export default function DocumentDetailPage({
 
     async function fetchDocument() {
       try {
-        const doc = await getDocumentById(params.id, userId!); // Add non-null assertion `!`
+        const doc = await getDocumentById(params.id); // Add non-null assertion `!`
         setDocument(doc);
       } catch (error) {
         console.error("Error fetching document:", error);
@@ -44,6 +47,23 @@ export default function DocumentDetailPage({
   if (!document) {
     return <p>Document not found</p>;
   }
+
+  const canSubmitBid =
+    permissions.includes("can_submit_bid") ||
+    permissions.includes("project_manager") ||
+    permissions.includes("admin") ||
+    permissions.includes("contractor") ||
+    permissions.includes("supplier") ||
+    permissions.includes("vendor");
+
+  const canViewSubmittedBids =
+    permissions.includes("can_view_submitted_bid") ||
+    permissions.includes("project_manager") ||
+    permissions.includes("admin") ||
+    permissions.includes("contractor") ||
+    permissions.includes("vendor") ||
+    permissions.includes("supplier") ||
+    permissions.includes("procurement_team");
 
   return (
     <div className="container mx-auto space-y-4 p-4">
@@ -104,18 +124,41 @@ export default function DocumentDetailPage({
 
         {/* Buttons Section */}
         <div className="absolute bottom-6 right-6 flex space-x-4">
-          <Link
-            href={`/projects/${document.projectId?._id}/bid-submission?documentId=${document._id}`}
-            className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-          >
-            Submit a Bid
-          </Link>
-          <Link
-            href={`/projects/${document.projectId?._id}/submitted-bids`}
-            className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-          >
-            View Submitted Bids
-          </Link>
+          {!canSubmitBid ? (
+            <FloatingTooltip message="Permission Required">
+              <button
+                disabled
+                className="inline-flex cursor-not-allowed items-center justify-center rounded bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400"
+              >
+                Submit a Bid
+              </button>
+            </FloatingTooltip>
+          ) : (
+            <Link
+              href={`/projects/${document.projectId?._id}/bid-submission?documentId=${document._id}`}
+              className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+            >
+              Submit a Bid
+            </Link>
+          )}
+
+          {/* {!canViewSubmittedBids ? (
+            <FloatingTooltip message="Permission Required">
+              <button
+                disabled
+                className="inline-flex cursor-not-allowed items-center justify-center rounded bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400"
+              >
+                View Submitted Bids
+              </button>
+            </FloatingTooltip>
+          ) : ( */}
+            <Link
+              href={`/projects/${document.projectId?._id}/submitted-bids`}
+              className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+            >
+              View Submitted Bids
+            </Link>
+          {/* )} */}
         </div>
       </div>
 
