@@ -79,21 +79,22 @@ Format your response as a JSON object with the following structure:
   "overallScore": "Overall score from 1 to 100"
 }
 
-Important: Ensure your response reflects the specific content, details, and context of the provided contract. Do not provide generic or overly generalized information. Focus only on the contract details provided.
-Important: Provide only the JSON object in your response, without any additional text or formatting.
+Important: Ensure your response reflects the specific content, details, and context of the provided contract. Do not provide generic or overly generalized information. Focus only on the contract details provided. Ensure that the response is valid JSON, adhering to proper syntax and escaping as necessary. Provide the JSON object without any additional text or formatting.
 
 Contract text:
-${contractText}
-`;
+${contractText}`;
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    const results = await model.generateContent(prompt, { timeout: 40000 }); // 20-second timeout
+    const results = await model.generateContent(prompt, { timeout: 80000 }); // 20-second timeout
 
     const text = results.response
       .text()
       .replace(/```json\n?|\n?```/g, "")
-      .trim();
+      .trim()
+      
+      console.log("Raw AI Response:", text);
+
     return JSON.parse(text); // Parse the AI's response as JSON
   } catch (error) {
     console.error("Error analyzing contract with AI:", error);

@@ -223,7 +223,7 @@ export function UploadModal({
               className={`mt-4 rounded ${
                 loading || !file
                   ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-slate-800 text-white hover:bg-slate-700"
               } px-4 py-2`}
             >
               {loading ? (
@@ -239,7 +239,7 @@ export function UploadModal({
         );
       case "uploaded":
         return (
-          <div className="text-center">
+          <div className="text-center pb-4">
             <p>File uploaded successfully!</p>
             <Button onClick={detectContractType} disabled={loading}>
               {loading ? "Detecting..." : "Detect Contract Type"}
@@ -263,7 +263,7 @@ export function UploadModal({
             <Button onClick={uploadAndAnalyzeContract} disabled={loading}>
               {loading ? "Analyzing..." : "Yes, Analyze"}
             </Button>
-            <Button variant="outline" onClick={() => setStep("upload")} className="mt-4">
+            <Button variant="outline" onClick={() => setStep("upload")} className="mt-4 ml-4">
               No, Try Another File
             </Button>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { UploadModal } from "@/components/modals/UploadModal";
+import { toast } from "sonner"; // Import Sonner's toast
 
 export default function UploadPage() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -43,7 +44,7 @@ export default function UploadPage() {
       <UploadModal
         isOpen={isModalOpen}
         onClose={handleClose}
-        onUploadComplete={() => alert("Upload Complete!")}
+        onUploadComplete={() => toast.success("Analyze Success!")}
       />
     </div>
   );
