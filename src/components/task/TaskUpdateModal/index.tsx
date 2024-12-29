@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ITask } from "@/types";
+import { ITask, IUser } from "@/types";
 
 interface TaskUpdateModalProps {
   isOpen: boolean;
@@ -11,40 +11,35 @@ interface TaskUpdateModalProps {
   onSave: (updatedTask: Partial<ITask>) => Promise<void>;
 }
 
-// Create a separate interface for form data to handle string dates
-interface TaskFormData {
-  title: string;
-  description?: string;
-  timeEstimate?: string;
-  status: "TODO" | "IN_PROGRESS" | "COMPLETED";
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  assignedUserId?: string;
-  startDate?: string;
-  dueDate?: string;
-}
-
 const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
   isOpen,
   onClose,
   task,
   onSave,
 }) => {
-  const [formData, setFormData] = useState<TaskFormData>({
+  const [formData, setFormData] = useState({
     title: "",
-    status: "TODO",
-    priority: "LOW",
+    description: "",
+    timeEstimate: "",
+    status: task.status as 'TODO' | 'IN_PROGRESS' | 'COMPLETED', // Explicitly typed
+    priority: task.priority as 'LOW' | 'MEDIUM' | 'HIGH', // Explicitly typed
+    assignedUserIds: [] as string[], // Handle multiple assignees
+    startDate: "",
+    dueDate: "",
   });
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<IUser[]>([]);
 
   useEffect(() => {
     if (isOpen) {
+      // Pre-fill form data with task details
       setFormData({
         title: task.title,
         description: task.description || "",
         timeEstimate: task.timeEstimate || "",
         status: task.status,
         priority: task.priority,
-        assignedUserId: task.assignedUserId || "",
+        assignedUserIds: task.assignedUserIds || [],
         startDate: task.startDate
           ? new Date(task.startDate).toISOString().split("T")[0]
           : "",
@@ -52,6 +47,22 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
           ? new Date(task.dueDate).toISOString().split("T")[0]
           : "",
       });
+
+      // Fetch user list
+      const fetchUsers = async () => {
+        try {
+          const response = await fetch("/api/users/getUsers");
+          if (!response.ok) {
+            throw new Error("Failed to fetch users");
+          }
+          const data: IUser[] = await response.json();
+          setUsers(data);
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      };
+
+      fetchUsers();
     }
   }, [isOpen, task]);
 
@@ -62,12 +73,27 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  const handleAddAssignee = (userId: string) => {
+    if (!formData.assignedUserIds.includes(userId)) {
+      setFormData((prevData) => ({
+        ...prevData,
+        assignedUserIds: [...prevData.assignedUserIds, userId],
+      }));
+    }
+  };
+
+  const handleRemoveAssignee = (userId: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      assignedUserIds: prevData.assignedUserIds.filter((id) => id !== userId),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Convert string dates to Date objects for the API
       const updatedTask: Partial<ITask> = {
         ...formData,
         startDate: formData.startDate ? new Date(formData.startDate) : undefined,
@@ -112,7 +138,7 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
             <textarea
               id="description"
               name="description"
-              value={formData.description || ""}
+              value={formData.description}
               onChange={handleInputChange}
               className="mt-2 block w-full rounded-md bg-white px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
               rows={4}
@@ -157,35 +183,46 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
             </div>
           </div>
 
-          {/* Additional Details */}
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="assignedUserId" className="block text-sm font-medium text-gray-900">
-                Assignee
-              </label>
-              <input
-                type="text"
-                id="assignedUserId"
-                name="assignedUserId"
-                value={formData.assignedUserId || ""}
-                onChange={handleInputChange}
-                className="mt-2 block w-full rounded-md bg-white px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
-              />
+          {/* Assignees */}
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Assignees
+            </label>
+            <div className="flex gap-2">
+              <select
+                onChange={(e) => handleAddAssignee(e.target.value)}
+                className="block w-full rounded-md bg-white px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
+              >
+                <option value="">Select Assignee</option>
+                {users
+                  .filter((user) => !formData.assignedUserIds.includes(user.clerk_id))
+                  .map((user) => (
+                    <option key={user.clerk_id} value={user.clerk_id}>
+                      {user.username} ({user.role || "No Role"})
+                    </option>
+                  ))}
+              </select>
             </div>
-            <div>
-              <label htmlFor="timeEstimate" className="block text-sm font-medium text-gray-900">
-                Time Estimate
-              </label>
-              <input
-                type="text"
-                id="timeEstimate"
-                name="timeEstimate"
-                value={formData.timeEstimate || ""}
-                onChange={handleInputChange}
-                placeholder="e.g., 2h 30m"
-                className="mt-2 block w-full rounded-md bg-white px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
-              />
-            </div>
+            <ul className="mt-4 space-y-2">
+              {formData.assignedUserIds.map((userId) => {
+                const user = users.find((u) => u.clerk_id === userId);
+                return (
+                  <li
+                    key={userId}
+                    className="flex items-center justify-between rounded-lg border border-gray-300 bg-white p-3 shadow-sm"
+                  >
+                    <span>{user?.username || "Unknown"} ({user?.role || "No Role"})</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAssignee(userId)}
+                      className="text-sm font-medium text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
           {/* Dates */}
@@ -198,7 +235,7 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
                 type="date"
                 id="startDate"
                 name="startDate"
-                value={formData.startDate || ""}
+                value={formData.startDate}
                 onChange={handleInputChange}
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
               />
@@ -211,7 +248,7 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
                 type="date"
                 id="dueDate"
                 name="dueDate"
-                value={formData.dueDate || ""}
+                value={formData.dueDate}
                 onChange={handleInputChange}
                 className="mt-2 block w-full rounded-md bg-white px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
               />
@@ -220,16 +257,10 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
 
           {/* Buttons */}
           <div className="flex justify-end space-x-6 mt-8">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              className="px-8 py-3"
-              disabled={loading}
-            >
+            <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="px-8 py-3">
+            <Button type="submit" disabled={loading}>
               {loading ? "Updating..." : "Save Changes"}
             </Button>
           </div>

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
-import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Updated to use employeeId
+import { useRouter } from "next/navigation";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
 
@@ -20,13 +20,15 @@ interface ILeave {
 export default function EmployeeLeavePage() {
   const [leaves, setLeaves] = useState<ILeave[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { userId } = useAuth(); // Clerk userId
+  const { employeeId } = useUserPermissions(); // Use employeeId from context
   const router = useRouter();
 
   useEffect(() => {
     const fetchEmployeeLeaves = async () => {
+      if (!employeeId) return;
+
       try {
-        const response = await fetch(`/api/leaves/get?employeeId=${userId}`);
+        const response = await fetch(`/api/leaves/get?employeeId=${employeeId}`);
         if (!response.ok) throw new Error("Failed to fetch leave applications.");
         const data = await response.json();
         setLeaves(data);
@@ -38,8 +40,8 @@ export default function EmployeeLeavePage() {
       }
     };
 
-    if (userId) fetchEmployeeLeaves();
-  }, [userId]);
+    fetchEmployeeLeaves();
+  }, [employeeId]);
 
   const handleDelete = async (id: string) => {
     try {

@@ -8,7 +8,7 @@ import TimeTracker from "@/components/task/TimeTracker";
 import TaskTags from "@/components/task/TaskTags";
 import ActivityLog from "@/components/ActivityLog";
 import { PlusCircle, Link2, Paperclip, MessageCircle, X } from "lucide-react";
-import { ITask } from "@/types"; // Adjust the path to your ITask definition
+import { ITask, IUser } from "@/types"; // Adjust the path to your type definitions
 import TaskAttachments from "@/components/task/TaskAttachments";
 import { useAuth } from "@clerk/nextjs";
 
@@ -19,6 +19,7 @@ const TaskDetailsPage: React.FC = () => {
     typeof params.tasksId === "string" ? params.tasksId : params.tasksId?.[0];
 
   const [task, setTask] = useState<ITask | null>(null);
+  const [assigneesDetails, setAssigneesDetails] = useState<IUser[]>([]); // Add state for assigneesDetails
   const [error, setError] = useState<string | null>(null);
   const [showDropzone, setShowDropzone] = useState(true);
   const [activityLogOpen, setActivityLogOpen] = useState(true); // Track sidebar state
@@ -26,28 +27,48 @@ const TaskDetailsPage: React.FC = () => {
   // Ref for ActivityLog component
   const activityLogRef = useRef<any>(null);
 
-  // Fetch task details on page load
+  // Fetch task details and assignee details on page load
   useEffect(() => {
     if (!tasksId) return;
-
-    const fetchTask = async () => {
+  
+    const fetchTaskDetails = async () => {
       try {
-        const response = await fetch(`/api/tasks/getTask?taskId=${tasksId}`);
-        if (!response.ok) {
+        const taskResponse = await fetch(`/api/tasks/getTask?taskId=${tasksId}`);
+        if (!taskResponse.ok) {
           throw new Error("Failed to fetch task details");
         }
-
-        const data: ITask = await response.json();
-        setTask(data);
-        toast.success(`Task "${data.title}" loaded successfully!`);
+  
+        const taskData: ITask = await taskResponse.json();
+        setTask(taskData);
+  
+        // Safeguard: Ensure assignedUserIds is defined as an array
+        const assignedUserIds = taskData.assignedUserIds || [];
+  
+        // Fetch assignee details only if there are assigned user IDs
+        if (assignedUserIds.length > 0) {
+          const assigneesResponse = await fetch(
+            `/api/users/getUsers?ids=${assignedUserIds.join(",")}`
+          );
+          if (!assigneesResponse.ok) {
+            throw new Error("Failed to fetch assignee details");
+          }
+  
+          const assigneesData: IUser[] = await assigneesResponse.json();
+          setAssigneesDetails(assigneesData);
+        } else {
+          setAssigneesDetails([]); // No assignees
+        }
+  
+        toast.success(`Task "${taskData.title}" loaded successfully!`);
       } catch (err: any) {
         setError(err.message || "An unknown error occurred");
         toast.error(err.message || "Error loading task details");
       }
     };
-
-    fetchTask();
+  
+    fetchTaskDetails();
   }, [tasksId]);
+  
 
   // Handle task updates
   const handleSave = async (updatedTask: Partial<ITask>) => {
@@ -112,7 +133,11 @@ const TaskDetailsPage: React.FC = () => {
         }`}
       >
         {/* Task Header with Save Handler */}
-        <TaskDetailsHeader task={task} onSave={handleSave} />
+        <TaskDetailsHeader
+          task={task}
+          onSave={handleSave}
+        />
+
         {/* Action Buttons */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
           <button className="flex items-center gap-2 rounded bg-gray-100 px-3 py-2 text-sm text-gray-600 hover:bg-gray-200">
@@ -133,8 +158,10 @@ const TaskDetailsPage: React.FC = () => {
           {/* Time Tracking Component */}
           <TimeTracker taskId={tasksId} activityLogRef={activityLogRef} />
         </div>
+
         {/* Task Tags Component */}
         <TaskTags tags={task.tags || []} />
+
         {/* Dropzone Visibility */}
         {showDropzone && (
           <TaskAttachments
@@ -157,7 +184,10 @@ const TaskDetailsPage: React.FC = () => {
             className="absolute left-1/2 top-4 flex -translate-x-1/2 transform flex-col items-center justify-center rounded bg-gray-100 p-2 shadow hover:bg-gray-200"
             onClick={() => setActivityLogOpen(true)}
           >
-            <MessageCircle className="mx-auto text-gray-600 hover:text-gray-900" size={20} />
+            <MessageCircle
+              className="mx-auto text-gray-600 hover:text-gray-900"
+              size={20}
+            />
             <span className="mt-1 text-center text-xs text-gray-600">
               Activity
             </span>

@@ -16,6 +16,8 @@ type Props = {
 interface IUser {
   clerk_id: string; // Use clerk_id
   username: string;
+  role: string;
+  profilePictureUrl: string;
 }
 
 const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
@@ -27,7 +29,7 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
   const [startDate, setStartDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [authorUserId, setAuthorUserId] = useState("");
-  const [assignedUserId, setAssignedUserId] = useState("");
+  const [assignedUserIds, setAssignedUserIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<IUser[]>([]);
 
@@ -77,7 +79,7 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
           startDate: formattedStartDate,
           dueDate: formattedDueDate,
           authorUserId,
-          assignedUserId,
+          assignedUserIds,
           projectId,
         }),
       });
@@ -117,7 +119,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
         }}
       >
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-900">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-900"
+          >
             Task Title
           </label>
           <input
@@ -133,7 +138,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-900">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-900"
+          >
             Description
           </label>
           <textarea
@@ -148,7 +156,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
 
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-900">
+            <label
+              htmlFor="status"
+              className="block text-sm font-medium text-gray-900"
+            >
               Status
             </label>
             <select
@@ -165,7 +176,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
           </div>
 
           <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-900">
+            <label
+              htmlFor="priority"
+              className="block text-sm font-medium text-gray-900"
+            >
               Priority
             </label>
             <select
@@ -183,7 +197,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
         </div>
 
         <div>
-          <label htmlFor="tags" className="block text-sm font-medium text-gray-900">
+          <label
+            htmlFor="tags"
+            className="block text-sm font-medium text-gray-900"
+          >
             Tags (comma separated)
           </label>
           <input
@@ -199,7 +216,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
 
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-900">
+            <label
+              htmlFor="startDate"
+              className="block text-sm font-medium text-gray-900"
+            >
               Start Date
             </label>
             <input
@@ -213,7 +233,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
           </div>
 
           <div>
-            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-900">
+            <label
+              htmlFor="dueDate"
+              className="block text-sm font-medium text-gray-900"
+            >
               Due Date
             </label>
             <input
@@ -228,7 +251,10 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
         </div>
 
         <div>
-          <label htmlFor="authorUserId" className="block text-sm font-medium text-gray-900">
+          <label
+            htmlFor="authorUserId"
+            className="block text-sm font-medium text-gray-900"
+          >
             Author
           </label>
           <select
@@ -248,29 +274,89 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
         </div>
 
         <div>
-          <label htmlFor="assignedUserId" className="block text-sm font-medium text-gray-900">
-            Assignee
-          </label>
-          <select
-            id="assignedUserId"
-            name="assignedUserId"
-            value={assignedUserId}
-            onChange={(e) => setAssignedUserId(e.target.value)}
-            className={selectStyles}
+          <label
+            htmlFor="assignedUserIds"
+            className="mb-2 block text-sm font-medium text-gray-900"
           >
-            <option value="">Select Assignee</option>
-            {users.map((user) => (
-              <option key={user.clerk_id} value={user.clerk_id}>
-                {user.username}
+            Assignees
+          </label>
+
+          {/* Select Dropdown */}
+          <div className="flex gap-2">
+            <select
+              id="assignedUserIds"
+              name="assignedUserIds"
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                if (selectedValue && !assignedUserIds.includes(selectedValue)) {
+                  setAssignedUserIds([...assignedUserIds, selectedValue]);
+                }
+              }}
+              className={`${selectStyles} w-full`}
+              value=""
+            >
+              <option value="" disabled>
+                Select Assignee
               </option>
-            ))}
-          </select>
+              {users
+                .filter((user) => !assignedUserIds.includes(user.clerk_id)) // Exclude already selected users
+                .map((user) => (
+                  <option key={user.clerk_id} value={user.clerk_id}>
+                    {user.username} ({user.role || "No Role"})
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Selected Assignees List */}
+          <ul className="mt-4 space-y-2">
+            {assignedUserIds.map((userId) => {
+              const user = users.find((u) => u.clerk_id === userId);
+              return (
+                <li
+                  key={userId}
+                  className="flex items-center justify-between rounded-lg border border-gray-300 bg-white p-3 shadow-sm"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 rounded-full bg-gray-200">
+                      {user?.profilePictureUrl && (
+                        <img
+                          src={user.profilePictureUrl}
+                          alt={user.username || "User"}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {user?.username || "Unknown"}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {user?.role || "No Role"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setAssignedUserIds(
+                        assignedUserIds.filter((id) => id !== userId),
+                      )
+                    }
+                    className="text-sm font-medium text-red-600 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
         <Button
           type="submit"
           disabled={!isFormValid() || isLoading}
-          className="w-full mt-6"
+          className="mt-6 w-full"
         >
           {isLoading ? "Creating..." : "Create Task"}
         </Button>

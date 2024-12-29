@@ -1,18 +1,19 @@
-// src/components/TaskCard/index.tsx
-
 "use client";
 
 import { ITask, IAttachment } from "@/types";
 import { format } from "date-fns";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
+import AssigneesModal from "@/components/task/AssigneesModal"; // Import the AssigneesModal
 
 type Props = {
-  task: ITask & { attachments?: IAttachment[] }; // Extend ITask to optionally include attachments
+  task: ITask; // Use the ITask interface directly
   onClick?: () => void; // Optional onClick handler for the task card
 };
 
 const TaskCard = ({ task, onClick }: Props) => {
+  const [isAssigneesModalOpen, setAssigneesModalOpen] = useState(false);
+
   return (
     <div
       className={`mb-3 rounded bg-white p-4 shadow dark:bg-dark-secondary dark:text-white ${
@@ -22,16 +23,16 @@ const TaskCard = ({ task, onClick }: Props) => {
     >
       {/* Attachments Section */}
       {task.attachments && task.attachments.length > 0 && (
-        <div>
+        <div className="mb-4">
           <strong>Attachments:</strong>
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap gap-2 mt-2">
             {task.attachments.map((attachment) => (
               <Image
                 key={attachment._id.toString()}
                 src={attachment.fileUrl}
                 alt={attachment.fileName}
-                width={400}
-                height={200}
+                width={100}
+                height={100}
                 className="rounded-md"
               />
             ))}
@@ -73,11 +74,30 @@ const TaskCard = ({ task, onClick }: Props) => {
         {task.authorId ? `Author ID: ${task.authorId.toString()}` : "Unknown"}
       </p>
       <p>
-        <strong>Assignee:</strong>{" "}
-        {task.assignedUserId
-          ? `Assignee ID: ${task.assignedUserId.toString()}`
-          : "Unassigned"}
+        <strong>Assignees:</strong>{" "}
+        {task.assignedUserIds && task.assignedUserIds.length > 0 ? (
+          <button
+            className="text-blue-600 hover:underline"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering onClick of the card
+              setAssigneesModalOpen(true);
+            }}
+          >
+            View Assignees
+          </button>
+        ) : (
+          "Unassigned"
+        )}
       </p>
+
+      {/* Assignees Modal */}
+      {isAssigneesModalOpen && (
+        <AssigneesModal
+          isOpen={isAssigneesModalOpen}
+          onClose={() => setAssigneesModalOpen(false)}
+          taskId={task._id.toString()} // Pass the task ID to fetch assignees
+        />
+      )}
     </div>
   );
 };

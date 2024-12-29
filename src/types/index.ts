@@ -85,7 +85,7 @@ export interface ITask {
   timeEstimate?: string, // Changed to string to allow "2h 3m"
   projectId: string;
   authorId: string; // Updated to string (clerk_id)
-  assignedUserId?: string; // Updated to string (clerk_id)
+  assignedUserIds: string[]; // Updated to an array of strings (clerk_id)
   createdAt: Date;
   updatedAt: Date;
   attachments?: {

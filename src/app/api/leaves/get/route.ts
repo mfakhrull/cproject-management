@@ -1,29 +1,30 @@
 import { NextResponse } from "next/server";
 import Leave from "@/models/Leave";
-import Employee from "@/models/Employee";
 import dbConnect from "@/lib/mongodb";
 
-export async function GET() {
+export async function GET(req: Request) {
   await dbConnect();
 
-  try {
-    // Fetch all leaves
-    const leaves = await Leave.find();
+  const url = new URL(req.url);
+  const employeeId = url.searchParams.get("employeeId");
 
-    // Fetch employee details for each leave
-    const leavesWithEmployeeDetails = await Promise.all(
-      leaves.map(async (leave) => {
-        const employee = await Employee.findOne({ employeeId: leave.employeeId });
-        return {
-          ...leave.toObject(),
-          employeeName: employee ? employee.name : "N/A", // Add employee name
-        };
-      })
+  if (!employeeId) {
+    return NextResponse.json(
+      { error: "Missing employeeId in query parameters" },
+      { status: 400 }
     );
+  }
 
-    return NextResponse.json(leavesWithEmployeeDetails, { status: 200 });
+  try {
+    // Fetch leaves for the specific employee
+    const leaves = await Leave.find({ employeeId });
+
+    return NextResponse.json(leaves, { status: 200 });
   } catch (error) {
     console.error("Error fetching leaves:", error);
-    return NextResponse.json({ error: "Failed to fetch leave requests" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch leave requests" },
+      { status: 500 }
+    );
   }
 }

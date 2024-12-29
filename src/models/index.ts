@@ -233,9 +233,12 @@ const taskSchema = new mongoose.Schema(
       type: String, // Updated to string (clerk_id)
       required: true,
     },
-    assignedUserId: {
-      type: String, // Updated to string (clerk_id)
-    },
+    assignedUserIds: [
+      {
+        type: String, // Clerk IDs of assignees
+        required: true,
+      },
+    ], // Changed to an array of strings
     attachments: [
       {
         _id: { type: mongoose.Schema.Types.ObjectId, auto: true },

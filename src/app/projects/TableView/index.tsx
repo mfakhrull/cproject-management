@@ -1,8 +1,11 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { ITask } from "@/types";
 import { useAppSelector } from "@/app/redux/redux";
+import AssigneesModal from "@/components/task/AssigneesModal";
 
 type Props = {
   id: string;
@@ -12,42 +15,55 @@ type Props = {
 // Define a type for the row data that converts ObjectId to string
 type TaskRow = Omit<
   ITask,
-  "_id" | "projectId" | "authorId" | "assignedUserId" | "startDate" | "dueDate"
+  "_id" | "projectId" | "authorId" | "assignedUserIds" | "startDate" | "dueDate"
 > & {
   id: string;
   projectId: string;
   authorId: string;
-  assignedUserId?: string;
+  assignedUserIds: string[]; // Maintain assignedUserIds as an array
   startDate: string; // Expect formatted string
   dueDate: string; // Expect formatted string
 };
-
-const columns: GridColDef<TaskRow>[] = [
-  { field: "title", headerName: "Title", width: 150 },
-  { field: "description", headerName: "Description", width: 250 },
-  {
-    field: "status",
-    headerName: "Status",
-    width: 130,
-    renderCell: (params) => (
-      <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
-        {params.value}
-      </span>
-    ),
-  },
-  { field: "priority", headerName: "Priority", width: 100 },
-  { field: "tags", headerName: "Tags", width: 200 },
-  { field: "startDate", headerName: "Start Date", width: 150 },
-  { field: "dueDate", headerName: "Due Date", width: 150 },
-  { field: "authorId", headerName: "Author", width: 200 },
-  { field: "assignedUserId", headerName: "Assignee", width: 200 },
-];
 
 const TableView = ({ id, setIsModalNewTaskOpen }: Props) => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null); // Track the selected task for modal
+
+  const columns: GridColDef<TaskRow>[] = [
+    { field: "title", headerName: "Title", width: 150 },
+    { field: "description", headerName: "Description", width: 250 },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 130,
+      renderCell: (params) => (
+        <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+          {params.value}
+        </span>
+      ),
+    },
+    { field: "priority", headerName: "Priority", width: 100 },
+    { field: "tags", headerName: "Tags", width: 200 },
+    { field: "startDate", headerName: "Start Date", width: 150 },
+    { field: "dueDate", headerName: "Due Date", width: 150 },
+    { field: "authorId", headerName: "Author", width: 200 },
+    {
+      field: "assignedUserIds",
+      headerName: "Assignees",
+      width: 150,
+      renderCell: (params) => (
+        <button
+          className="text-blue-600 hover:underline"
+          onClick={() => setSelectedTaskId(params.row.id)} // Open modal for selected task
+        >
+          View Assignees
+        </button>
+      ),
+    },
+  ];
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -76,7 +92,7 @@ const TableView = ({ id, setIsModalNewTaskOpen }: Props) => {
     id: task._id.toString(),
     projectId: task.projectId.toString(),
     authorId: task.authorId.toString(),
-    assignedUserId: task.assignedUserId?.toString(),
+    assignedUserIds: task.assignedUserIds, // Pass array of assigned user IDs
     startDate: task.startDate
       ? new Date(task.startDate).toLocaleDateString()
       : "Not set",
@@ -127,6 +143,13 @@ const TableView = ({ id, setIsModalNewTaskOpen }: Props) => {
           },
         }}
       />
+      {selectedTaskId && (
+        <AssigneesModal
+          isOpen={!!selectedTaskId}
+          onClose={() => setSelectedTaskId(null)} // Close modal
+          taskId={selectedTaskId}
+        />
+      )}
     </div>
   );
 };

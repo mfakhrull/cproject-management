@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Edit3, Trash2 } from "lucide-react";
+import { Edit3 } from "lucide-react";
 import TaskUpdateModal from "@/components/task/TaskUpdateModal";
-import { ITask } from "@/types"; // Adjust the path to where your ITask interface is located
-import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
-import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the permissions hook
+import { ITask } from "@/types"; // Adjust the path to where your ITask and IUser interfaces are located
+import FloatingTooltip from "@/components/FloatingTooltip";
+import { useUserPermissions } from "@/context/UserPermissionsContext";
+import AssigneesModal from "@/components/task/AssigneesModal"; // Import the new AssigneesModal
 
 interface TaskDetailsHeaderProps {
   task: ITask; // Use the ITask interface for type safety
@@ -17,7 +18,8 @@ const TaskDetailsHeader: React.FC<TaskDetailsHeaderProps> = ({
   onSave,
 }) => {
   const [isModalOpen, setModalOpen] = useState(false);
-  const { permissions } = useUserPermissions(); // Get user permissions
+  const [isAssigneesModalOpen, setAssigneesModalOpen] = useState(false); // State for assignees modal
+  const { permissions } = useUserPermissions();
 
   const handleSave = async (updatedTask: Partial<ITask>) => {
     try {
@@ -64,14 +66,6 @@ const TaskDetailsHeader: React.FC<TaskDetailsHeaderProps> = ({
               <Edit3 size={20} />
             </button>
           )}
-
-          {/* <button
-            className="p-2 text-gray-500 hover:text-gray-700"
-            disabled
-            title="Delete functionality not implemented yet"
-          >
-            <Trash2 size={20} />
-          </button> */}
         </div>
       </div>
 
@@ -79,7 +73,17 @@ const TaskDetailsHeader: React.FC<TaskDetailsHeaderProps> = ({
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[
           { label: "State", value: task.status },
-          { label: "Assignees", value: task.assignedUserId || "Unassigned" },
+          {
+            label: "Assignees",
+            value: (
+              <button
+                className="text-blue-600 hover:underline"
+                onClick={() => setAssigneesModalOpen(true)}
+              >
+                View Assignees
+              </button>
+            ),
+          },
           { label: "Priority", value: task.priority },
           { label: "Time Estimate", value: task.timeEstimate || "Unspecified" },
           {
@@ -110,6 +114,13 @@ const TaskDetailsHeader: React.FC<TaskDetailsHeaderProps> = ({
         onClose={() => setModalOpen(false)}
         task={task}
         onSave={handleSave}
+      />
+
+      {/* Assignees Modal */}
+      <AssigneesModal
+        isOpen={isAssigneesModalOpen}
+        onClose={() => setAssigneesModalOpen(false)}
+        taskId={task._id} // Pass taskId to fetch assignees dynamically
       />
     </div>
   );

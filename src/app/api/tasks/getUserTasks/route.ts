@@ -1,6 +1,7 @@
 // src/app/api/tasks/getUserTasks/route.ts
 import { NextResponse } from "next/server";
 import { Task } from "../../../../models";
+import { User } from "../../../../models";
 import dbConnect from "../../../../lib/mongodb";
 
 export async function GET(req: Request) {
@@ -17,15 +18,31 @@ export async function GET(req: Request) {
   }
 
   try {
-    // Query tasks where the user is either the author or the assignee
+    // Fetch tasks where the user is either the author or an assignee
     const tasks = await Task.find({
-      $or: [{ authorId: userId }, { assignedUserId: userId }],
-    })
-      .populate("projectId", "name") // Populate project details if needed
-      .populate("authorId", "username") // Populate author details if needed
-      .populate("assignedUserId", "username"); // Populate assignee details if needed
+      $or: [{ authorId: userId }, { assignedUserIds: userId }],
+    }).populate("projectId", "name"); // Populate project details
 
-    return NextResponse.json(tasks, { status: 200 });
+    // Collect all unique `assignedUserIds` from tasks
+    const allAssigneeIds = Array.from(
+      new Set(tasks.flatMap((task) => task.assignedUserIds || []))
+    );
+
+    // Fetch user details for all assignees
+    const users = await User.find(
+      { clerk_id: { $in: allAssigneeIds } },
+      { clerk_id: 1, username: 1, role: 1 } // Fetch only relevant fields
+    );
+
+    // Map assignee details to each task
+    const tasksWithAssignees = tasks.map((task) => {
+      const assigneesDetails = (task.assignedUserIds || []).map((userId) =>
+        users.find((user) => user.clerk_id === userId)
+      );
+      return { ...task.toObject(), assigneesDetails };
+    });
+
+    return NextResponse.json(tasksWithAssignees, { status: 200 });
   } catch (error: any) {
     console.error("Error retrieving user's tasks:", error);
     return NextResponse.json(

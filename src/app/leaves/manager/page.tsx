@@ -11,7 +11,7 @@ interface ILeave {
   _id: string;
   leaveId: string;
   employeeId: string;
-  employeeName: string; // New property
+  employeeName: string;
   leaveType: string;
   startDate: string;
   endDate: string;
@@ -26,12 +26,13 @@ export default function ManagerLeavePage() {
   useEffect(() => {
     const fetchLeaves = async () => {
       try {
-        const response = await fetch("/api/leaves/get");
+        const response = await fetch("/api/leaves/manager-get"); // Updated API route
         if (!response.ok) throw new Error("Failed to fetch leave applications");
         const data = await response.json();
         setLeaves(data);
       } catch (error) {
         console.error("Error fetching leave applications:", error);
+        toast.error("Error fetching leave applications.");
       } finally {
         setLoading(false);
       }
@@ -65,7 +66,7 @@ export default function ManagerLeavePage() {
     id: leave._id,
     leaveId: leave.leaveId,
     employeeId: leave.employeeId,
-    employeeName: leave.employeeName, // Include the employee name
+    employeeName: leave.employeeName,
     leaveType: leave.leaveType,
     startDate: leave.startDate,
     endDate: leave.endDate,
@@ -75,7 +76,7 @@ export default function ManagerLeavePage() {
   const columns: GridColDef[] = [
     { field: "leaveId", headerName: "Leave ID", flex: 1 },
     { field: "employeeId", headerName: "Employee ID", flex: 1 },
-    { field: "employeeName", headerName: "Employee Name", flex: 1 }, // New column
+    { field: "employeeName", headerName: "Employee Name", flex: 1 },
     { field: "leaveType", headerName: "Leave Type", flex: 1 },
     { field: "startDate", headerName: "Start Date", flex: 1 },
     { field: "endDate", headerName: "End Date", flex: 1 },

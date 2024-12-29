@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 
 interface UserPermissionsContextType {
   permissions: string[]; // List of permission keys
+  employeeId: string | null; // Employee ID of the user
   loading: boolean;
 }
 
@@ -18,6 +19,7 @@ export const UserPermissionsProvider: React.FC<{
 }> = ({ children }) => {
   const { userId } = useAuth();
   const [permissions, setPermissions] = useState<string[]>([]);
+  const [employeeId, setEmployeeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,9 +34,11 @@ export const UserPermissionsProvider: React.FC<{
 
         const data = await response.json();
         setPermissions(data.permissions || []);
+        setEmployeeId(data.employeeId || null);
       } catch (error) {
         console.error("Error fetching permissions:", error);
         setPermissions([]);
+        setEmployeeId(null);
       } finally {
         setLoading(false);
       }
@@ -44,7 +48,7 @@ export const UserPermissionsProvider: React.FC<{
   }, [userId]);
 
   return (
-    <UserPermissionsContext.Provider value={{ permissions, loading }}>
+    <UserPermissionsContext.Provider value={{ permissions, employeeId, loading }}>
       {children}
     </UserPermissionsContext.Provider>
   );

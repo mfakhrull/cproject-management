@@ -7,8 +7,11 @@ export async function GET() {
   await dbConnect();
 
   try {
-    // Fetch `clerk_id`, `username`, and `profilePictureUrl` from the User model
-    const users = await User.find({}, { clerk_id: 1, username: 1, profilePictureUrl: 1 });
+    // Fetch `clerk_id`, `username`, `profilePictureUrl`, and `role` from the User model
+    const users = await User.find(
+      {},
+      { clerk_id: 1, username: 1, profilePictureUrl: 1, role: 1 } // Include `role`
+    );
     return NextResponse.json(users, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching users:", error.message || error);

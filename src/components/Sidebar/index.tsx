@@ -31,6 +31,8 @@ import { usePathname } from "next/navigation";
 import { SignedIn, UserButton, SignedOut, SignInButton } from "@clerk/nextjs";
 import { useAppDispatch, useAppSelector } from "@/app/redux/redux";
 import { setIsSidebarCollapsed } from "@/app/state";
+import { useUserPermissions } from "@/context/UserPermissionsContext";
+import FloatingTooltip from "@/components/FloatingTooltip";
 
 interface Project {
   _id: string;
@@ -44,6 +46,7 @@ const Sidebar: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { permissions, loading: permissionsLoading } = useUserPermissions();
 
   const pathname = usePathname();
   const dispatch = useAppDispatch();
@@ -79,6 +82,12 @@ const Sidebar: React.FC = () => {
 
     fetchProjects();
   }, [refreshProjects]); // Refetch whenever refreshProjects changes
+
+  const canAccessContractAnalysis =
+    permissions.includes("admin") ||
+    permissions.includes("project_manager") ||
+    permissions.includes("procurement_team") ||
+    permissions.includes("can_access_contract_analysis");
 
   return (
     <div className={sidebarClassNames}>
@@ -167,12 +176,27 @@ const Sidebar: React.FC = () => {
             isCollapsed={isSidebarCollapsed}
           />
 
-          <SidebarLink
-            icon={FileChartPie}
-            label="Contract Analysis"
-            href="/dashboard"
-            isCollapsed={isSidebarCollapsed}
-          />
+          {!canAccessContractAnalysis ? (
+            <FloatingTooltip message="Permission Required">
+              <div
+                className={`relative flex cursor-not-allowed items-center gap-3 px-8 py-3 text-gray-400 transition-colors ${
+                  isSidebarCollapsed ? "justify-center" : "justify-start"
+                }`}
+              >
+                <FileChartPie className="h-6 w-6 text-gray-400" />
+                {!isSidebarCollapsed && (
+                  <span className="font-medium">Contract Analysis</span>
+                )}
+              </div>
+            </FloatingTooltip>
+          ) : (
+            <SidebarLink
+              icon={FileChartPie}
+              label="Contract Analysis"
+              href="/dashboard"
+              isCollapsed={isSidebarCollapsed}
+            />
+          )}
 
           <SidebarLink
             icon={Users}

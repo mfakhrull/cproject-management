@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       points,
       projectId,
       authorUserId,
-      assignedUserId,
+      assignedUserIds, 
     } = await req.json();
 
     const newTask = await Task.create({
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       points,
       projectId,
       authorId: authorUserId,
-      assignedUserId,
+      assignedUserIds, // Change to assignedUserIds
     });
 
     return NextResponse.json(newTask, { status: 201 });

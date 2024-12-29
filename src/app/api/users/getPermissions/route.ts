@@ -23,12 +23,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Return role permissions from the user document
-    return NextResponse.json({ permissions: user.rolePermissions });
+    return NextResponse.json({
+      permissions: user.rolePermissions,
+      employeeId: user.employeeId,
+    });
   } catch (error) {
     console.error("Error fetching role permissions:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
