@@ -33,6 +33,7 @@ import { useAppDispatch, useAppSelector } from "@/app/redux/redux";
 import { setIsSidebarCollapsed } from "@/app/state";
 import { useUserPermissions } from "@/context/UserPermissionsContext";
 import FloatingTooltip from "@/components/FloatingTooltip";
+import { toast } from "sonner";
 
 interface Project {
   _id: string;
@@ -46,7 +47,7 @@ const Sidebar: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { permissions, loading: permissionsLoading } = useUserPermissions();
+  const { employeeId, permissions, loading: permissionsLoading } = useUserPermissions();
 
   const pathname = usePathname();
   const dispatch = useAppDispatch();
@@ -62,26 +63,42 @@ const Sidebar: React.FC = () => {
       isSidebarCollapsed ? "w-0 hidden" : "w-64"
     }`;
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      setIsLoadingProjects(true);
-      try {
-        const response = await fetch("/api/projects/read");
-        if (!response.ok) {
-          throw new Error("Failed to fetch projects");
+    useEffect(() => {
+      const fetchProjects = async () => {
+        setIsLoadingProjects(true);
+        try {
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            'permissions': JSON.stringify(permissions),
+            'employeeId': employeeId || "",
+          };
+    
+          const response = await fetch("/api/projects/read", {
+            method: "GET",
+            headers,
+          });
+    
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to fetch projects");
+          }
+    
+          const data: Project[] = await response.json();
+          setProjects(data);
+          setError(null);
+        } catch (err: any) {
+          console.error("Error fetching projects:", err);
+          setError(err.message);
+          toast.error("Failed to load projects");
+        } finally {
+          setIsLoadingProjects(false);
         }
-        const data: Project[] = await response.json();
-        setProjects(data);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setIsLoadingProjects(false);
+      };
+    
+      if (permissions && employeeId) {
+        fetchProjects();
       }
-    };
-
-    fetchProjects();
-  }, [refreshProjects]); // Refetch whenever refreshProjects changes
+    }, [refreshProjects, permissions, employeeId]); // Added permissions and employeeId as dependencies
 
   const canAccessContractAnalysis =
     permissions.includes("admin") ||

@@ -24,21 +24,21 @@ export async function GET(req: NextRequest) {
     if (isAdmin) {
       // Fetch all projects for admin
       projects = await Project.find({
-        status: { $in: ['PLANNING', 'IN_PROGRESS'] }
+        status: { $in: ['PLANNING', 'IN_PROGRESS', 'COMPLETED'] }
       });
       console.log(`Admin fetched all projects: ${projects.length}`);
     } else if (isProjectManager) {
       // Fetch projects managed by the project manager
       projects = await Project.find({
         managerId: employeeId,
-        status: { $in: ['PLANNING', 'IN_PROGRESS'] }
+        status: { $in: ['PLANNING', 'IN_PROGRESS', 'COMPLETED'] }
       });
       console.log(`Project Manager fetched managed projects: ${projects.length}`);
     } else {
       // Fetch projects where user is a team member
       projects = await Project.find({
         teamMembers: employeeId,
-        status: { $in: ['PLANNING', 'IN_PROGRESS'] }
+        status: { $in: ['PLANNING', 'IN_PROGRESS', 'COMPLETED'] }
       });
       console.log(`User fetched team member projects: ${projects.length}`);
     }
