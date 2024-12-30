@@ -11,6 +11,7 @@ interface AddSpecificItemModalProps {
     price: number;
     location: string;
     maintenanceSchedule: string;
+    maintenanceType: string[]; // Include maintenanceType
   }) => void;
 }
 
@@ -23,6 +24,7 @@ const AddSpecificItemModal: React.FC<AddSpecificItemModalProps> = ({
   const [price, setPrice] = useState<number | "">("");
   const [location, setLocation] = useState("");
   const [maintenanceSchedule, setMaintenanceSchedule] = useState<string>("");
+  const [maintenanceType, setMaintenanceType] = useState<string>(""); // For input handling
 
   const handleSubmit = () => {
     if (!specificItemId || !price || !location || !maintenanceSchedule) {
@@ -35,6 +37,9 @@ const AddSpecificItemModal: React.FC<AddSpecificItemModalProps> = ({
       price: Number(price),
       location,
       maintenanceSchedule,
+      maintenanceType: maintenanceType
+        .split(",")
+        .map((type) => type.trim()), // Convert comma-separated string to array
     });
 
     // Clear form and close modal
@@ -42,6 +47,7 @@ const AddSpecificItemModal: React.FC<AddSpecificItemModalProps> = ({
     setPrice("");
     setLocation("");
     setMaintenanceSchedule("");
+    setMaintenanceType("");
     onClose();
   };
 
@@ -95,6 +101,16 @@ const AddSpecificItemModal: React.FC<AddSpecificItemModalProps> = ({
               value={maintenanceSchedule}
               onChange={(e) => setMaintenanceSchedule(e.target.value)}
               className="mt-2 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Maintenance Type</label>
+            <input
+              type="text"
+              value={maintenanceType}
+              onChange={(e) => setMaintenanceType(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter types separated by commas, e.g., Cleaning, Inspection"
             />
           </div>
         </div>

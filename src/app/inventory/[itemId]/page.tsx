@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import EditSpecificItemModal from "@/components/EditSpecificItemModal";
 import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import the hook
 import FloatingTooltip from "@/components/FloatingTooltip"; // Import your tooltip component
+import MaintenanceHistoryListModal from "@/components/MaintenanceHistoryListModal";
 
 interface ItemDetails {
   name: string;
@@ -27,7 +28,18 @@ interface ItemDetails {
     price: number;
     location: string;
     maintenanceSchedule: string;
+    maintenanceType: string[]; // Added maintenanceType as an array of strings
+    maintenanceHistory: {
+      date: string; // Date of maintenance
+      maintenanceType: string[]; // Types of maintenance performed
+    }[]; // Added maintenanceHistory as an array of records
   }[];
+}
+
+// Define the type for maintenance history
+interface MaintenanceRecord {
+  date: string;
+  maintenanceType: string[];
 }
 
 const ItemDetailsPage = ({
@@ -41,6 +53,10 @@ const ItemDetailsPage = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [maintenanceHistory, setMaintenanceHistory] = useState<
+    MaintenanceRecord[]
+  >([]);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isEditSpecificItemModalOpen, setIsEditSpecificItemModalOpen] =
     useState<boolean>(false);
   const [specificItemToEdit, setSpecificItemToEdit] = useState<
@@ -145,6 +161,7 @@ const ItemDetailsPage = ({
     price: number;
     location: string;
     maintenanceSchedule: string;
+    maintenanceType: string[];
   }) => {
     if (!itemId) return;
 
@@ -298,7 +315,6 @@ const ItemDetailsPage = ({
           </div>
         </div>
       </div>
-
       {/* Right Section: Quantity Table */}
       <div className="w-3/5">
         <div className="rounded-lg bg-white p-6 shadow">
@@ -322,6 +338,12 @@ const ItemDetailsPage = ({
                   Maintenance
                 </th>
                 <th className="border px-4 py-2 font-semibold text-gray-700">
+                  Maintenance Type
+                </th>
+                <th className="border px-4 py-2 font-semibold text-gray-700">
+                  Maintenance History
+                </th>
+                <th className="border px-4 py-2 font-semibold text-gray-700">
                   Actions
                 </th>
               </tr>
@@ -338,7 +360,23 @@ const ItemDetailsPage = ({
                   <td className="border px-4 py-2">{itemDetail.location}</td>
                   <td className="border px-4 py-2">
                     <Calendar className="mr-1 inline-block h-4 w-4 text-blue-500" />
-                    {itemDetail.maintenanceSchedule}
+                    {new Date(
+                      itemDetail.maintenanceSchedule,
+                    ).toLocaleDateString()}
+                  </td>
+                  <td className="border px-4 py-2">
+                    {itemDetail.maintenanceType?.join(", ") || "N/A"}
+                  </td>
+                  <td className="border px-4 py-2">
+                    <button
+                      onClick={() => {
+                        setMaintenanceHistory(itemDetail.maintenanceHistory);
+                        setIsHistoryModalOpen(true);
+                      }}
+                      className="text-blue-500 hover:underline"
+                    >
+                      View History
+                    </button>
                   </td>
                   <td className="border px-4 py-2">
                     {!canEditInventory ? (
@@ -385,6 +423,7 @@ const ItemDetailsPage = ({
             </tbody>
           </table>
         </div>
+
         {/* Add Specific Item Button */}
         <div className="mt-6">
           {!canEditInventory ? (
@@ -408,15 +447,18 @@ const ItemDetailsPage = ({
           )}
         </div>
       </div>
-
-      {/* Add Specific Item Modal */}
+      ;{/* Add Specific Item Modal */}
       <AddSpecificItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddSpecificItem}
       />
-
-      {/* Edit Item Modal */}
+      <MaintenanceHistoryListModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        history={maintenanceHistory}
+      />
+      ;{/* Edit Item Modal */}
       <EditItemModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -438,6 +480,7 @@ const ItemDetailsPage = ({
             price: 0,
             location: "",
             maintenanceSchedule: "",
+            maintenanceType: [], // Add this default value
           }
         }
       />

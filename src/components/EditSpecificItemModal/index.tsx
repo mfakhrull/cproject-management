@@ -12,12 +12,14 @@ interface EditSpecificItemModalProps {
     price: number;
     location: string;
     maintenanceSchedule: string; // Date as string in ISO format
+    maintenanceType: string[]; // Maintenance types as an array of strings
   }) => void;
   initialData: {
     specificItemId: string;
     price: number;
     location: string;
     maintenanceSchedule: string; // Date as string in ISO format
+    maintenanceType: string[]; // Maintenance types as an array of strings
   };
 }
 
@@ -29,16 +31,29 @@ const EditSpecificItemModal: React.FC<EditSpecificItemModalProps> = ({
 }) => {
   const [formData, setFormData] = useState(initialData);
 
-  // Sync formData with initialData when the modal is opened or initialData changes
   useEffect(() => {
     if (isOpen) {
-      setFormData(initialData);
+      setFormData({
+        ...initialData,
+        maintenanceType: initialData.maintenanceType || [], // Ensure it's always an array
+      });
     }
   }, [isOpen, initialData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleMaintenanceTypeChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      maintenanceType: e.target.value.split(",").map((type) => type.trim()),
+    }));
   };
 
   const handleSubmit = () => {
@@ -50,9 +65,9 @@ const EditSpecificItemModal: React.FC<EditSpecificItemModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <div className="flex justify-between mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+        <div className="mb-4 flex justify-between">
           <h2 className="text-xl font-bold">Edit Specific Item</h2>
           <button onClick={onClose}>
             <X size={24} />
@@ -65,7 +80,7 @@ const EditSpecificItemModal: React.FC<EditSpecificItemModalProps> = ({
             value={formData.specificItemId}
             onChange={handleChange}
             placeholder="Specific Item ID"
-            className="w-full p-2 border rounded"
+            className="w-full rounded border p-2"
             disabled
           />
           <input
@@ -74,7 +89,7 @@ const EditSpecificItemModal: React.FC<EditSpecificItemModalProps> = ({
             value={formData.price}
             onChange={handleChange}
             placeholder="Price"
-            className="w-full p-2 border rounded"
+            className="w-full rounded border p-2"
           />
           <input
             type="text"
@@ -82,7 +97,7 @@ const EditSpecificItemModal: React.FC<EditSpecificItemModalProps> = ({
             value={formData.location}
             onChange={handleChange}
             placeholder="Location"
-            className="w-full p-2 border rounded"
+            className="w-full rounded border p-2"
           />
           <div>
             <label
@@ -97,13 +112,34 @@ const EditSpecificItemModal: React.FC<EditSpecificItemModalProps> = ({
               name="maintenanceSchedule"
               value={formData.maintenanceSchedule || ""}
               onChange={handleChange}
-              className="mt-2 block w-full rounded-md bg-white px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
+              className="mt-2 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="maintenanceType"
+              className="block text-sm font-medium text-gray-900"
+            >
+              Maintenance Type (comma-separated)
+            </label>
+            <input
+              type="text"
+              id="maintenanceType"
+              name="maintenanceType"
+              value={
+                Array.isArray(formData.maintenanceType)
+                  ? formData.maintenanceType.join(", ")
+                  : ""
+              }
+              onChange={handleMaintenanceTypeChange}
+              className="mt-2 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
+              placeholder="e.g., Cleaning, Inspection"
             />
           </div>
         </div>
         <button
           onClick={handleSubmit}
-          className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          className="mt-4 w-full rounded bg-blue-500 py-2 text-white hover:bg-blue-600"
         >
           Save Changes
         </button>

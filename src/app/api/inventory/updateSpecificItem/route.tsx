@@ -7,7 +7,8 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { itemId, specificItemId, price, location, maintenanceSchedule } = body;
+    const { itemId, specificItemId, price, location, maintenanceSchedule, maintenanceType } =
+      body;
 
     const updatedItem = await InventoryItemModel.findOneAndUpdate(
       { _id: itemId, "items.specificItemId": specificItemId },
@@ -16,6 +17,7 @@ export async function PUT(req: NextRequest) {
           "items.$.price": price,
           "items.$.location": location,
           "items.$.maintenanceSchedule": maintenanceSchedule,
+          "items.$.maintenanceType": maintenanceType,
         },
       },
       { new: true }

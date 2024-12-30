@@ -14,18 +14,29 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { specificItemId, price, location, maintenanceSchedule } = body;
+    const { specificItemId, price, location, maintenanceSchedule, maintenanceType } = body;
 
     if (!specificItemId || !price || !location || !maintenanceSchedule) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
     }
 
-    // Update the item and fetch the updated document
+    // Ensure maintenanceType is an array
+    const maintenanceTypeArray = Array.isArray(maintenanceType)
+      ? maintenanceType
+      : [];
+
+    // Add the specific item to the inventory item's `items` array
     const updatedItem = await InventoryItemModel.findByIdAndUpdate(
       itemId,
       {
         $push: {
-          items: { specificItemId, price, location, maintenanceSchedule },
+          items: {
+            specificItemId,
+            price,
+            location,
+            maintenanceSchedule,
+            maintenanceType: maintenanceTypeArray, // Use the array directly
+          },
         },
       },
       { new: true } // Return the updated document
