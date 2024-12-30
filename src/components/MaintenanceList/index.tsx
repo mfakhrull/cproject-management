@@ -6,6 +6,7 @@ import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
 import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
 import FloatingTooltip from "../FloatingTooltip";
+import TaskStatusChart from "@/components/TaskStatusChart"; // Import the status chart component
 import { Info } from "lucide-react";
 
 interface MaintenanceItem {
@@ -51,6 +52,20 @@ const MaintenanceList: React.FC<MaintenanceListProps> = ({
 
     fetchData();
   }, [apiUrl, refreshTrigger]);
+
+  // Calculate status distribution for the chart
+  const statusCount = items.reduce(
+    (acc: Record<string, number>, item) => {
+      acc[item.status] = (acc[item.status] || 0) + 1;
+      return acc;
+    },
+    { Overdue: 0, Pending: 0 },
+  );
+
+  const statusDistribution = Object.keys(statusCount).map((key) => ({
+    name: key,
+    count: statusCount[key],
+  }));
 
   const rows = items.map((item, index) => ({
     id: index,
@@ -146,34 +161,53 @@ const MaintenanceList: React.FC<MaintenanceListProps> = ({
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-md">
-      <div className="flex items-center gap-4 mb-4">
-        <h2 className="text-xl font-semibold">Maintenance Items</h2>
-        <FloatingTooltip
-          width="200px"
-          message="You are viewing maintenance items that are overdue or due within the next 30 days."
-        >
-          <div className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100">
-            <Info className="h-5 w-5 cursor-pointer text-slate-800/40 hover:text-slate-800" />
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* Maintenance List Table */}
+      <div className="md:col-span-2">
+        <div className="rounded-lg bg-white p-4 shadow-md">
+          <div className="mb-4 flex items-center gap-4">
+            <h2 className="text-xl font-semibold">Maintenance Items</h2>
+            <FloatingTooltip
+              width="200px"
+              message="You are viewing maintenance items that are overdue or due within the next 30 days."
+            >
+              <div className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100">
+                <Info className="h-5 w-5 cursor-pointer text-slate-800/40 hover:text-slate-800" />
+              </div>
+            </FloatingTooltip>
           </div>
-        </FloatingTooltip>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            getRowId={(row) => row.id}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 5,
+                  page: 0,
+                },
+              },
+            }}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            className="h-96"
+          />
+        </div>
       </div>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        getRowId={(row) => row.id}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 5,
-              page: 0,
-            },
-          },
-        }}
-        pageSizeOptions={[5, 10, 20]}
-        disableRowSelectionOnClick
-        className="h-96"
-      />
+
+      {/* Status Chart */}
+      <div>
+        <TaskStatusChart
+          className="pb-10 pt-5 shadow-md"
+          taskStatus={statusDistribution}
+          colorMapping={{
+            Overdue: "#BE6464", // Custom hex color for Overdue
+            Pending: "#AF894D", // Custom hex color for Pending
+          }}
+          title="Maintenance Status Distribution"
+          description="Overview of maintenance distribution by status"
+        />
+      </div>
     </div>
   );
 };

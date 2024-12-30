@@ -25,6 +25,15 @@ export default function LeaveDetailsPage() {
   const [newStatus, setNewStatus] = useState<string>("");
   const { permissions, loading: permissionsLoading } = useUserPermissions();
 
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-MY", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
+  };
+
   useEffect(() => {
     const fetchLeaveDetails = async () => {
       try {
@@ -107,11 +116,15 @@ export default function LeaveDetailsPage() {
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-500">Start Date</p>
-          <p className="text-lg font-medium text-gray-800">{leave.startDate}</p>
+          <p className="text-lg font-medium text-gray-800">
+            {formatDate(leave.startDate)}
+          </p>
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-500">End Date</p>
-          <p className="text-lg font-medium text-gray-800">{leave.endDate}</p>
+          <p className="text-lg font-medium text-gray-800">
+            {formatDate(leave.endDate)}
+          </p>
         </div>
         <div className="md:col-span-2">
           <p className="text-sm font-semibold text-gray-500">Reason</p>
@@ -134,7 +147,6 @@ export default function LeaveDetailsPage() {
                 width="200px"
                 message={`Permission Required to Update Status (Current: ${newStatus})`}
               >
-                {" "}
                 <select
                   id="status"
                   value={newStatus}

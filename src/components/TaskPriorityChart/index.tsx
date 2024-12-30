@@ -11,14 +11,17 @@ interface TaskPriorityChartProps {
 }
 
 const COLORS = [
-    "hsl(var(--chart-3))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-4))",
-    "hsl(var(--chart-5))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
 ];
 
 const TaskPriorityChart: React.FC<TaskPriorityChartProps> = ({ taskDistribution }) => {
+  // Calculate the total number of tasks
+  const totalTasks = taskDistribution.reduce((total, task) => total + task.count, 0);
+
   return (
     <Card>
       <CardHeader>
@@ -72,7 +75,7 @@ const TaskPriorityChart: React.FC<TaskPriorityChartProps> = ({ taskDistribution 
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Total Tasks: {totalTasks} <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Updated task priorities overview.

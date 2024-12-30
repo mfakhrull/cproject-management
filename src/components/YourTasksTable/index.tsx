@@ -1,4 +1,3 @@
-// src/components/YourTasksTable.tsx
 "use client";
 
 import React from "react";
@@ -23,24 +22,85 @@ const YourTasksTable: React.FC<YourTasksTableProps> = ({
   isLoading,
   isDarkMode,
 }) => {
-  const taskColumns: GridColDef<ITask>[] = [
-    { field: "title", headerName: "Title", width: 200 },
-    { field: "status", headerName: "Status", width: 150 },
-    { field: "priority", headerName: "Priority", width: 150 },
-    { field: "dueDate", headerName: "Due Date", width: 150 },
+  const getStatusClass = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "in_progress":
+        return "bg-yellow-100 text-yellow-800";
+      case "todo":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPriorityClass = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const rows = tasks.map((task) => ({
+    ...task,
+    id: task._id, // Map `_id` to `id` for DataGrid
+    formattedDueDate: new Intl.DateTimeFormat("en-MY", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(new Date(task.dueDate)),
+  }));
+
+  const taskColumns: GridColDef[] = [
+    { field: "title", headerName: "Title", flex: 1 },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      renderCell: (params) => (
+        <span
+          className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusClass(
+            params.row.status
+          )}`}
+        >
+          {params.row.status}
+        </span>
+      ),
+    },
+    {
+      field: "priority",
+      headerName: "Priority",
+      flex: 1,
+      renderCell: (params) => (
+        <span
+          className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getPriorityClass(
+            params.row.priority
+          )}`}
+        >
+          {params.row.priority}
+        </span>
+      ),
+    },
+    {
+      field: "formattedDueDate",
+      headerName: "Due Date",
+      flex: 1,
+    },
   ];
 
   return (
     <div className="rounded-lg bg-white p-4 shadow dark:bg-dark-secondary mt-6">
-      <h3 className="mb-4 text-lg font-semibold dark:text-white">
-        Your Tasks
-      </h3>
+      <h3 className="mb-4 text-lg font-semibold dark:text-white">Your Tasks</h3>
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
-          rows={tasks.map((task) => ({
-            ...task,
-            id: task._id, // Ensure DataGrid uses `id` instead of `_id`
-          }))}
+          rows={rows}
           columns={taskColumns}
           getRowId={(row) => row._id}
           checkboxSelection

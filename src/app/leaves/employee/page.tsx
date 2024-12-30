@@ -64,12 +64,21 @@ export default function EmployeeLeavePage() {
     router.push(`/leaves/${id}`);
   };
 
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-MY", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
+  };
+
   const rows = leaves.map((leave) => ({
     id: leave._id,
     leaveId: leave.leaveId,
     leaveType: leave.leaveType,
-    startDate: leave.startDate,
-    endDate: leave.endDate,
+    startDate: formatDate(leave.startDate),
+    endDate: formatDate(leave.endDate),
     status: leave.status,
   }));
 
