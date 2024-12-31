@@ -3,6 +3,7 @@
 import { ITask, IAttachment } from "@/types";
 import { format } from "date-fns";
 import Image from "next/image";
+import Link from "next/link"; // For non-image attachments
 import React, { useState } from "react";
 import AssigneesModal from "@/components/task/AssigneesModal"; // Import the AssigneesModal
 
@@ -26,16 +27,28 @@ const TaskCard = ({ task, onClick }: Props) => {
         <div className="mb-4">
           <strong>Attachments:</strong>
           <div className="flex flex-wrap gap-2 mt-2">
-            {task.attachments.map((attachment) => (
-              <Image
-                key={attachment._id.toString()}
-                src={attachment.fileUrl}
-                alt={attachment.fileName}
-                width={100}
-                height={100}
-                className="rounded-md"
-              />
-            ))}
+            {task.attachments.map((attachment) =>
+              attachment.fileUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                <Image
+                  key={attachment._id.toString()}
+                  src={attachment.fileUrl}
+                  alt={attachment.fileName}
+                  width={100}
+                  height={100}
+                  className="rounded-md"
+                />
+              ) : (
+                <Link
+                  key={attachment._id.toString()}
+                  href={attachment.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  {attachment.fileName}
+                </Link>
+              ),
+            )}
           </div>
         </div>
       )}

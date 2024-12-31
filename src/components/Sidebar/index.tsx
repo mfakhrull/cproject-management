@@ -34,6 +34,7 @@ import { setIsSidebarCollapsed } from "@/app/state";
 import { useUserPermissions } from "@/context/UserPermissionsContext";
 import FloatingTooltip from "@/components/FloatingTooltip";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 interface Project {
   _id: string;
@@ -47,7 +48,14 @@ const Sidebar: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { employeeId, permissions, loading: permissionsLoading } = useUserPermissions();
+  const {
+    employeeId,
+    permissions,
+    role,
+    loading: permissionsLoading,
+  } = useUserPermissions();
+  const { user } = useUser();
+  const username = user?.username;
 
   const pathname = usePathname();
   const dispatch = useAppDispatch();
@@ -63,42 +71,42 @@ const Sidebar: React.FC = () => {
       isSidebarCollapsed ? "w-0 hidden" : "w-64"
     }`;
 
-    useEffect(() => {
-      const fetchProjects = async () => {
-        setIsLoadingProjects(true);
-        try {
-          const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-            'permissions': JSON.stringify(permissions),
-            'employeeId': employeeId || "",
-          };
-    
-          const response = await fetch("/api/projects/read", {
-            method: "GET",
-            headers,
-          });
-    
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to fetch projects");
-          }
-    
-          const data: Project[] = await response.json();
-          setProjects(data);
-          setError(null);
-        } catch (err: any) {
-          console.error("Error fetching projects:", err);
-          setError(err.message);
-          toast.error("Failed to load projects");
-        } finally {
-          setIsLoadingProjects(false);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setIsLoadingProjects(true);
+      try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          permissions: JSON.stringify(permissions),
+          employeeId: employeeId || "",
+        };
+
+        const response = await fetch("/api/projects/read", {
+          method: "GET",
+          headers,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to fetch projects");
         }
-      };
-    
-      if (permissions && employeeId) {
-        fetchProjects();
+
+        const data: Project[] = await response.json();
+        setProjects(data);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error fetching projects:", err);
+        setError(err.message);
+        toast.error("Failed to load projects");
+      } finally {
+        setIsLoadingProjects(false);
       }
-    }, [refreshProjects, permissions, employeeId]); // Added permissions and employeeId as dependencies
+    };
+
+    if (permissions && employeeId) {
+      fetchProjects();
+    }
+  }, [refreshProjects, permissions, employeeId]); // Added permissions and employeeId as dependencies
 
   const canAccessContractAnalysis =
     permissions.includes("admin") ||
@@ -130,18 +138,18 @@ const Sidebar: React.FC = () => {
         {!isSidebarCollapsed && (
           <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 px-8 py-4 dark:border-gray-700">
             <Image
-              src="/logo.png" // Placeholder for logo - update as needed
+              src="https://res.cloudinary.com/dftpdqp65/image/upload/v1735640295/Untitled_design_2_xelkqd.png" // Placeholder for logo - update as needed
               alt="Logo"
-              width={40}
+              width={60}
               height={40}
             />
             <div>
               <h3 className="text-md font-bold tracking-wide dark:text-gray-200">
-                FAKHRUL
+                {username}
               </h3>
               <div className="mt-1 flex items-start gap-2">
                 <Lock className="mt-[0.1rem] h-3 w-3 text-gray-500 dark:text-gray-400" />
-                <p className="text-xs text-gray-500">Private</p>
+                <p className="text-xs text-gray-500">{role}</p>
               </div>
             </div>
           </div>

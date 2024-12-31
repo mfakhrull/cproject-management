@@ -104,21 +104,21 @@ const HomePage = () => {
       setError(null);
       try {
         const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          'permissions': JSON.stringify(permissions),
-          'employeeId': employeeId || "",
+          "Content-Type": "application/json",
+          permissions: JSON.stringify(permissions),
+          employeeId: employeeId || "",
         };
-  
+
         const projectsResponse = await fetch("/api/projects/readforchart", {
           method: "GET",
           headers,
         });
-  
+
         if (!projectsResponse.ok) {
           const errorData = await projectsResponse.json();
           throw new Error(errorData.message || "Failed to fetch projects.");
         }
-  
+
         const projectsData: IProject[] = await projectsResponse.json();
         console.log("Fetched projects:", projectsData);
         setProjects(projectsData);
@@ -130,7 +130,7 @@ const HomePage = () => {
         setIsLoading(false);
       }
     };
-  
+
     if (permissions && employeeId) {
       fetchProjects();
     }
@@ -227,6 +227,21 @@ const HomePage = () => {
     count: projectStatusCount[key] || 0, // Ensure missing statuses are included with a count of 0
   }));
 
+  const canViewMaintenanceItem =
+    permissions.includes("can_view_maintenance_item") ||
+    permissions.includes("admin") ||
+    permissions.includes("project_manager") ||
+    permissions.includes("inventory_manager") ||
+    permissions.includes("inventory_team") ||
+    permissions.includes("procurement_team");
+
+  const canViewAllLeavesApplication =
+    permissions.includes("can_view_all_leaves_application") ||
+    permissions.includes("admin") ||
+    permissions.includes("project_manager") ||
+    permissions.includes("hr_manager") ||
+    permissions.includes("hr_team");
+
   return (
     <div className="flex min-h-screen justify-center bg-gray-100">
       <div className="container mx-auto max-w-[90%] px-4 sm:px-6 lg:px-8">
@@ -258,28 +273,26 @@ const HomePage = () => {
           />
 
           {/* Maintenance List */}
-          <div className="mt-8">
-            <h2 className="mb-4 text-lg font-semibold">Maintenance Items</h2>
-            <MaintenanceList
-              apiUrl="/api/inventory/maintenance"
-              onUpdate={(item) => handleOpenModal(item)}
-              refreshTrigger={refreshTrigger}
-            />
-          </div>
+          {canViewMaintenanceItem && (
+            <div className="mt-8">
+              <MaintenanceList
+                apiUrl="/api/inventory/maintenance"
+                onUpdate={(item) => handleOpenModal(item)}
+                refreshTrigger={refreshTrigger}
+              />
+            </div>
+          )}
 
           {/* Leave Applications */}
-          <div className="mt-8">
-            <h2 className="mb-4 text-lg font-semibold">
-              Manager Leave Applications
-            </h2>
-            <div className="w-full">
-              <ManagerLeavePage />
+          {canViewAllLeavesApplication && (
+            <div className="mt-8">
+              <div className="w-full">
+                <ManagerLeavePage />
+              </div>
             </div>
-          </div>
+          )}
+
           <div className="mt-8">
-            <h2 className="mb-4 text-lg font-semibold">
-              Employee Leave Applications
-            </h2>
             <div className="w-full">
               <EmployeeLeavePage />
             </div>

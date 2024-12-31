@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { NextRequest } from "next/server"; // Import NextRequest
+import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import { User } from "@/models"; // Import your User model
-import { getAuth } from "@clerk/nextjs/server"; // Import Clerk getAuth
+import { User } from "@/models";
+import { getAuth } from "@clerk/nextjs/server";
 
 export async function GET(req: NextRequest) {
   await dbConnect(); // Ensure database connection
@@ -22,16 +22,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Return role permissions from the user document
+    // Return permissions, employeeId, username, and role
     return NextResponse.json({
       permissions: user.rolePermissions,
       employeeId: user.employeeId,
+      username: user.username,
+      role: user.role,
     });
   } catch (error) {
-    console.error("Error fetching role permissions:", error);
+    console.error("Error fetching user permissions:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

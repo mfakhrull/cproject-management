@@ -77,7 +77,7 @@ export interface ITask {
   title: string;
   description?: string;
   status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' | 'BACKLOG';
   tags: string[];
   startDate?: Date;
   dueDate?: Date;

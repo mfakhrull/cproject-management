@@ -192,6 +192,8 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
               <option value="HIGH">High</option>
               <option value="MEDIUM">Medium</option>
               <option value="LOW">Low</option>
+              <option value="URGENT">Urgent</option>
+              <option value="BACKLOG">Backlog</option>
             </select>
           </div>
         </div>

@@ -22,7 +22,7 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
     description: "",
     timeEstimate: "",
     status: task.status as 'TODO' | 'IN_PROGRESS' | 'COMPLETED', // Explicitly typed
-    priority: task.priority as 'LOW' | 'MEDIUM' | 'HIGH', // Explicitly typed
+    priority: task.priority as 'LOW' | 'MEDIUM' | 'HIGH'| 'URGENT'| 'BACKLOG', // Explicitly typed
     assignedUserIds: [] as string[], // Handle multiple assignees
     startDate: "",
     dueDate: "",
@@ -179,6 +179,8 @@ const TaskUpdateModal: React.FC<TaskUpdateModalProps> = ({
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
                 <option value="HIGH">High</option>
+                <option value="URGENT">Urgent</option>
+                <option value="BACKLOG">Backlog</option>
               </select>
             </div>
           </div>

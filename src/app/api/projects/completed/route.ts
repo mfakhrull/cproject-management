@@ -15,7 +15,7 @@ export async function GET() {
     const projectsWithManagers = await Promise.all(
       projects.map(async (project) => {
         const manager = await User.findOne(
-          { clerk_id: project.managerId }, // Match managerId to clerk_id
+          { employeeId: project.managerId }, // Match managerId to clerk_id
           "username" // Only fetch the username
         );
 
@@ -25,7 +25,7 @@ export async function GET() {
         };
       })
     );
-
+console.log(projectsWithManagers);
     return NextResponse.json(projectsWithManagers, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching completed projects:", error.message);
