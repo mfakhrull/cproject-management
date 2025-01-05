@@ -1,20 +1,24 @@
 "use client";
 
 import { useAppSelector } from "@/app/redux/redux"; // Adjusted redux path if necessary
+import { useUserPermissions } from "@/context/UserPermissionsContext"; // Import UserPermissionsContext
 import Header from "@/components/Header";
 import { DisplayOption, Gantt, Task, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import React, { useEffect, useMemo, useState } from "react";
 
 type Project = {
-  id: string;
+  _id: string;
   name: string;
   startDate: string;
   endDate: string;
+  progress: number | null; // Progress can be null initially
 };
 
 const Timeline = () => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+  const { permissions, employeeId, loading: permissionsLoading } =
+    useUserPermissions();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,8 +30,21 @@ const Timeline = () => {
 
   useEffect(() => {
     const fetchProjects = async () => {
+      if (permissionsLoading) return; // Wait for permissions to load
+      if (!permissions || !employeeId) {
+        setError("Missing permissions or employeeId.");
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch("/api/projects/read"); // Adjust API path as needed
+        const response = await fetch("/api/projects/readfortimeline", {
+          method: "GET",
+          headers: {
+            permissions: JSON.stringify(permissions),
+            employeeId: employeeId,
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch projects");
         }
@@ -42,7 +59,7 @@ const Timeline = () => {
     };
 
     fetchProjects();
-  }, []);
+  }, [permissions, employeeId, permissionsLoading]);
 
   const ganttTasks: Task[] = useMemo(() => {
     return (
@@ -50,53 +67,114 @@ const Timeline = () => {
         start: new Date(project.startDate),
         end: new Date(project.endDate),
         name: project.name,
-        id: `Project-${project.id}`,
+        id: `Project-${project._id}`,
         type: "project",
-        progress: 50, // Adjust progress calculation if needed
+        progress: project.progress ?? 0, // Ensure 0 is not overridden by a fallback
         isDisabled: false,
+        styles: {
+          backgroundColor: isDarkMode ? "#1f2937" : "#d1e7dd",
+          progressColor: isDarkMode ? "#34d399" : "#2c7a7b",
+          progressSelectedColor: "#2563eb",
+        },
       })) || []
     );
-  }, [projects]);
+  }, [projects, isDarkMode]);
 
-  const handleViewModeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleViewModeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setDisplayOptions((prev) => ({
       ...prev,
       viewMode: event.target.value as ViewMode,
     }));
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  const customTooltip = ({ task }: { task: Task }) => (
+    <div
+      style={{
+        background: "white",
+        padding: "10px",
+        borderRadius: "5px",
+        boxShadow: "0 0 5px rgba(0,0,0,0.3)",
+        fontSize: "12px",
+      }}
+    >
+      <strong>{task.name}</strong>
+      <p>Progress: {task.progress}%</p>
+      <p>
+        From: {task.start.toLocaleDateString()} To:{" "}
+        {task.end.toLocaleDateString()}
+      </p>
+    </div>
+  );
+
+  if (isLoading || permissionsLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="max-w-full p-8">
+    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-gray-100"} p-8`}>
       {/* Header Section */}
-      <header className="mb-4 flex items-center justify-between">
-        <Header name="Projects Timeline" />
-        <div className="relative inline-block w-64">
-          <select
-            className="focus:shadow-outline block w-full appearance-none rounded border border-gray-400 bg-white px-4 py-2 pr-8 leading-tight shadow hover:border-gray-500 focus:outline-none dark:border-dark-secondary dark:bg-dark-secondary dark:text-white"
-            value={displayOptions.viewMode}
-            onChange={handleViewModeChange}
-          >
-            <option value={ViewMode.Day}>Day</option>
-            <option value={ViewMode.Week}>Week</option>
-            <option value={ViewMode.Month}>Month</option>
-          </select>
-        </div>
+      <header className="mb-8">
+        <h1
+          className={`text-3xl font-bold ${
+            isDarkMode ? "text-white" : "text-gray-800"
+          }`}
+        >
+          Projects Timeline
+        </h1>
+        <p className={`${isDarkMode ? "text-gray-400" : "text-gray-600"} mt-2`}>
+        View and track project schedules and progress in one place.
+        </p>
       </header>
 
       {/* Timeline Section */}
-      <div className="overflow-hidden rounded-md bg-white shadow dark:bg-dark-secondary dark:text-white">
-        <div className="timeline">
+      <div
+        className={`rounded-lg shadow-lg ${
+          isDarkMode ? "bg-gray-800 text-white" : "bg-white"
+        } p-6`}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2
+            className={`text-xl font-semibold ${
+              isDarkMode ? "text-gray-200" : "text-gray-800"
+            }`}
+          >
+            Gantt Chart
+          </h2>
+          <div className="relative inline-block w-48">
+            <select
+              className="block w-full rounded border border-gray-400 bg-white px-4 py-2 pr-8 text-gray-700 shadow focus:border-blue-500 focus:outline-none focus:ring dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              value={displayOptions.viewMode}
+              onChange={handleViewModeChange}
+            >
+              <option value={ViewMode.Day}>Day</option>
+              <option value={ViewMode.Week}>Week</option>
+              <option value={ViewMode.Month}>Month</option>
+            </select>
+          </div>
+        </div>
+
+        <div
+          className={`overflow-hidden rounded-md ${
+            isDarkMode ? "bg-gray-700" : "bg-gray-50"
+          }`}
+        >
           <Gantt
             tasks={ganttTasks}
             {...displayOptions}
             columnWidth={displayOptions.viewMode === ViewMode.Month ? 150 : 100}
-            listCellWidth="100px"
-            projectBackgroundColor={isDarkMode ? "#101214" : "#1f2937"}
-            projectProgressColor={isDarkMode ? "#1f2937" : "#aeb8c2"}
-            projectProgressSelectedColor={isDarkMode ? "#000" : "#9ba1a6"}
+            listCellWidth="200px" // Wider task list
+            rowHeight={40} // Increased row height for better readability
+            headerHeight={50} // Increased header height
+            fontFamily="Arial, sans-serif"
+            fontSize="14px"
+            barCornerRadius={5} // Rounded taskbars
+            barFill={75} // Occupation percentage for taskbars
+            todayColor="#f3f4f6" // Highlight today column
+            TooltipContent={customTooltip} // Custom tooltip component
+            projectBackgroundColor={isDarkMode ? "#101214" : "#e2e8f0"}
+            projectProgressColor={isDarkMode ? "#1f2937" : "#2c7a7b"}
+            projectProgressSelectedColor={isDarkMode ? "#000" : "#2563eb"}
           />
         </div>
       </div>

@@ -65,42 +65,59 @@ const Timeline = ({ id, setIsModalNewTaskOpen }: Props) => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="px-4 xl:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-2 py-5">
-        <h1 className="me-2 text-lg font-bold dark:text-white">
+    <div className="min-h-screen bg-gray-100 p-8 dark:bg-gray-900">
+      {/* Header Section */}
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           Project Tasks Timeline
         </h1>
-        <div className="relative inline-block w-64">
-          <select
-            className="focus:shadow-outline block w-full appearance-none rounded border border-gray-400 bg-white px-4 py-2 pr-8 leading-tight shadow hover:border-gray-500 focus:outline-none dark:border-dark-secondary dark:bg-dark-secondary dark:text-white"
-            value={displayOptions.viewMode}
-            onChange={handleViewModeChange}
-          >
-            <option value={ViewMode.Day}>Day</option>
-            <option value={ViewMode.Week}>Week</option>
-            <option value={ViewMode.Month}>Month</option>
-          </select>
-        </div>
-      </div>
+        <p className="mt-1 text-gray-600 dark:text-gray-400">
+          Visualize tasks for your project timeline.
+        </p>
+      </header>
 
-      <div className="overflow-hidden rounded-md bg-white shadow dark:bg-dark-secondary dark:text-white">
-        <div className="timeline">
-          <Gantt
-            tasks={ganttTasks}
-            {...displayOptions}
-            columnWidth={displayOptions.viewMode === ViewMode.Month ? 150 : 100}
-            listCellWidth="100px"
-            barBackgroundColor="#aeb8c2"
-            barBackgroundSelectedColor="#9ba1a6"
-          />
+      {/* Timeline Section */}
+      <div className="rounded-lg bg-white shadow-lg dark:bg-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+            Task Timeline
+          </h2>
+          <div className="relative inline-block w-48">
+            <select
+              className="block w-full rounded border border-gray-400 bg-white px-4 py-2 pr-8 text-gray-700 shadow focus:border-blue-500 focus:outline-none focus:ring dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              value={displayOptions.viewMode}
+              onChange={handleViewModeChange}
+            >
+              <option value={ViewMode.Day}>Day</option>
+              <option value={ViewMode.Week}>Week</option>
+              <option value={ViewMode.Month}>Month</option>
+            </select>
+          </div>
         </div>
-        <div className="px-4 pb-5 pt-1">
-          <button
-            className="flex items-center rounded bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
+
+        <div className="overflow-hidden rounded-b-lg">
+          <div className="timeline">
+            <Gantt
+              tasks={ganttTasks}
+              {...displayOptions}
+              columnWidth={displayOptions.viewMode === ViewMode.Month ? 150 : 100}
+              listCellWidth="150px" // Adjusted width for side columns
+              barBackgroundColor="#aeb8c2"
+              barBackgroundSelectedColor="#9ba1a6"
+              barProgressColor="#4caf50"
+              barProgressSelectedColor="#2563eb"
+            />
+          </div>
+        </div>
+
+        {/* Footer Section */}
+        <div className="flex justify-end p-6">
+          {/* <button
+            className="flex items-center rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
             onClick={() => setIsModalNewTaskOpen(true)}
           >
-            Add New Task
-          </button>
+            + Add New Task
+          </button> */}
         </div>
       </div>
     </div>
