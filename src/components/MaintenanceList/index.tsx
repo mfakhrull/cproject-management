@@ -23,12 +23,14 @@ interface MaintenanceListProps {
   apiUrl: string;
   onUpdate: (item: MaintenanceItem) => void; // Callback for update action
   refreshTrigger: number; // Prop to trigger re-fetching
+  onDataUpdate: (data: MaintenanceItem[]) => void; // New callback
 }
 
 const MaintenanceList: React.FC<MaintenanceListProps> = ({
   apiUrl,
   onUpdate,
   refreshTrigger,
+  onDataUpdate,
 }) => {
   const [items, setItems] = useState<MaintenanceItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -43,6 +45,7 @@ const MaintenanceList: React.FC<MaintenanceListProps> = ({
         if (!response.ok) throw new Error("Failed to fetch data.");
         const data = await response.json();
         setItems(data);
+        onDataUpdate(data); // Pass data back to the parent
       } catch (err: any) {
         setError(err.message);
       } finally {

@@ -12,6 +12,8 @@ import EmployeeLeavePage from "@/app/leaves/employee/page";
 import { useAppSelector } from "../redux/redux";
 import { toast } from "sonner";
 import { useUserPermissions } from "@/context/UserPermissionsContext";
+import * as XLSX from "xlsx"; // Import xlsx for exporting Excel files
+import { Download } from "lucide-react";
 
 interface ITask {
   _id: string;
@@ -35,6 +37,7 @@ interface MaintenanceItem {
   location: string;
   status: string;
   maintenanceType?: string[];
+  parentItemName: string;
 }
 
 const HomePage = () => {
@@ -182,6 +185,45 @@ const HomePage = () => {
     }
   };
 
+  const exportToExcel = () => {
+    const workbook = XLSX.utils.book_new();
+
+    // Tasks Sheet
+    const tasksData = tasks.map((task) => ({
+      Title: task.title,
+      Status: task.status,
+      Priority: task.priority,
+      "Due Date": task.dueDate,
+    }));
+    const tasksSheet = XLSX.utils.json_to_sheet(tasksData);
+    XLSX.utils.book_append_sheet(workbook, tasksSheet, "Tasks");
+
+    // Projects Sheet
+    const projectsData = projects.map((project) => ({
+      Name: project.name,
+      "Start Date": project.startDate,
+      "End Date": project.endDate || "N/A",
+      Status: project.status,
+    }));
+    const projectsSheet = XLSX.utils.json_to_sheet(projectsData);
+    XLSX.utils.book_append_sheet(workbook, projectsSheet, "Projects");
+
+    // Maintenance Items Sheet
+    const maintenanceData = maintenanceItems.map((item) => ({
+      "Specific Item ID": item.specificItemId,
+      "Parent Item": item.parentItemName,
+      "Maintenance Schedule": item.maintenanceSchedule,
+      Location: item.location,
+      Status: item.status,
+      "Maintenance Type": item.maintenanceType?.join(", ") || "N/A",
+    }));
+    const maintenanceSheet = XLSX.utils.json_to_sheet(maintenanceData);
+    XLSX.utils.book_append_sheet(workbook, maintenanceSheet, "Maintenance");
+
+    // Export Workbook
+    XLSX.writeFile(workbook, "Dashboard_Report.xlsx");
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -227,6 +269,12 @@ const HomePage = () => {
     count: projectStatusCount[key] || 0, // Ensure missing statuses are included with a count of 0
   }));
 
+  const handleMaintenanceDataUpdate = (data: MaintenanceItem[]) => {
+    setMaintenanceItems(data);
+  };
+
+  console.log("Maintenance Items:", maintenanceItems);
+
   const canViewMaintenanceItem =
     permissions.includes("can_view_maintenance_item") ||
     permissions.includes("admin") ||
@@ -246,8 +294,21 @@ const HomePage = () => {
     <div className="flex min-h-screen justify-center bg-gray-100">
       <div className="container mx-auto max-w-[90%] px-4 sm:px-6 lg:px-8">
         <div className="w-full py-8">
-          {/* Header */}
-          <Header name="Project Management Dashboard" />
+        <div className="mt-4 flex items-center justify-between">
+  {/* Header */}
+  <Header name="Project Management Dashboard" />
+
+  {/* Export Button */}
+  <button
+    onClick={exportToExcel}
+    className="-mt-8 flex items-center gap-1 text-slate-800 hover:text-slate-700 focus:outline-none whitespace-nowrap"
+  >
+    <Download size={16} className="inline" />
+    Generate Report
+  </button>
+</div>
+
+ 
 
           {/* Charts */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -279,6 +340,7 @@ const HomePage = () => {
                 apiUrl="/api/inventory/maintenance"
                 onUpdate={(item) => handleOpenModal(item)}
                 refreshTrigger={refreshTrigger}
+                onDataUpdate={handleMaintenanceDataUpdate} // New callback for data
               />
             </div>
           )}

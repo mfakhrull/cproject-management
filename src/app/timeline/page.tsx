@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { DisplayOption, Gantt, Task, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import React, { useEffect, useMemo, useState } from "react";
+import { Download } from "lucide-react";
 
 type Project = {
   _id: string;
@@ -17,8 +18,11 @@ type Project = {
 
 const Timeline = () => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-  const { permissions, employeeId, loading: permissionsLoading } =
-    useUserPermissions();
+  const {
+    permissions,
+    employeeId,
+    loading: permissionsLoading,
+  } = useUserPermissions();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +85,7 @@ const Timeline = () => {
   }, [projects, isDarkMode]);
 
   const handleViewModeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
+    event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setDisplayOptions((prev) => ({
       ...prev,
@@ -89,30 +93,38 @@ const Timeline = () => {
     }));
   };
 
-  const customTooltip = ({ task }: { task: Task }) => (
-    <div
-      style={{
-        background: "white",
-        padding: "10px",
-        borderRadius: "5px",
-        boxShadow: "0 0 5px rgba(0,0,0,0.3)",
-        fontSize: "12px",
-      }}
-    >
-      <strong>{task.name}</strong>
-      <p>Progress: {task.progress}%</p>
-      <p>
-        From: {task.start.toLocaleDateString()} To:{" "}
-        {task.end.toLocaleDateString()}
-      </p>
-    </div>
-  );
+  const exportToCSV = () => {
+    // Prepare CSV data
+    const csvHeaders = ["Project Name", "Start Date", "End Date", "Progress"];
+    const csvRows = projects.map((project) => [
+      project.name,
+      new Date(project.startDate).toLocaleDateString(),
+      new Date(project.endDate).toLocaleDateString(),
+      `${project.progress ?? 0}%`,
+    ]);
+
+    const csvContent = [csvHeaders, ...csvRows]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    // Create a Blob and download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "projects_timeline.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (isLoading || permissionsLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-gray-100"} p-8`}>
+    <div
+      className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-gray-100"} p-8`}
+    >
       {/* Header Section */}
       <header className="mb-8">
         <h1
@@ -123,7 +135,7 @@ const Timeline = () => {
           Projects Timeline
         </h1>
         <p className={`${isDarkMode ? "text-gray-400" : "text-gray-600"} mt-2`}>
-        View and track project schedules and progress in one place.
+          View and track project schedules and progress in one place.
         </p>
       </header>
 
@@ -133,7 +145,7 @@ const Timeline = () => {
           isDarkMode ? "bg-gray-800 text-white" : "bg-white"
         } p-6`}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h2
             className={`text-xl font-semibold ${
               isDarkMode ? "text-gray-200" : "text-gray-800"
@@ -171,11 +183,18 @@ const Timeline = () => {
             barCornerRadius={5} // Rounded taskbars
             barFill={75} // Occupation percentage for taskbars
             todayColor="#f3f4f6" // Highlight today column
-            TooltipContent={customTooltip} // Custom tooltip component
-            projectBackgroundColor={isDarkMode ? "#101214" : "#e2e8f0"}
-            projectProgressColor={isDarkMode ? "#1f2937" : "#2c7a7b"}
-            projectProgressSelectedColor={isDarkMode ? "#000" : "#2563eb"}
           />
+        </div>
+
+        {/* Export Button */}
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={exportToCSV}
+            className="flex items-center gap-2 text-slate-800 hover:text-slate-700 focus:outline-none"
+          >
+            <Download size={16} />
+            Generate Report
+          </button>
         </div>
       </div>
     </div>
