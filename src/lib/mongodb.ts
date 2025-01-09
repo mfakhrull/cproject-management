@@ -1,10 +1,9 @@
-// src/lib/mongodb.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const MONGO_URI = process.env.MONGO_URI as string;
 
 if (!MONGO_URI) {
-  throw new Error('Please define the MONGO_URI environment variable inside .env.local');
+  throw new Error("Please define the MONGO_URI environment variable inside .env.local");
 }
 
 interface ICached {
@@ -32,20 +31,26 @@ if (!cached) {
 
 async function dbConnect(): Promise<mongoose.Connection> {
   if (cached.conn) {
+    console.log("MongoDB already connected"); // Log if already connected
     return cached.conn;
   }
 
   if (!cached.promise) {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
-      dbName: 'project-management',
+      dbName: "project-management",
       serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
     };
 
     cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
+      console.log("MongoDB connected successfully"); // Log on successful connection
       return mongoose.connection;
+    }).catch((err) => {
+      console.error("MongoDB connection failed:", err.message); // Log error on failure
+      throw err; // Re-throw error to handle it upstream
     });
   }
+
   cached.conn = await cached.promise;
   return cached.conn;
 }
