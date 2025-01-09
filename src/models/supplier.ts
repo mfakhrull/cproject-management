@@ -58,7 +58,7 @@ export interface SupplierDocument extends mongoose.Document {
   phone: string;
   address: string;
   materials: string[];
-  complianceDocs: ComplianceDoc[];
+  complianceDocs: (ComplianceDoc & { _id: mongoose.Types.ObjectId })[];
   orderHistory: OrderHistory[];
   supplierClerkId: string | null;
 }

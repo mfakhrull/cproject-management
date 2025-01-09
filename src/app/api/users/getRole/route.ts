@@ -1,32 +1,37 @@
-// src/pages/api/users/getRole.ts
-
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import {User} from "@/models"; // Import your User model
+import { User } from "@/models";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  await dbConnect(); // Connect to the database
-
-  const { userId } = req.query;
-
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  if (!userId || typeof userId !== "string") {
-    return res.status(400).json({ error: "Invalid or missing userId parameter" });
-  }
+export async function GET(req: NextRequest) {
+  await dbConnect(); // Ensure database connection
 
   try {
-    const user = await User.findOne({ clerk_id: userId }); // Adjust based on your schema
+    // Extract `userId` from query parameters
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Invalid or missing userId parameter" },
+        { status: 400 }
+      );
     }
 
-    return res.status(200).json({ role: user.role }); // Assuming "role" is a field in your User model
+    // Find the user in your database using the Clerk ID
+    const user = await User.findOne({ clerk_id: userId });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Return the user's role
+    return NextResponse.json({ role: user.role }, { status: 200 });
   } catch (error) {
     console.error("Error fetching user role:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
