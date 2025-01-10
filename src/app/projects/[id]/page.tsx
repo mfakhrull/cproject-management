@@ -37,8 +37,8 @@ const ProjectPage = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         projectId={projectId} // Pass projectId to ProjectHeader
+        refreshProjectList={() => {}} // Pass a dummy function or implement the actual function
       />
-
       {/* Conditional Rendering of Tabs */}
       {activeTab === "Board" && (
         <BoardView
