@@ -47,7 +47,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   onUpdate,
   isButtonDisabled = false, // Default to false if not provided
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
   const dispatch = useAppDispatch();
 
   const handleUpdate = (updatedProject: IProject) => {

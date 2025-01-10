@@ -294,21 +294,19 @@ const HomePage = () => {
     <div className="flex min-h-screen justify-center bg-gray-100">
       <div className="container mx-auto max-w-[90%] px-4 sm:px-6 lg:px-8">
         <div className="w-full py-8">
-        <div className="mt-4 flex items-center justify-between">
-  {/* Header */}
-  <Header name="Project Management Dashboard" />
+          <div className="mt-4 flex items-center justify-between">
+            {/* Header */}
+            <Header name="Project Management Dashboard" />
 
-  {/* Export Button */}
-  <button
-    onClick={exportToExcel}
-    className="-mt-8 flex items-center gap-1 text-slate-800 hover:text-slate-700 focus:outline-none whitespace-nowrap"
-  >
-    <Download size={16} className="inline" />
-    Generate Report
-  </button>
-</div>
-
- 
+            {/* Export Button */}
+            <button
+              onClick={exportToExcel}
+              className="-mt-8 flex items-center gap-1 whitespace-nowrap text-slate-800 hover:text-slate-700 focus:outline-none"
+            >
+              <Download size={16} className="inline" />
+              Generate Report
+            </button>
+          </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

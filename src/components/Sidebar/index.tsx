@@ -23,6 +23,7 @@ import {
   X,
   Files,
   FileChartPie,
+  PlusSquare,
 } from "lucide-react";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
 import Image from "next/image";
@@ -35,6 +36,8 @@ import { useUserPermissions } from "@/context/UserPermissionsContext";
 import FloatingTooltip from "@/components/FloatingTooltip";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import ModalNewProject from "@/app/projects/ModalNewProject";
+
 
 interface Project {
   _id: string;
@@ -57,12 +60,14 @@ const Sidebar: React.FC = () => {
   const { user } = useUser();
   const username = user?.username;
 
+  const [isModalNewProjectOpen, setIsModalNewProjectOpen] = useState(false);
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
   );
-  const refreshProjects = useAppSelector(
+  const [refreshProjects, setRefreshProjects] = useState(0); // Use this to trigger re-fetching
+  const refreshProjectsFromUpdates = useAppSelector(
     (state) => state.global.refreshProjects,
   ); // Listen for project refresh changes
 
@@ -71,7 +76,6 @@ const Sidebar: React.FC = () => {
       isSidebarCollapsed ? "w-0 hidden" : "w-64"
     }`;
 
-  useEffect(() => {
     const fetchProjects = async () => {
       setIsLoadingProjects(true);
       try {
@@ -80,17 +84,17 @@ const Sidebar: React.FC = () => {
           permissions: JSON.stringify(permissions),
           employeeId: employeeId || "",
         };
-
+  
         const response = await fetch("/api/projects/read", {
           method: "GET",
           headers,
         });
-
+  
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || "Failed to fetch projects");
         }
-
+  
         const data: Project[] = await response.json();
         setProjects(data);
         setError(null);
@@ -102,17 +106,28 @@ const Sidebar: React.FC = () => {
         setIsLoadingProjects(false);
       }
     };
-
-    if (permissions && employeeId) {
-      fetchProjects();
-    }
-  }, [refreshProjects, permissions, employeeId]); // Added permissions and employeeId as dependencies
+  
+    useEffect(() => {
+      if (permissions && employeeId) {
+        fetchProjects();
+      }
+    }, [refreshProjects, refreshProjectsFromUpdates, permissions, employeeId]);
+  
+    // Function to trigger a manual refresh
+    const refreshProjectList = () => {
+      setRefreshProjects((prev) => prev + 1);
+    };
 
   const canAccessContractAnalysis =
     permissions.includes("admin") ||
     permissions.includes("project_manager") ||
     permissions.includes("procurement_team") ||
     permissions.includes("can_access_contract_analysis");
+
+  const canCreateProject =
+    permissions.includes("can_create_project") ||
+    permissions.includes("admin") ||
+    permissions.includes("project_manager");
 
   return (
     <div className={sidebarClassNames}>
@@ -138,7 +153,7 @@ const Sidebar: React.FC = () => {
         {!isSidebarCollapsed && (
           <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 px-8 py-4 dark:border-gray-700">
             <Image
-              src="https://res.cloudinary.com/dftpdqp65/image/upload/v1735640295/Untitled_design_2_xelkqd.png" // Placeholder for logo - update as needed
+              src="https://res.cloudinary.com/dftpdqp65/image/upload/v1736444341/Final_Logo_Nexion_tyrfrc.png" // Placeholder for logo - update as needed
               alt="Logo"
               width={60}
               height={40}
@@ -244,7 +259,28 @@ const Sidebar: React.FC = () => {
           )}
         </button>
         {showProjects && (
-          <div className="">
+          <div>
+            {/* New Project Button */}
+            {canCreateProject ? (
+              <button
+                className="mx-8 my-2 flex w-48 items-center justify-center rounded-md bg-gray-200/60 px-3 py-2 text-gray-700 font-medium hover:bg-gray-300"
+                onClick={() => setIsModalNewProjectOpen(true)}
+              >
+                <PlusSquare className="mr-2 h-5 w-5" />
+                New Project
+              </button>
+            ) : (
+              <FloatingTooltip message="Permission Required">
+                <button
+                  className="mx-8 my-2 flex w-full cursor-not-allowed items-center justify-center rounded-md bg-gray-200 px-3 py-2 text-gray-400"
+                  disabled
+                >
+                  <PlusSquare className="mr-2 h-5 w-5" />
+                  New Project
+                </button>
+              </FloatingTooltip>
+            )}
+
             {isLoadingProjects ? (
               <p className="text-gray-500">Loading projects...</p>
             ) : error ? (
@@ -264,14 +300,16 @@ const Sidebar: React.FC = () => {
           </div>
         )}
 
+        {/* Modal for Adding a New Project */}
+        <ModalNewProject
+          isOpen={isModalNewProjectOpen}
+          onClose={() => setIsModalNewProjectOpen(false)}
+          onProjectAdded={refreshProjectList} // Call refreshProjectList after adding a project
+        />
+
         <nav>
-          <SidebarLink
-            icon={User}
-            label="My Profile"
-            href="/employees/me"
-            isCollapsed={isSidebarCollapsed}
-          />
-          <SidebarLink
+          
+          {/* <SidebarLink
             icon={User}
             label="Users"
             href="/users"
@@ -282,7 +320,7 @@ const Sidebar: React.FC = () => {
             label="Teams"
             href="/teams"
             isCollapsed={isSidebarCollapsed}
-          />
+          /> */}
         </nav>
 
         {/* PRIORITIES LINKS */}
@@ -335,6 +373,12 @@ const Sidebar: React.FC = () => {
           <hr className="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
         </div>
         <nav>
+        <SidebarLink
+            icon={User}
+            label="My Profile"
+            href="/employees/me"
+            isCollapsed={isSidebarCollapsed}
+          />
           <SidebarLink
             icon={History}
             label="History"

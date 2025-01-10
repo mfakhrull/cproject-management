@@ -44,6 +44,7 @@ const Navbar: React.FC = () => {
         {/* Dark Mode Toggle */}
         <button
           onClick={() => dispatch(setIsDarkMode(!isDarkMode))}
+          disabled
           className={
             isDarkMode
               ? "rounded p-2 dark:hover:bg-gray-700"
@@ -59,7 +60,7 @@ const Navbar: React.FC = () => {
 
         {/* Settings Link */}
         <Link
-          href="/settings"
+          href=""
           className={
             isDarkMode
               ? "h-min w-min rounded p-2 dark:hover:bg-gray-700"

@@ -1,4 +1,3 @@
-// src\app\projects\ProjectHeader.tsx
 "use client";
 
 import Header from "@/components/Header";
@@ -22,9 +21,15 @@ type Props = {
   activeTab: string;
   setActiveTab: (tabName: string) => void;
   projectId: string; // Pass the current project ID to link to the details page
+  refreshProjectList: () => void; // Add this prop to refresh the sidebar
 };
 
-const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
+const ProjectHeader = ({
+  activeTab,
+  setActiveTab,
+  projectId,
+  refreshProjectList,
+}: Props) => {
   const { permissions } = useUserPermissions(); // Get user permissions
   const canCreateProject =
     permissions.includes("can_create_project") || // Permission check
@@ -52,15 +57,12 @@ const ProjectHeader = ({ activeTab, setActiveTab, projectId }: Props) => {
     if (projectId) fetchProject();
   }, [projectId]);
 
-  // Disable button logic
-  const isButtonDisabled =
-    !permissions.includes("admin") && !permissions.includes("project_manager");
-
   return (
     <div className="px-4 xl:px-6">
       <ModalNewProject
         isOpen={isModalNewProjectOpen}
         onClose={() => setIsModalNewProjectOpen(false)}
+        onProjectAdded={refreshProjectList} // Call this function to refresh the sidebar
       />
       <div className="pb-6 pt-6 lg:pb-4 lg:pt-8">
         <Header
