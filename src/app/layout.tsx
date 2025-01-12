@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import DashboardWrapper from "../components/DashboardWrapper";
 
+// Disable fetch-based caching globally
+export const fetchCache = 'force-no-store';
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

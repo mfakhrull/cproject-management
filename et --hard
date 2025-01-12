@@ -1,0 +1,369 @@
+[33mcommit 911745c1d8a35e2a2bf3d57604906281d1db0115[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 22:11:52 2025 +0800
+
+    enhance GET open opportunities API to fully disable caching with additional headers
+
+[33mcommit 3545cb2318b69d6d3ea9a04886160ea99f0da51b[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 21:57:15 2025 +0800
+
+    enhance GET open opportunities API to include project details and disable caching
+
+[33mcommit ffc3bc44ba2c75e7ec72c0df7b559347dadc8160[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 21:27:23 2025 +0800
+
+    debug error fetching bid details in production
+
+[33mcommit 3d8252c881f2da24a0673d7c3c36ff61c439672e[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 20:39:03 2025 +0800
+
+    refactor bid management feature to use api instead of server action to avoid erro in production
+
+[33mcommit 3124fc9eb75d185217ed580313aea306d17159ab[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 18:41:06 2025 +0800
+
+    resolve the MissingSchemaError in your Vercel deployment
+
+[33mcommit 931fac845f4986e51d3f49029ba50dae7fdd62a4[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 18:24:50 2025 +0800
+
+    fix Project model is not registered in deployment by importing project in EditorDocument model
+
+[33mcommit c16708094726cf0707185ca80edc0859c0dd898c[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 18:06:32 2025 +0800
+
+    fix Project model is not registered in deployment
+
+[33mcommit f2bc72db438863baa1320a72f0958b6adbe13bdb[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 17:46:08 2025 +0800
+
+    update opportunities page to use api instead of server action
+
+[33mcommit 1b345b0c5242d80ea8ada772bd6bfafea9929634[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 13:22:22 2025 +0800
+
+    add contractor management feature
+
+[33mcommit 77ed19e1e81978f0c1ca2a9007e3e9ece3f7592d[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 12 01:08:02 2025 +0800
+
+    Revert "delete seed that cause data lost when deploy"
+    
+    This reverts commit 077afa5e4bb904a17aae13e1f522e382b6ec6a23.
+
+[33mcommit 077afa5e4bb904a17aae13e1f522e382b6ec6a23[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Fri Jan 10 12:30:37 2025 +0800
+
+    delete seed that cause data lost when deploy
+
+[33mcommit c837138ef32b3d32178385c30c331c5da1b0124e[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Fri Jan 10 09:23:41 2025 +0800
+
+    debug project header props in project details page
+
+[33mcommit b6f357e52b8fea03fd036fbb94c05a1f7edd6e1a[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Fri Jan 10 09:12:02 2025 +0800
+
+    fix sidebar to refetch project once new project created
+
+[33mcommit 2bdad57398ace55b776a7e518747459493a9d114[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Jan 9 13:24:09 2025 +0800
+
+    update mongodb error and success log
+
+[33mcommit 90592a34320c3551b11bb99864b7fa2ae9baec7e[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Jan 9 09:40:50 2025 +0800
+
+    Optimize build and cleanup unused files
+    
+    - Removed unused API routes: deleteItem, searchItems, updateItem.
+    - Removed unused components: ProjectCard, UserCard.
+    - Deleted unused search page.
+    - Updated `getRole` API route for improved server handling.
+    - Optimized `layout.tsx` and `next.config.mjs` for better performance.
+    - Cleaned up supplier model.
+    - Updated dependencies in `package.json` and `package-lock.json`.
+
+[33mcommit 778a8a6781f4dd97dc8e6f0cc78b10a17111fe26[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Jan 8 02:54:03 2025 +0800
+
+    add export to csv feature for data analysis
+
+[33mcommit c6c039ad550bc3a9e451a59de21c64bcb63124ba[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Jan 5 16:55:54 2025 +0800
+
+    debug timeline to update new api and update the styling
+
+[33mcommit 3b45d9ee271c3cb6829aa3739f7443e7c3d4422b[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Tue Dec 31 23:32:16 2024 +0800
+
+    fix bug on priority page to request from proper api
+
+[33mcommit 15db3cfb8bb73adf019110a01e0b433207c58657[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Mon Dec 30 22:49:31 2024 +0800
+
+    update homepage chart backend to only fetch based on users related project or task and role, update project list side bar to fetch based on user realted project and role
+
+[33mcommit c0f4ae729f5b5788c51af7aad09dd18f597b3488[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Mon Dec 30 16:27:17 2024 +0800
+
+    add maintenance item table and maintenance status distribution chart, add leave application table for both employee and manager
+
+[33mcommit 905c4611289775775290226e7eeacfbbf19ee906[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Mon Dec 30 13:10:57 2024 +0800
+
+    Create Maintenance Item component in dahboard to track upcoming maintenance and the maintenance type, update inventory  modal to save maintenance histoery and maintenance type, update add and  edit specific item modal to recieve more input due to model update, update project status chart style to use shadcnui
+
+[33mcommit 5fce0f1384055c1cea30e357e2f883c7de3c9def[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Dec 29 17:28:03 2024 +0800
+
+    update leaves for manager and employee page to differentiat the role, update task to have mulitiple assignees, make assignees modal
+
+[33mcommit ff31cfdcede11eab42470112950a16c374237308[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Dec 28 02:58:00 2024 +0800
+
+    update user contracts to show all contract instead of just user's own uploaded contract, update prompt on ai services to reduce chances of failure by json format problem
+
+[33mcommit 076c3856570ddab39298c06e8265f35f75eff525[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Fri Dec 27 23:21:01 2024 +0800
+
+    update permission access for bid management, update bid management UI, update submitted bid page to only show user own submitted bid if no permission, update UI/UX for contract analysis, update prompt for ai service to be more specific related to contract
+
+[33mcommit abe86e253a275c0fb2c0855435ec6b85a80459b9[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Fri Dec 27 00:14:18 2024 +0800
+
+    fix bug for supplier details to ensure empty array if data doensn't exist, update search functionality in suppliers page
+
+[33mcommit dbdce9d223e8f451d487833cd479501d98312039[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Dec 26 21:55:39 2024 +0800
+
+    update webhook to check if user role include supplier to update supplier clerkId, update supplier data model to include more information and compliance, update permission access for supplier details page
+
+[33mcommit 932af64f9ff056fd30de390755010a270cbadfde[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Dec 26 14:20:44 2024 +0800
+
+    update inventory item page to add update and delete features, update permission access check for button
+
+[33mcommit 99a76d89b27148d2a4b47952d084a36ec54b5074[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Dec 25 23:21:49 2024 +0800
+
+    update permisson access for task details page
+
+[33mcommit a2d58bf3db26768ca5359ff56ec41f6080e998cc[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Dec 25 21:53:39 2024 +0800
+
+    update permission access for boardview task page
+
+[33mcommit fa21dc46eac2c8a6a8930d851815effaa2fdd102[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Dec 25 21:15:33 2024 +0800
+
+    update access permission for project details and necessary add tooltip
+
+[33mcommit 582b28032682ac15d48cef45e52c72abfb98a452[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Tue Dec 24 20:58:16 2024 +0800
+
+    update user model and employee model to save user permisson for easier role base access implementation. update webhook to save user rolePermission on created user. update user when employee name, role or permission is updated. Create context provider for role permission
+
+[33mcommit 6791d7402b322fb6487b7581afc76b6a24c77d31[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Tue Dec 24 12:07:28 2024 +0800
+
+    make activity log responsive and can be toggle open and close
+
+[33mcommit 19c6884ffab117a60b4405f1ebff8da924cacc41[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Tue Dec 24 00:09:30 2024 +0800
+
+    update activity log feature to track more detailed time activity, attachment activity, and add comment features with reply feature
+
+[33mcommit fdd62f961a999b0c155c8b61280889640ec36da1[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Dec 22 23:28:08 2024 +0800
+
+    create upload attachment feature for task
+
+[33mcommit bb5ff14a2af9d01a0dd755e8c848b8144c42268e[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Dec 22 12:06:07 2024 +0800
+
+    update Task Details page to track activity (currently just timer activity)  and update task detail
+
+[33mcommit 26ebc184e3aa7938d51a2d6dddf58d1eb5b0e6b5[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Dec 21 16:46:44 2024 +0800
+
+    create submitted bid details page for showing necessary details and update status
+
+[33mcommit a1be398b213c5cc9b0acbf10cba7a65b07ded412[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Dec 21 11:56:12 2024 +0800
+
+    update update project feature UX, automatically update project list in sidebar and debug team members to refetch after project update
+
+[33mcommit dfd6c1e2ff7477a803500a3e49c9177dd6ee2da7[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Fri Dec 20 16:33:05 2024 +0800
+
+    add delete attachment feature and update project details page UI
+
+[33mcommit 4844371cdce3e20aaf7c84f764946bb01996e600[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Dec 19 14:10:30 2024 +0800
+
+    create add and delete team members features for project
+
+[33mcommit d6f0d6ae59365cbabe36484235c61a836950f217[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Dec 18 01:38:15 2024 +0800
+
+    add action button for task card to peek, see detail and delete
+
+[33mcommit b518ba5a9ce15e841ec0d64b071108e1f060e5c3[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Dec 18 00:07:00 2024 +0800
+
+    create project history page and features to delete project
+
+[33mcommit 827d120aeee97427a9d6ebf861b4812668b7dd40[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Mon Dec 16 00:03:28 2024 +0800
+
+    implement leave application and approval features
+
+[33mcommit 17df1cd1516c4dcc25098049ea21510f3af27b81[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Dec 15 12:50:26 2024 +0800
+
+    create employee management feature
+
+[33mcommit 213d0b7fed70a263cee9e31ebd1349cfc64649f6[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Tue Dec 10 12:36:26 2024 +0800
+
+    implement contract management features
+
+[33mcommit faac8a171bc156bac5e06ce7117b4268cc5481e5[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Tue Dec 3 15:31:52 2024 +0800
+
+    add approve bid card in project details page
+
+[33mcommit 2d7c12f9be765c2aec80bc184c565dbf07de3029[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Dec 1 21:45:13 2024 +0800
+
+    update submitted-bid action backend to automatically update opportunity document with status to closed and assignedContractorID
+
+[33mcommit 5f883dea9b331b693e9e6ed913c2df591b253a86[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sun Dec 1 14:20:03 2024 +0800
+
+    setup bid-submission and submitted-bids page
+
+[33mcommit 8bde1880ac22215550161b137ef630833f06405f[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Nov 30 14:24:12 2024 +0800
+
+    add button to go to editor from project details and bring projectID and name with it, update editor to save project id and deadline
+
+[33mcommit b92ff3311f78029177a05a4a38ad7ed87d2f53d5[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Nov 30 02:13:03 2024 +0800
+
+    setup opportunity lise page and specific oppportunity page
+
+[33mcommit 405a56b33bad13f10774e9c59f908a1548b4b8ad[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Fri Nov 29 16:44:07 2024 +0800
+
+    setup platejs text editor
+
+[33mcommit 6469220e5bfa6086a8f0a2dc740420c19a993f31[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Nov 23 22:43:27 2024 +0800
+
+    fix project details api to use the correct populate, update model to use virtual field to join the data
+
+[33mcommit 421f99530a83f5e72a0671e17af74e376b28e60a[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Nov 23 21:54:42 2024 +0800
+
+    create attachment feature to upload and downloan file, setup cloudify
+
+[33mcommit b6bdd10d55765b8cbb5808484c6fd5ee99bab4f7[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Sat Nov 23 00:00:54 2024 +0800
+
+    make project details page and implement material request feature
+
+[33mcommit 772a345ee8b02c8c3a5dd4bd2a82096ab2b54a94[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Nov 21 02:51:00 2024 +0800
+
+    develop inventory management feature
+
+[33mcommit bee3ddde0d34b8364a46e2a2f8eea5da9619bc66[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Nov 20 17:56:10 2024 +0800
+
+    update task pages
+
+[33mcommit d4fcba15b78dde54b60adc2d8bd4865b3252a1b1[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Wed Nov 20 09:37:41 2024 +0800
+
+    make the frontend works
+
+[33mcommit d6d91bd6addca846de9b80b8c203a08634e4420e[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Nov 14 20:44:00 2024 +0800
+
+    setup the backend
+
+[33mcommit ffd759ce14539b386705c8b96175b05e71473ba1[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Thu Nov 14 04:38:58 2024 +0800
+
+    setup dashbaord wrapper, navbar, sidebar, redux, databse models
+
+[33mcommit a16fbd7250abd5a146942e2fa422a591144752b4[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Tue Nov 12 01:59:02 2024 +0800
+
+    make webhooks work
+
+[33mcommit db1446a280b35912e78b50aceb2d071200701976[m
+Author: mfakhrull <mfakrul383@gmail.com>
+Date:   Mon Nov 11 14:27:17 2024 +0800
+
+    Initial commit, setup database, clerk webhooks, models, clerk
