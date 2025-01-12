@@ -17,9 +17,11 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Disable caching by adding Cache-Control header
+    // Disable caching completely with multiple headers
     const response = NextResponse.json(documents, { status: 200 });
-    response.headers.set("Cache-Control", "no-store, max-age=0");
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
     return response;
   } catch (error) {
     console.error("Error fetching open opportunities:", error);

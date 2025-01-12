@@ -13,7 +13,12 @@ export default function DocumentsPage() {
   useEffect(() => {
     async function fetchOpportunities() {
       try {
-        const response = await fetch("/api/documents/getOpenOpportunities");
+        const response = await fetch("/api/documents/getOpenOpportunities", {
+          cache: 'no-store',
+          headers: {
+            'Pragma': 'no-cache',
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch open opportunities");
         }
