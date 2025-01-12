@@ -1,6 +1,5 @@
 // src/models/EditorDocument.ts
 import mongoose from "mongoose";
-import { Project } from "@/models"; // Import the Project model
 
 export interface IEditorDocument extends mongoose.Document {
   content: any[];
@@ -8,8 +7,8 @@ export interface IEditorDocument extends mongoose.Document {
   projectId: mongoose.Types.ObjectId;
   title?: string;
   deadline?: Date;
-  status?: string; // New field for status
-  assignedContractorId?: string; // Optional field for assigned contractor
+  status?: string;
+  assignedContractorId?: string;
   createdAt?: Date;
 }
 
@@ -24,7 +23,7 @@ const EditorDocumentSchema = new mongoose.Schema({
   },
   projectId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Project",
+    ref: "Project", // Just use the string reference, no need to import Project
     required: true,
   },
   title: {
@@ -36,11 +35,11 @@ const EditorDocumentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["OPEN", "CLOSED"], // Status can be either "OPEN" or "CLOSED"
+    enum: ["OPEN", "CLOSED"],
     default: "OPEN",
   },
   assignedContractorId: {
-    type: String, // Clerk user ID of the assigned contractor
+    type: String,
     ref: "User",
     default: null,
   },
@@ -50,5 +49,13 @@ const EditorDocumentSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.models.EditorDocument ||
-  mongoose.model<IEditorDocument>("EditorDocument", EditorDocumentSchema);
+// Add this if you need any virtual populate
+EditorDocumentSchema.virtual('project', {
+  ref: 'Project',
+  localField: 'projectId',
+  foreignField: '_id',
+  justOne: true
+});
+
+const EditorDocument = mongoose.models.EditorDocument || mongoose.model<IEditorDocument>("EditorDocument", EditorDocumentSchema);
+export default EditorDocument;
