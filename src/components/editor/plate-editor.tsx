@@ -23,8 +23,8 @@ export function PlateEditor() {
   const [deadline, setDeadline] = useState('');
   const [status, setStatus] = useState('OPEN'); // New state for status
   const searchParams = useSearchParams();
-  const projectId = searchParams.get("projectId");
-  const projectName = searchParams.get("projectName");
+  const projectId = searchParams ? searchParams.get("projectId") : null;
+  const projectName = searchParams ? searchParams.get("projectName") : null;
 
   const handleSave = async () => {
     if (!userId || !projectId) {

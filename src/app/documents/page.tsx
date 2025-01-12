@@ -1,28 +1,24 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getOpenOpportunities } from "@/app/action/documentActions";
 import { Search } from "lucide-react";
 
 export default function DocumentsPage() {
-  const { userId } = useAuth();
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [filteredOpportunities, setFilteredOpportunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    if (!userId) {
-      // Redirect to login if userId is null or undefined
-      window.location.href = "/sign-in";
-      return;
-    }
-
     async function fetchOpportunities() {
       try {
-        const docs = await getOpenOpportunities(); // Add non-null assertion `!`
+        const response = await fetch("/api/documents/getOpenOpportunities");
+        if (!response.ok) {
+          throw new Error("Failed to fetch open opportunities");
+        }
+
+        const docs = await response.json();
         setOpportunities(docs);
         setFilteredOpportunities(docs); // Initialize filtered list
       } catch (error) {
@@ -33,7 +29,7 @@ export default function DocumentsPage() {
     }
 
     fetchOpportunities();
-  }, [userId]);
+  }, []);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = event.target.value.toLowerCase();

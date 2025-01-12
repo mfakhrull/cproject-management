@@ -3,7 +3,6 @@
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { PlateReader } from "@/components/editor/plate-reader";
-import { getDocumentById } from "@/app/action/documentActions";
 import Link from "next/link";
 import { Calendar, ClipboardCheck, FileText, Users } from "lucide-react";
 import { useUserPermissions } from "@/context/UserPermissionsContext";
@@ -28,7 +27,12 @@ export default function DocumentDetailPage({
 
     async function fetchDocument() {
       try {
-        const doc = await getDocumentById(params.id); // Add non-null assertion `!`
+        const response = await fetch(`/api/documents/${params.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch document");
+        }
+
+        const doc = await response.json();
         setDocument(doc);
       } catch (error) {
         console.error("Error fetching document:", error);
@@ -68,8 +72,6 @@ export default function DocumentDetailPage({
   return (
     <div className="container mx-auto space-y-4 p-4">
       {/* Document Title */}
-
-      {/* Associated Details */}
       <div className="relative flex flex-col rounded-lg bg-white p-6 shadow-md">
         {/* Details Section */}
         <div className="pb-8">
@@ -142,23 +144,12 @@ export default function DocumentDetailPage({
             </Link>
           )}
 
-          {/* {!canViewSubmittedBids ? (
-            <FloatingTooltip message="Permission Required">
-              <button
-                disabled
-                className="inline-flex cursor-not-allowed items-center justify-center rounded bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400"
-              >
-                View Submitted Bids
-              </button>
-            </FloatingTooltip>
-          ) : ( */}
-            <Link
-              href={`/projects/${document.projectId?._id}/submitted-bids`}
-              className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-            >
-              View Submitted Bids
-            </Link>
-          {/* )} */}
+          <Link
+            href={`/projects/${document.projectId?._id}/submitted-bids`}
+            className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+          >
+            View Submitted Bids
+          </Link>
         </div>
       </div>
 
