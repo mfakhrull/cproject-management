@@ -1,5 +1,6 @@
 // src/models/EditorDocument.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import { Project } from "@/models"; // Import the Project model
 
 export interface IEditorDocument extends mongoose.Document {
   content: any[];
@@ -23,24 +24,24 @@ const EditorDocumentSchema = new mongoose.Schema({
   },
   projectId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project',
+    ref: "Project",
     required: true,
   },
   title: {
     type: String,
-    default: 'Untitled Document',
+    default: "Untitled Document",
   },
   deadline: {
     type: Date,
   },
   status: {
     type: String,
-    enum: ['OPEN', 'CLOSED'], // Status can be either "OPEN" or "CLOSED"
-    default: 'OPEN',
+    enum: ["OPEN", "CLOSED"], // Status can be either "OPEN" or "CLOSED"
+    default: "OPEN",
   },
   assignedContractorId: {
     type: String, // Clerk user ID of the assigned contractor
-    ref: 'User',
+    ref: "User",
     default: null,
   },
   createdAt: {
@@ -50,4 +51,4 @@ const EditorDocumentSchema = new mongoose.Schema({
 });
 
 export default mongoose.models.EditorDocument ||
-  mongoose.model<IEditorDocument>('EditorDocument', EditorDocumentSchema);
+  mongoose.model<IEditorDocument>("EditorDocument", EditorDocumentSchema);
