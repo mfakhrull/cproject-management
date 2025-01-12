@@ -46,3 +46,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Failed to fetch employee data" }, { status: 500 });
   }
 }
+
+export const revalidate = 0;

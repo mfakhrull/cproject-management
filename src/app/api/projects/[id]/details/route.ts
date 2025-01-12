@@ -39,3 +39,5 @@ export async function GET(req: Request, context: { params: { id: string } }) {
     return NextResponse.json({ message: `Error: ${error.message}` }, { status: 500 });
   }
 }
+
+export const revalidate = 0;

@@ -14,3 +14,5 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: "Failed to fetch employee" }, { status: 500 });
   }
 }
+
+export const revalidate = 0;

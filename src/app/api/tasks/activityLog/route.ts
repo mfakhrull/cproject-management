@@ -27,6 +27,8 @@ export async function GET(req: Request) {
   }
 }
 
+export const revalidate = 0;
+
 
 // Log an activity for a task
 export async function POST(req: Request) {

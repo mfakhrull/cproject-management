@@ -24,6 +24,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
   }
 
+  export const revalidate = 0;
+
+
 // POST: Upload Attachment
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   await dbConnect();

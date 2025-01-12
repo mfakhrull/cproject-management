@@ -35,3 +35,5 @@ console.log(projectsWithManagers);
     );
   }
 }
+
+export const revalidate = 0;

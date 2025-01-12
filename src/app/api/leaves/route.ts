@@ -46,3 +46,5 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch leave requests" }, { status: 500 });
   }
 }
+
+export const revalidate = 0;

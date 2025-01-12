@@ -58,3 +58,5 @@ export async function GET(req: Request): Promise<NextResponse> {
     );
   }
 }
+
+export const revalidate = 0;

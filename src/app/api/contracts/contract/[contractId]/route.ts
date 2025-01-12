@@ -28,3 +28,5 @@ export async function GET(req: Request, context: { params: { contractId: string 
     );
   }
 }
+
+export const revalidate = 0;

@@ -48,6 +48,9 @@ export async function GET(req: NextRequest, { params }: { params: { bidId: strin
   }
 }
 
+export const revalidate = 0;
+
+
 // Update bid status
 export async function PATCH(req: NextRequest, { params }: { params: { bidId: string } }) {
   const { status, documentId } = await req.json();
