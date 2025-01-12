@@ -91,6 +91,17 @@ const ModalNewTask = ({ isOpen, onClose, projectId }: Props) => {
       toast.success("Task created successfully!");
       fetchTasks(projectId); // Refresh tasks via context
       onClose(); // Close the modal on success
+
+      // Clear the form fields
+      setTitle("");
+      setDescription("");
+      setStatus("TODO");
+      setPriority("MEDIUM");
+      setTags("");
+      setStartDate("");
+      setDueDate("");
+      setAuthorUserId("");
+      setAssignedUserIds([]);
     } catch (error) {
       console.error("Error creating task:", error);
       toast.error("Error creating task");

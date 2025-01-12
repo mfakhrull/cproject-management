@@ -31,7 +31,7 @@ if (!cached) {
 
 async function dbConnect(): Promise<mongoose.Connection> {
   if (cached.conn) {
-    console.log("MongoDB already connected"); // Log if already connected
+    // console.log("MongoDB already connected"); // Log if already connected
     return cached.conn;
   }
 

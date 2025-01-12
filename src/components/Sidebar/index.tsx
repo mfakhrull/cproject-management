@@ -26,6 +26,7 @@ import {
   PlusSquare,
 } from "lucide-react";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
+import EngineeringIcon from '@mui/icons-material/Engineering';
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -207,6 +208,12 @@ const Sidebar: React.FC = () => {
             icon={PrecisionManufacturingOutlinedIcon}
             label="Supplier Management"
             href="/inventory/suppliers"
+            isCollapsed={isSidebarCollapsed}
+          />
+          <SidebarLink
+            icon={EngineeringIcon }
+            label="Contractor Management"
+            href="/inventory/contractors"
             isCollapsed={isSidebarCollapsed}
           />
           <SidebarLink
