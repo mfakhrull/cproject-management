@@ -1,4 +1,3 @@
-// src/components/editor/plate-editor.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -12,8 +11,6 @@ import { Plate } from '@udecode/plate-common/react';
 import { useCreateEditor } from '@/components/editor/use-create-editor';
 import { SettingsDialog } from '@/components/editor/settings';
 import { Editor, EditorContainer } from '@/components/plate-ui/editor';
-
-import { saveDocument } from '@/app/action/documentActions';
 
 export function PlateEditor() {
   const { userId } = useAuth();
@@ -33,22 +30,32 @@ export function PlateEditor() {
     }
 
     setIsSaving(true);
-    const formData = new FormData();
-    formData.append('content', JSON.stringify(editor.children));
-    formData.append('title', title);
-    formData.append('projectId', projectId);
-    formData.append('deadline', deadline);
-    formData.append('status', status); // Pass the status to the backend
 
     try {
-      const result = await saveDocument(userId, formData);
-      if (result.success) {
+      const response = await fetch('/api/documents/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          content: JSON.stringify(editor.children),
+          title,
+          projectId,
+          deadline,
+          status, // Pass the status to the backend
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
         toast.success('Document saved successfully!', {
           description: `Document ID: ${result.documentId}`,
         });
       } else {
         toast.error('Failed to save document', {
-          description: result.error,
+          description: result.message || 'Unknown error',
         });
       }
     } catch (error) {

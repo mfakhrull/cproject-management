@@ -3,6 +3,65 @@ import dbConnect from "@/lib/mongodb";
 import Bid from "@/models/Bid";
 import cloudinary from "@/utils/cloudinary";
 import mongoose from "mongoose";
+import { User } from "@/models";
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const projectId = searchParams.get("projectId");
+  const userId = searchParams.get("userId");
+  const permissions = searchParams.get("permissions")?.split(",") || [];
+
+  if (!projectId || !userId) {
+    return NextResponse.json(
+      { success: false, message: "Project ID and User ID are required" },
+      { status: 400 }
+    );
+  }
+
+  await dbConnect();
+
+  try {
+    const canViewAllBids =
+      permissions.includes("admin") ||
+      permissions.includes("project_manager") ||
+      permissions.includes("procurement_team") ||
+      permissions.includes("can_see_all_submitted_bid");
+
+    let bids;
+
+    if (canViewAllBids) {
+      bids = await Bid.find({ projectId }).sort({ createdAt: -1 }).lean();
+    } else {
+      bids = await Bid.find({ projectId, contractorId: userId })
+        .sort({ createdAt: -1 })
+        .lean();
+    }
+
+    const contractorIds = bids.map((bid) => bid.contractorId);
+    const contractors = await User.find({ clerk_id: { $in: contractorIds } })
+      .select("clerk_id username")
+      .lean();
+
+    const bidsWithContractors = bids.map((bid) => {
+      const contractor = contractors.find(
+        (user) => user.clerk_id === bid.contractorId
+      );
+      return {
+        ...bid,
+        contractorName: contractor ? contractor.username : "Unknown Contractor",
+        documentId: bid.documentId,
+      };
+    });
+
+    return NextResponse.json({ success: true, bids: bidsWithContractors });
+  } catch (error) {
+    console.error("Error fetching submitted bids:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch submitted bids" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

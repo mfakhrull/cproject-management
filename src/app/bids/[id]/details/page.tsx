@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getBidDetails } from "@/app/action/bidActions"; // Action to fetch bid details
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 
 export default function BidDetailsPage() {
-  const { id } = useParams();
+  const { id } = useParams() as { id: string | string[] };
   const { userId } = useAuth();
   const router = useRouter();
   const [bid, setBid] = useState<any>(null);
@@ -31,8 +30,12 @@ export default function BidDetailsPage() {
 
     async function fetchBidDetails() {
       try {
-        const response = await getBidDetails(bidId, userId!); // bidId is now guaranteed to be a string
-        setBid(response);
+        const response = await fetch(`/api/bids?bidId=${bidId}&userId=${userId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch bid details");
+        }
+        const data = await response.json();
+        setBid(data.bid);
       } catch (error) {
         console.error("Error fetching bid details:", error);
         toast.error("Failed to fetch bid details");

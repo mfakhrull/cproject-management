@@ -12,7 +12,8 @@ import ModalNewTask from "@/components/ModalNewTask";
 import { useParams } from "next/navigation"; // Use Next.js hook for params
 
 const ProjectPage = () => {
-  const { id } = useParams(); // Retrieve project ID from the URL
+  const params = useParams(); // Retrieve params from the URL
+  const id = params ? params.id : null; // Extract project ID from params
   const [activeTab, setActiveTab] = useState("Board"); // Manage active tab
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false); // Manage task modal
 

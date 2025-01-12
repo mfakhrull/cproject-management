@@ -3,7 +3,6 @@
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { updateBidStatus } from "@/app/action/bidActions";
 import { useUserPermissions } from "@/context/UserPermissionsContext";
 import FloatingTooltip from "@/components/FloatingTooltip";
 
@@ -24,7 +23,8 @@ interface Bid {
 }
 
 export default function BidDetailsPage() {
-  const { bidId } = useParams();
+  const params = useParams();
+  const bidId = params?.bidId;
   const router = useRouter();
   const [bid, setBid] = useState<Bid | null>(null); // Use the Bid type
   const [loading, setLoading] = useState(true);
@@ -71,13 +71,16 @@ export default function BidDetailsPage() {
         label: "Confirm",
         onClick: async () => {
           try {
-            const result = await updateBidStatus(
-              bid._id,
-              status,
-              bid.documentId,
-            );
+            const response = await fetch(`/api/bids/${bid._id}`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ status, documentId: bid.documentId }),
+            });
+            const result = await response.json();
 
-            if (!result.success) {
+            if (!response.ok) {
               throw new Error(result.message || "Failed to update status");
             }
 
@@ -109,7 +112,7 @@ export default function BidDetailsPage() {
   if (!bid) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-red-500">Bid not found</p>
+        <p className="text-red-500">Bid not found</p>;
       </div>
     );
   }

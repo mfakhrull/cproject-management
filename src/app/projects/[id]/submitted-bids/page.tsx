@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { getSubmittedBids, updateBidStatus } from "@/app/action/bidActions";
 import ApproveIcon from "@mui/icons-material/CheckCircle";
 import RejectIcon from "@mui/icons-material/Cancel";
 import DetailsIcon from "@mui/icons-material/Info";
@@ -23,7 +22,7 @@ import { Info } from "lucide-react";
 export default function SubmittedBidsPage() {
   const router = useRouter();
 
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [bids, setBids] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { userId } = useAuth();
@@ -39,13 +38,13 @@ export default function SubmittedBidsPage() {
 
     async function fetchBids() {
       try {
-        const response = await getSubmittedBids(
-          projectId,
-          userId!,
-          permissions,
-        );
-        console.log("Fetched Bids:", response); // Debugging
-        setBids(response);
+        const response = await fetch(`/api/bids?projectId=${projectId}&userId=${userId}`);
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to fetch submitted bids");
+        }
+        console.log("Fetched Bids:", result.bids); // Debugging
+        setBids(result.bids);
       } catch (error) {
         console.error("Error fetching submitted bids:", error);
         toast.error("Failed to fetch submitted bids");
@@ -61,9 +60,16 @@ export default function SubmittedBidsPage() {
     (id: GridRowId, status: "APPROVED" | "REJECTED", documentId: string) =>
     async () => {
       try {
-        const result = await updateBidStatus(id as string, status, documentId); // Pass documentId
+        const response = await fetch(`/api/bids/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status, documentId }),
+        });
+        const result = await response.json();
 
-        if (!result.success) {
+        if (!response.ok) {
           throw new Error(result.message || "Failed to update status");
         }
 

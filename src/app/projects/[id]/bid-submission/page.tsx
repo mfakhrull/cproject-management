@@ -3,7 +3,6 @@
 import { useAuth } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getDocumentById } from "@/app/action/documentActions";
 import { toast } from "sonner";
 import { Calendar } from "lucide-react";
 
@@ -22,7 +21,7 @@ export default function BidSubmissionPage() {
   });
   const [timeline, setTimeline] = useState<string>("");
 
-  const documentId = searchParams.get("documentId");
+  const documentId = searchParams ? searchParams.get("documentId") : null;
 
   useEffect(() => {
     if (!userId) {
@@ -39,7 +38,11 @@ export default function BidSubmissionPage() {
     async function fetchOpportunityData() {
       try {
         if (documentId) {
-          const data = await getDocumentById(documentId);
+          const response = await fetch(`/api/documents/${documentId}`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch opportunity data");
+          }
+          const data = await response.json();
           setOpportunityData(data);
         }
       } catch (error) {
