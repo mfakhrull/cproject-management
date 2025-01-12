@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import EditorDocument from "@/models/EditorDocument";
+import { Project } from "@/models";
 import mongoose from "mongoose";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
   const { id } = params;
   await dbConnect();
 
@@ -17,7 +21,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     if (!document) {
       return NextResponse.json(
         { message: "Document not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -26,7 +30,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     console.error("Error fetching document:", error);
     return NextResponse.json(
       { message: "Failed to fetch document" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
