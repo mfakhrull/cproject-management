@@ -1,5 +1,6 @@
 // src/models/EditorDocument.ts
 import mongoose from "mongoose";
+import { Project } from "@/models"; // Explicitly import Project to ensure registration
 
 export interface IEditorDocument extends mongoose.Document {
   content: any[];
@@ -57,5 +58,7 @@ EditorDocumentSchema.virtual('project', {
   justOne: true
 });
 
-const EditorDocument = mongoose.models.EditorDocument || mongoose.model<IEditorDocument>("EditorDocument", EditorDocumentSchema);
+export const EditorDocument = mongoose.models.EditorDocument || 
+  mongoose.model<IEditorDocument>("EditorDocument", EditorDocumentSchema);
+
 export default EditorDocument;

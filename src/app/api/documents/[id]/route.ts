@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import EditorDocument from "@/models/EditorDocument";
 import mongoose from "mongoose";
+import dbConnect from "@/lib/mongodb";
+import { Project } from "@/models"; // Import Project from models index
+import { EditorDocument } from "@/models/EditorDocument";
 
 export async function GET(
   req: Request,
@@ -11,13 +12,16 @@ export async function GET(
   await dbConnect();
 
   try {
+    // Ensure Project model is registered first
+    await mongoose.model('Project');
+
     const document = await EditorDocument.findOne({
       _id: new mongoose.Types.ObjectId(id),
     })
       .populate({ 
         path: "projectId", 
         select: "name _id",
-        model: "Project"  // Specify the model name as a string
+        model: Project  // Use the imported model directly
       })
       .lean();
 
