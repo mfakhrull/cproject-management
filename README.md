@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CProject Management
 
-## Getting Started
+CProject Management is a project management tool built using Next.js 14. It is designed specifically for construction teams to efficiently manage their projects, track progress, and collaborate effectively.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Task Management**: Create, assign, and track tasks.
+- **Project Dashboard**: Get an overview of inventory maintenance, task, project status and progress.
+- **Reporting**: Generate detailed reports on project progress, team performance, and resource utilization.
+- **Collaboration**: Comment on tasks and share updates with team members.
+- **Kanban Board**: Use a Kanban board to visualize and manage tasks in a flexible and intuitive way.
+- **File Attachments**: Attach files and documents to tasks for easy reference and collaboration.
+- **Manage Inventory**: Keep track of construction materials and supplies.
+- **Manage Bids**: Handle bidding processes for construction projects.
+- **AI-Driven Analytics**: Use AI to analyze project data and provide insights for better decision-making.
+- **User Roles**: Manage user roles and permissions.
+- And many more features to explore!
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technologies Used
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Tech Stack
+- **Frontend**: Next.js, React, TailwindCSS
+- **Backend**: Node.js, MongoDB
+- **Authentication**: Clerk
+- **Media Management**: Cloudinary
+- **Deployment**: Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Installation
 
-## Learn More
+To get started with the project, follow these steps:
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository:**
+    ```sh
+    git clone https://github.com/mfakhrull/cproject-management.git
+    cd cproject-management
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies:**
+    ```sh
+    npm install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Run the development server:**
+    ```sh
+    npm run dev
+    ```
 
-## Deploy on Vercel
+4. Open your browser and navigate to `http://localhost:3000` to view the application.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Usage
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Creating a Project
+
+1. Click on the "Create Project" button on the dashboard.
+2. Fill in the project details and click "Save".
+
+### Adding Tasks
+
+1. Navigate to the desired project.
+2. Click on "Add Task".
+3. Fill in the task details and assign it to a team member.
+
+### Tracking Progress
+
+1. Use the project dashboard to get an overview of the project status.
+2. View task details and comments to track progress.
+
+## Contributing
+
+We welcome contributions! To contribute to this project, follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add new feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a Pull Request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Contact
+
+If you have any questions or suggestions, feel free to open an issue or contact the repository owner.
+
+---
+
+Thank you for using CProject Management! We hope it helps you manage your projects more effectively.
